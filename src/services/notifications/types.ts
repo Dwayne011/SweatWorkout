@@ -40,6 +40,9 @@ export interface RestInfo {
   setLabel: string;
 }
 
+/** Authoritative snapshot of an in-progress rest, read back from the renderer. */
+export interface RestSnapshot extends RestInfo {}
+
 /**
  * Actions that can originate *from* a notification (Android lock-screen buttons).
  * These only ever affect the rest timer — completing a set is done in-app, so
@@ -74,6 +77,21 @@ export interface NotificationService {
 
   /** Tear down all workout notifications (finish or discard). */
   endSession(): Promise<void>;
+
+  /**
+   * Tell the renderer whether the app is currently foreground/visible. While
+   * visible, the renderer avoids per-second notification churn (the in-app UI
+   * shows the live timer); while hidden it keeps the lock-screen notification
+   * ticking.
+   */
+  setAppVisibility(visible: boolean): void;
+
+  /**
+   * Read the renderer's authoritative rest state (e.g. after the app was
+   * backgrounded and a lock-screen +/- button changed the end-time). Returns
+   * null if no rest is currently active. Used to reconcile the app's timer.
+   */
+  getActiveRest(): Promise<RestSnapshot | null>;
 
   /**
    * Subscribe to events coming back from the notification layer.

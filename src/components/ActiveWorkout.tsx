@@ -132,6 +132,7 @@ interface RestTimerOverlayProps {
   key?: React.Key;
   target: { endTime: number; total: number; exerciseName: string };
   onCancel: () => void;
+  onReachedZero: () => void;
   onAddSeconds: (secs: number) => void;
   onSubtractSeconds: (secs: number) => void;
   session: any;
@@ -142,6 +143,7 @@ interface RestTimerOverlayProps {
 function RestTimerOverlay({
   target,
   onCancel,
+  onReachedZero,
   onAddSeconds,
   onSubtractSeconds,
   session,
@@ -245,19 +247,18 @@ function RestTimerOverlay({
           }
         }
         clearInterval(intervalId);
-        onCancel();
+        // Don't end on our own (possibly stale) clock — the rest may have been
+        // extended from the lock screen. Ask the parent to reconcile against the
+        // service worker's authoritative end-time, which either keeps the timer
+        // running (if extended) or ends it (if truly over).
+        onReachedZero();
       }
     }, 1000);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [target, onCancel]);
-
-  if (secondsLeft <= 0 && hasAlertedZeroRef.current === target.endTime) {
-    // Only return null if we've already handled the zero-alert (or keep it rendering until unmounted)
-    return null;
-  }
+  }, [target, onReachedZero]);
 
   const isTabActive = !activeTab || activeTab === "workouts";
 
@@ -279,12 +280,13 @@ function RestTimerOverlay({
          isTabActive ? "" : "pointer-events-none"
        }`}
     >
-      {/* Retracting large background section */}
+      {/* Retracting large background section (scaleX is GPU-composited — no per-frame layout) */}
       <motion.div
-        initial={{ width: "100%" }}
-        animate={{ width: `${(secondsLeft / target.total) * 100}%` }}
+        initial={{ scaleX: 1 }}
+        animate={{ scaleX: Math.max(0, Math.min(1, secondsLeft / target.total)) }}
         transition={{ duration: 1, ease: "linear" }}
-        className="absolute inset-y-0 left-0 bg-indigo-50 dark:bg-indigo-950/40 border-r border-indigo-200 dark:border-indigo-500/20"
+        style={{ transformOrigin: "left" }}
+        className="absolute inset-y-0 left-0 w-full origin-left bg-indigo-50 dark:bg-indigo-950/40 border-r border-indigo-200 dark:border-indigo-500/20"
       />
 
       <div className="relative z-10 p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -367,10 +369,11 @@ function ActiveWorkoutDuration({ startTime }: ActiveWorkoutDurationProps) {
 
 interface ActiveRestCountdownProps {
   target: { endTime: number; total: number; exerciseName: string };
-  onCancel: () => void;
 }
 
-function ActiveRestCountdown({ target, onCancel }: ActiveRestCountdownProps) {
+// Display-only countdown text. It never ends the rest itself — the parent
+// reconciles against the service worker (see RestTimerOverlay.onReachedZero).
+function ActiveRestCountdown({ target }: ActiveRestCountdownProps) {
   const [seconds, setSeconds] = useState(() => {
     return Math.max(0, Math.ceil((target.endTime - Date.now()) / 1000));
   });
@@ -383,12 +386,11 @@ function ActiveRestCountdown({ target, onCancel }: ActiveRestCountdownProps) {
       setSeconds(left);
       if (left <= 0) {
         clearInterval(intervalId);
-        onCancel();
       }
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [target.endTime, onCancel]);
+  }, [target.endTime]);
 
   const formatTimerTime = (sec: number) => {
     const mins = Math.floor(sec / 60);
@@ -1078,6 +1080,40 @@ export default function ActiveWorkout({
     return unsubscribe;
   }, [setRestTimerTarget]);
 
+  // Reconcile the app's rest timer against the service worker's authoritative
+  // state. Used when the app regains focus (a lock-screen +/- may have changed
+  // the end-time while we were backgrounded) and when the in-app countdown hits
+  // zero (the rest may have been extended rather than finished).
+  const reconcileRest = useCallback(async () => {
+    const rest = await notificationService.getActiveRest();
+    if (rest && rest.endTime > Date.now() + 250) {
+      setRestTimerTarget({
+        endTime: rest.endTime,
+        total: rest.totalSeconds,
+        exerciseName: rest.exerciseName || "Rest",
+      });
+    } else {
+      setRestTimerTarget(null);
+    }
+  }, [setRestTimerTarget]);
+
+  // Report foreground/background state to the notification layer so it only
+  // ticks the lock-screen notification while we're hidden (avoids per-second
+  // churn during active use). On *regaining* focus, reconcile the rest timer so
+  // any lock-screen +/- change is picked up. We don't reconcile on the initial
+  // mount to avoid racing a fresh session's END_SESSION cleanup.
+  useEffect(() => {
+    const report = (reconcile: boolean) => {
+      const visible = typeof document !== "undefined" && document.visibilityState === "visible";
+      notificationService.setAppVisibility(visible);
+      if (visible && reconcile) reconcileRest();
+    };
+    report(false);
+    const onChange = () => report(true);
+    document.addEventListener("visibilitychange", onChange);
+    return () => document.removeEventListener("visibilitychange", onChange);
+  }, [reconcileRest]);
+
   // Drag and Drop States for Grouping Supersets
   const [draggedExerciseId, setDraggedExerciseId] = useState<string | null>(null);
   const [dragOverExId, setDragOverExId] = useState<string | null>(null);
@@ -1212,7 +1248,7 @@ export default function ActiveWorkout({
               <p className="text-xs font-mono font-bold flex items-center gap-1.5 truncate">
                 <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-ping shrink-0" />
                 <span className="truncate bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-500/30 font-extrabold">
-                  ⏳ Rest: <ActiveRestCountdown target={restTimerTarget} onCancel={cancelRestTimer} />
+                  ⏳ Rest: <ActiveRestCountdown target={restTimerTarget} />
                 </span>
                 <span className="text-gray-500 dark:text-gray-400 border-l border-gray-300 dark:border-white/10 pl-2.5 ml-1">
                   Tracked: <ActiveWorkoutDuration startTime={session.startTime} />
@@ -1254,6 +1290,7 @@ export default function ActiveWorkout({
             key="rest-timer"
             target={restTimerTarget}
             onCancel={cancelRestTimer}
+            onReachedZero={reconcileRest}
             onAddSeconds={(secs) => {
               setRestTimerTarget((prev) => {
                 if (!prev) return null;
