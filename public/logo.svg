@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Dark deep backdrop gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#04040a" />
+      <stop offset="100%" stop-color="#0e0f21" />
+    </linearGradient>
+    
+    <!-- Vivid metabolic theme accent gradient (Indigo to Violet to Orange) -->
+    <linearGradient id="themeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+
+    <!-- Warm orange glowing aura -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ea580c" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#4f46e5" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Solid rounded base plate for elegant adaptive masking -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Ambient background glow centered -->
+  <circle cx="256" cy="256" r="220" fill="url(#glow)" />
+
+  <!-- Outer orbital ring with dashed speed/reps lines -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#themeGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 30 120 40" />
+
+  <!-- Stylized metabolic active motif: Dumbbell merged with a burning flame core -->
+  <g transform="translate(256, 256) scale(1.15)">
+    <!-- Dumbbell Bar -->
+    <rect x="-80" y="-8" width="160" height="16" rx="4" fill="#f8fafc" opacity="0.9" />
+    
+    <!-- Outer heavy weight plates (Left) -->
+    <rect x="-100" y="-45" width="20" height="90" rx="8" fill="url(#themeGrad)" />
+    <rect x="-115" y="-30" width="12" height="60" rx="6" fill="#6366f1" />
+    
+    <!-- Outer heavy weight plates (Right) -->
+    <rect x="80" y="-45" width="20" height="90" rx="8" fill="url(#themeGrad)" />
+    <rect x="103" y="-30" width="12" height="60" rx="6" fill="#ea580c" stroke="#ea580c" />
+
+    <!-- Center active sweat sweat droplet/flame motif -->
+    <path d="M 0 -70 
+             C 25 -40, 35 -15, 35 15 
+             C 35 45, -35 45, -35 15 
+             C -35 -15, -25 -40, 0 -70 Z" 
+          fill="url(#themeGrad)" 
+          opacity="0.95" />
+
+    <!-- Core glowing inner accent -->
+    <path d="M 0 -45 
+             C 14 -25, 20 -10, 20 10 
+             C 20 30, -20 30, -20 10 
+             C -20 -10, -14 -25, 0 -45 Z" 
+          fill="#ffedd5" />
+  </g>
+</svg>

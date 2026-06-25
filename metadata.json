@@ -1,0 +1,6 @@
+{
+  "name": "SW3AT Workouts",
+  "description": "An interactive workout and sets logger with an integrated, intelligent Gemini Chat Assistant that can make direct changes to your templates, history, and active workout sessions on your behalf.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

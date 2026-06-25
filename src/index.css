@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  :root {
+    --bg-main: #ffffff;
+    --text-main: #111111;
+    --text-muted: #4b5563;
+    --panel-bg: #f4f4f6;
+    --panel-border: rgba(0, 0, 0, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --btn-bg: rgba(0, 0, 0, 0.04);
+    --btn-hover: rgba(0, 0, 0, 0.08);
+    --glow-color: rgba(236, 72, 153, 0.2); /* rainbow/prism soft aura for light mode default fallback */
+  }
+  
+  .dark {
+    --bg-main: #000000;
+    --text-main: #e2e8f0; /* Soft silver */
+    --text-muted: #94a3b8; /* Light gray */
+    --panel-bg: #09090b; /* Deep pitch-black charcoal */
+    --panel-border: rgba(147, 51, 234, 0.25); /* Electric Violet */
+    --glass-bg: rgba(10, 10, 10, 0.85);
+    --glass-border: rgba(147, 51, 234, 0.25);
+    --btn-bg: rgba(147, 51, 234, 0.08);
+    --btn-hover: rgba(147, 51, 234, 0.2);
+    --glow-color: rgba(147, 51, 234, 0.5); /* Glowing Electric Violet */
+  }
+
+  /* Suppress native web UI and lock native behaviors for Android layout compliance */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
+  }
+
+  html, body {
+    -webkit-touch-callout: none !important;
+    overscroll-behavior-y: contain !important; /* Lock Pull-to-Refresh reload */
+    touch-action: pan-x pan-y !important; /* Disable pinch zoom */
+  }
+
+  /* Allow inputs and editing regions to remain fully selectable */
+  input, textarea, [contenteditable="true"] {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+
+  /* High-visibility scale settings */
+  html {
+    font-size: 16px; /* Base size for rem scaling */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  h1, .h1-text {
+    font-size: 2.25rem; /* 36px */
+    line-height: 1.1;
+  }
+
+  p, ul, ol, label {
+    font-size: 1.125rem; /* 18px */
+  }
+  input, select, textarea {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  button, a, .cta-text {
+    font-size: 1rem; /* 16px */
+  }
+
+  /* 44pt Touch Targets Minimums */
+  button, a {
+    min-height: 36px;
+    min-width: 36px;
+  }
+  input, select {
+    min-height: 36px;
+    min-width: 36px;
+  }
+
+  small, caption, .caption-text, .text-xs, .text-sm, span {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+@keyframes wiggle-once {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-12px); }
+  30% { transform: translateX(9px); }
+  45% { transform: translateX(-6px); }
+  60% { transform: translateX(3px); }
+  75% { transform: translateX(-1px); }
+}
+
+.animate-wiggle-once {
+  animation: wiggle-once 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation-delay: 250ms;
+}
+
+/* Hide all default scrollbars globally */
+html, body {
+  -ms-overflow-style: none !important;  /* IE/Edge */
+  scrollbar-width: none !important;     /* Firefox */
+}
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Custom ambient scrollbars for premium viewport analytics */
+::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Gemini Neural Fluid ambient backgrounds and glows */
+@keyframes fluid-glow {
+  0% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.15) rotate(120deg);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9) rotate(240deg);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1) rotate(360deg);
+  }
+}
+
+.gemini-bg-glow-1 {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(0,0,0,0) 100%);
+  animation: fluid-glow 15s infinite alternate ease-in-out;
+}
+
+.gemini-bg-glow-2 {
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(59, 130, 246, 0.04) 60%, rgba(0,0,0,0) 100%);
+  animation: fluid-glow 20s infinite alternate-reverse ease-in-out;
+  animation-delay: -5s;
+}
+
+/* Glassmorphism for panels and buttons */
+.gemini-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  transition: all 0.2s ease;
+}
+
+.gemini-glass-active {
+  background: var(--panel-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glow-color);
+  box-shadow: 0 4px 20px -2px var(--glow-color);
+}
+
+.gemini-glass-btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gemini-glass-btn:hover {
+  background: var(--btn-hover);
+  border: 1px solid rgba(128, 128, 128, 0.12);
+}
+
+.gemini-input {
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.gemini-input:focus {
+  border-color: var(--glow-color);
+  background: var(--glass-bg);
+  box-shadow: 0 0 0 1px var(--glow-color);
+}
+
+/* Pulsing text colors for AI status indicators */
+@keyframes text-shine {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gemini-text-spark {
+  background: linear-gradient(to right, #818cf8, #c084fc, #60a5fa, #818cf8);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-shine 6s linear infinite;
+}
+
+/* Custom neural floating bottom menu bar styled similarly to premium user requested reference */
+.neural-bottom-bar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 -8px 32px 0 var(--panel-border);
+}
+
+/* Globally disable spinner buttons on input[type=number] */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+@keyframes swipe-hint {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70% { transform: translateX(-4px); }
+  20%, 40%, 60% { transform: translateX(4px); }
+  80% { transform: translateX(0); }
+}
+.animate-swipe-hint {
+  animation: swipe-hint 4s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}

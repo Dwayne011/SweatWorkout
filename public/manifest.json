@@ -1,0 +1,167 @@
+{
+  "id": "/?homescreen=1",
+  "name": "SW3AT Workouts",
+  "short_name": "SW3AT",
+  "description": "Voice-enabled intelligent athletic logger and Gemini Coach.",
+  "lang": "en-US",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "window-controls-overlay",
+    "tabbed",
+    "minimal-ui"
+  ],
+  "background_color": "#04040a",
+  "theme_color": "#04040a",
+  "orientation": "portrait",
+  "categories": [
+    "fitness",
+    "sports",
+    "health",
+    "lifestyle"
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.sw3at.workouts",
+      "id": "com.sw3at.workouts"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/sw3at-workouts/id123456789",
+      "id": "com.sw3at.workouts"
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "https://*.sw3at.io"
+    },
+    {
+      "origin": "https://*.sw3at.app"
+    }
+  ],
+  "iarc_rating_id": "76ec2a66-70eb-40bd-b65a-07204f1a26d2",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "SW3AT Workouts Performance Monitor on Desktop"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SW3AT Active Logger and Live Gemini Coach on Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Workout",
+      "short_name": "Workout",
+      "description": "Start a new workout session immediately",
+      "url": "/?action=start_workout",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "View Analytics",
+      "short_name": "Analytics",
+      "description": "Visualize your performance indices",
+      "url": "/?action=analytics",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Exercise Guide",
+      "short_name": "Guide",
+      "description": "Learn correct posture and exercises with Gemini Pro Coach",
+      "url": "/?action=guide",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/?action=open_file",
+      "accept": {
+        "application/json": [".json"],
+        "application/x-sw3at": [".sw3at"]
+      },
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+sw3at",
+      "url": "/?uri=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/?action=share",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

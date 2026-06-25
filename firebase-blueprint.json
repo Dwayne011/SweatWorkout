@@ -1,0 +1,92 @@
+{
+  "entities": {
+    "Exercise": {
+      "title": "CustomExercise",
+      "description": "User created custom gym exercise",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier of the exercise" },
+        "name": { "type": "string", "description": "Display name of the exercise" },
+        "category": { "type": "string", "description": "The category, e.g. Chest, Back" },
+        "equipment": { "type": "string", "description": "The type of equipment used" },
+        "userId": { "type": "string", "description": "Owner of the custom exercise" }
+      },
+      "required": ["id", "name", "category", "equipment", "userId"]
+    },
+    "Workout": {
+      "title": "WorkoutSession",
+      "description": "A completed workout session logged by the user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique session ID" },
+        "name": { "type": "string", "description": "Name of the workout session" },
+        "startTime": { "type": "string", "description": "ISO start time of the workout" },
+        "endTime": { "type": "string", "description": "ISO completion time of the workout" },
+        "notes": { "type": "string", "description": "Optional general session notes" },
+        "exercises": {
+          "type": "array",
+          "description": "List of logged exercises and sets"
+        },
+        "userId": { "type": "string", "description": "Referenced owner of the workout" }
+      },
+      "required": ["id", "name", "startTime", "endTime", "exercises", "userId"]
+    },
+    "Template": {
+      "title": "WorkoutTemplate",
+      "description": "Pre-configured workout routine saved for future fast logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique template ID" },
+        "name": { "type": "string", "description": "Name of the routine template" },
+        "exercises": {
+          "type": "array",
+          "description": "Routine exercises and default set bounds"
+        },
+        "notes": { "type": "string", "description": "Default template notes or instruction" },
+        "userId": { "type": "string", "description": "Owner of the workout template" }
+      },
+      "required": ["id", "name", "exercises", "userId"]
+    },
+    "ExerciseNote": {
+      "title": "ExerciseNote",
+      "description": "Custom user notes for custom or standard exercises",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner of the exercise notes" },
+        "exerciseId": { "type": "string", "description": "The specific exercise ID (can be default or custom)" },
+        "notes": { "type": "string", "description": "Custom persistent notes about training this exercise" }
+      },
+      "required": ["userId", "exerciseId", "notes"]
+    },
+    "UserSheets": {
+      "title": "UserSheets",
+      "description": "User Google Sheets integration configuration",
+      "type": "object",
+      "properties": {
+        "spreadsheetId": { "type": "string", "description": "The Google Sheets spreadsheet ID" }
+      }
+    }
+  },
+  "firestore": {
+    "/custom_exercises/{exerciseId}": {
+      "schema": "Exercise",
+      "description": "Collection of user-created custom workout exercises"
+    },
+    "/workouts/{workoutId}": {
+      "schema": "Workout",
+      "description": "Collection of logged completed workout sessions"
+    },
+    "/templates/{templateId}": {
+      "schema": "Template",
+      "description": "Collection of pre-planned routines saved as templates"
+    },
+    "/exercise_notes/{noteId}": {
+      "schema": "ExerciseNote",
+      "description": "Collection of user's personal technical notes per gym exercise"
+    },
+    "/user_sheets/{userId}": {
+      "schema": "UserSheets",
+      "description": "Google sheets connection metadata mapped by user ID"
+    }
+  }
+}
