@@ -199,6 +199,7 @@ let iosFinishId = null;  // iOS-only setTimeout used to fire the rest-over alert
 let state = {
   mode: 'idle',          // 'idle' | 'tracking' | 'resting'
   platform: 'android',
+  appVisible: true,      // when true, the app is foreground; skip per-second notification churn
   workoutStartTime: null,
   exerciseName: '',
   setLabel: '',
@@ -353,9 +354,23 @@ function startTrackingLoop() {
   clearLoops();
   state.mode = 'tracking';
   renderTracking();
-  // Only Android benefits from a ticking duration; iOS stays static.
-  if (!isIOS()) {
+  // Tick the duration only when the app is hidden (the in-app UI shows it while
+  // foreground). iOS can't live-update at all, so it stays static.
+  if (!isIOS() && !state.appVisible) {
     intervalId = setInterval(() => { renderTracking(); }, 1000);
+  }
+}
+
+// React to a foreground/background change without disrupting the rest expiry
+// clock. Tracking re-evaluates whether it needs a ticking interval; resting
+// keeps its expiry interval but refreshes the notification immediately if we
+// have just gone to the background.
+function reconcileLoopsForVisibility() {
+  if (state.mode === 'tracking') {
+    startTrackingLoop();
+  } else if (state.mode === 'resting' && !isIOS() && !state.appVisible && state.restEndTime) {
+    const remaining = Math.max(0, Math.ceil((state.restEndTime - Date.now()) / 1000));
+    if (remaining > 0) renderRest(remaining);
   }
 }
 
@@ -407,15 +422,19 @@ function startRestLoop() {
     return;
   }
 
+  // Render once now so the notification exists even while foreground.
+  renderRest(Math.max(0, Math.ceil((state.restEndTime - Date.now()) / 1000)));
+
   const tick = () => {
     const remaining = Math.max(0, Math.ceil((state.restEndTime - Date.now()) / 1000));
     if (remaining <= 0) {
       finishRest();
-    } else {
-      renderRest(remaining);
+      return;
     }
+    // Only repaint the notification per-second while hidden; the in-app overlay
+    // covers the live countdown when the app is foreground.
+    if (!state.appVisible) renderRest(remaining);
   };
-  tick();
   intervalId = setInterval(tick, 1000);
 }
 
@@ -424,6 +443,7 @@ async function clearAll() {
   state = {
     mode: 'idle',
     platform: state.platform,
+    appVisible: state.appVisible,
     workoutStartTime: null,
     exerciseName: '',
     setLabel: '',
@@ -466,6 +486,12 @@ self.addEventListener('message', (event) => {
       await persistState();
       startRestLoop();
     })());
+  } else if (data.type === 'APP_VISIBILITY') {
+    event.waitUntil((async () => {
+      state.appVisible = !!data.visible;
+      await persistState();
+      reconcileLoopsForVisibility();
+    })());
   } else if (data.type === 'END_SESSION') {
     event.waitUntil(clearAll());
   }
@@ -477,8 +503,9 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   event.waitUntil((async () => {
-    // The SW may have been recycled since the timer started; rebuild state.
-    if (state.mode === 'idle') await restoreState();
+    // The SW may have been recycled since the timer started; rebuild state so
+    // the +/- buttons always have a valid end-time to work from.
+    if (state.mode === 'idle' || !state.restEndTime) await restoreState();
 
     if (action === 'add_30' && state.restEndTime) {
       state.restEndTime += 30000;

@@ -143,11 +143,12 @@ function WorkoutBanner({ activeWorkout, setActiveTab, activeTab, exercises, rest
           <div className="w-8 h-[3.5px] bg-zinc-500/80 dark:bg-white/45 rounded-full shadow-[0_0.5px_1px_rgba(0,0,0,0.15)] dark:shadow-none" />
         </div>
 
-        {/* Retracting Red-to-Rose Background Accent Section */}
+        {/* Retracting Red-to-Rose Background Accent Section (scaleX = GPU-composited, no layout thrash) */}
         <motion.div
-          animate={{ width: `${progressPercent}%` }}
+          animate={{ scaleX: Math.max(0, Math.min(1, progressPercent / 100)) }}
           transition={{ duration: 1, ease: "linear" }}
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-600 to-rose-600"
+          style={{ transformOrigin: "left" }}
+          className="absolute inset-y-0 left-0 w-full origin-left bg-gradient-to-r from-red-600 to-rose-600"
         />
         
         {/* Background patterns overlay */}

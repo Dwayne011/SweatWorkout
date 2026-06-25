@@ -16,11 +16,46 @@ import type {
   NotificationEvent,
   NotificationPermissionState,
   RestInfo,
+  RestSnapshot,
   TrackingInfo,
 } from "./types";
 
 /** Shared name for the SW <-> app event channel. Must match sw.js. */
 export const TIMER_SYNC_CHANNEL = "sw3at-timer-sync";
+
+// IndexedDB coordinates — must match the persistence in sw.js.
+const DB_NAME = "WorkoutTimerDB";
+const STORE_NAME = "workoutState";
+const STATE_KEY = "notif-engine-state";
+
+/** Read the service worker's persisted engine state directly from IndexedDB. */
+function readEngineState(): Promise<any | null> {
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e: any) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: "key" });
+        }
+      };
+      req.onsuccess = (e: any) => {
+        const db = e.target.result;
+        try {
+          const tx = db.transaction(STORE_NAME, "readonly");
+          const getReq = tx.objectStore(STORE_NAME).get(STATE_KEY);
+          getReq.onsuccess = () => resolve(getReq.result ? getReq.result.value : null);
+          getReq.onerror = () => resolve(null);
+        } catch {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
 
 function detectPlatform(): "ios" | "android" {
   if (typeof navigator === "undefined") return "android";
@@ -113,6 +148,24 @@ export class WebNotificationService implements NotificationService {
 
   async endSession(): Promise<void> {
     await this.post({ type: "END_SESSION" });
+  }
+
+  setAppVisibility(visible: boolean): void {
+    // Fire-and-forget; the SW persists this so it survives a worker restart.
+    void this.post({ type: "APP_VISIBILITY", visible });
+  }
+
+  async getActiveRest(): Promise<RestSnapshot | null> {
+    const state = await readEngineState();
+    if (!state || state.mode !== "resting") return null;
+    const endTime = Number(state.restEndTime);
+    if (!endTime || endTime <= Date.now()) return null;
+    return {
+      endTime,
+      totalSeconds: Number(state.restTotalSeconds) || 90,
+      exerciseName: state.exerciseName || "",
+      setLabel: state.setLabel || "",
+    };
   }
 
   onEvent(handler: (event: NotificationEvent) => void): () => void {

@@ -29,5 +29,6 @@ export type {
   NotificationActionType,
   NotificationPermissionState,
   RestInfo,
+  RestSnapshot,
   TrackingInfo,
 } from "./types";
