@@ -31,12 +31,6 @@ import {
 import { WorkoutSession, WorkoutExercise, WorkoutSet, Exercise, SetType } from "../types";
 import { motion, AnimatePresence, useMotionValue, useTransform, useDragControls } from "motion/react";
 import { openExerciseGuide } from "./ExerciseGuideModal";
-import { getNotificationService } from "../services/notifications";
-
-// Shared notification layer. The web implementation talks to the service worker
-// today; a Capacitor-backed native implementation can be swapped in later
-// without touching this component (see src/services/notifications/index.ts).
-const notificationService = getNotificationService();
 
 interface ActiveWorkoutProps {
   session: WorkoutSession;
@@ -180,11 +174,53 @@ function RestTimerOverlay({
     };
   }, []);
 
-  // The lock-screen rest notification is driven by the parent through the
-  // NotificationService (see the rest effect in ActiveWorkout). This overlay is
-  // purely the in-app countdown + audio/haptic cue. Cancelling clears the shared
-  // restTimerTarget, which the parent relays to the notification layer.
+  // A. Memoized next exercise text dynamically computed from exercises to prevent re-triggering starting timers on other set updates
+  const nextExText = useMemo(() => {
+    let currentExerciseName = "";
+    let currentSetNum = 0;
+    let totalSets = 0;
+    if (session && session.exercises) {
+      for (const ex of session.exercises) {
+        const exerciseDetails = exercisesList.find((e) => e.id === ex.exerciseId);
+        const firstUncompletedIdx = ex.sets.findIndex((s) => !s.isCompleted);
+        if (firstUncompletedIdx !== -1) {
+          currentExerciseName = exerciseDetails?.name || "Exercise";
+          currentSetNum = firstUncompletedIdx + 1;
+          totalSets = ex.sets.length;
+          break;
+        }
+      }
+    }
+    return currentExerciseName ? `Set ${currentSetNum} of ${totalSets}` : "";
+  }, [session, exercisesList]);
+
+  // 2. Service Worker Timer Controller Synchronisation
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.ready.then((reg) => {
+        if (reg.active) {
+          const platform = /iPad|iPhone|iPod/.test(navigator.userAgent) ? "ios" : "android";
+          reg.active.postMessage({
+            type: "START_TIMER",
+            endTime: target.endTime,
+            exerciseName: target.exerciseName || "Next Exercise",
+            nextExText: nextExText,
+            platform,
+            total: target.total || 90,
+          });
+        }
+      }).catch((e) => console.warn("Service Worker timer link failed:", e));
+    }
+  }, [target.endTime, target.total, target.exerciseName, nextExText]);
+
   const handleManualCancel = () => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.ready.then((reg) => {
+        if (reg.active) {
+          reg.active.postMessage({ type: "CANCEL_TIMER" });
+        }
+      }).catch(() => {});
+    }
     onCancel();
   };
 
@@ -995,9 +1031,13 @@ export default function ActiveWorkout({
   const restTimerTarget = externalRestTimerTarget !== undefined ? externalRestTimerTarget : localRestTimerTarget;
   const setRestTimerTarget = externalSetRestTimerTarget !== undefined ? externalSetRestTimerTarget : setLocalRestTimerTarget;
 
-  // Request notification permission once when the active workout mounts.
+  // Request Notification permission on mount
   useEffect(() => {
-    notificationService.requestPermission();
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
   }, []);
 
   const triggerRestTimer = useCallback((seconds: number, name: string) => {
@@ -1012,71 +1052,142 @@ export default function ActiveWorkout({
     setRestTimerTarget(null);
   }, [setRestTimerTarget]);
 
-  // Derive the current exercise + set label (the set the user is on, or — once
-  // a set is completed — the set they are about to do). Shared by the tracking
-  // notification and the rest "up next" text.
-  const computeTrackingInfo = useCallback(() => {
-    const exercises = session.exercises || [];
-    let currentEx = exercises.find((ex: any) => ex.sets.some((s: any) => !s.isCompleted));
-    if (!currentEx && exercises.length > 0) currentEx = exercises[exercises.length - 1];
-    if (!currentEx) return { exerciseName: "Workout", setLabel: "" };
+  // We do not cancel the background Service Worker timer on component unmount because the timer 
+  // is specifically designed to run in the background (even if the app is hidden, tab-switched, or double-mounted).
+  // Explicit cancellation is fully handled through manual Finish, Discard, or Skip Rest buttons.
 
-    const exDef = exercisesList.find((e: any) => e.id === currentEx.exerciseId);
-    const exerciseName = exDef ? exDef.name : ((currentEx as any).name || "Exercise");
-    const idx = currentEx.sets.findIndex((s: any) => !s.isCompleted);
-    const setNum = idx !== -1 ? idx + 1 : currentEx.sets.length;
-    const setLabel = currentEx.sets.length > 0 ? `Set ${setNum} of ${currentEx.sets.length}` : "";
-    return { exerciseName, setLabel };
-  }, [session.exercises, exercisesList]);
-
-  // Keep the latest tracking info in a ref so the rest effect can read it
-  // without re-firing on unrelated session edits (e.g. typing a weight).
-  const trackingInfoRef = useRef(computeTrackingInfo());
-  trackingInfoRef.current = computeTrackingInfo();
-
-  // Tracking notification: shown whenever a session is active and we are NOT
-  // resting. The service worker ticks the elapsed duration itself, so there is
-  // no per-second loop here.
+  // Update background tracker status notification when timer is NOT active
   useEffect(() => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
     if (restTimerTarget !== null) return;
-    const info = computeTrackingInfo();
-    notificationService.showTracking({
-      workoutStartTime: new Date(session.startTime).getTime(),
-      exerciseName: info.exerciseName,
-      setLabel: info.setLabel,
-    });
-  }, [restTimerTarget, computeTrackingInfo, session.startTime]);
 
-  // Rest notification: when a rest timer is active, hand the absolute end-time
-  // to the notification layer. Re-runs only when the timer itself changes
-  // (start / +30 / -30), not on every session edit.
-  useEffect(() => {
-    if (restTimerTarget === null) return;
-    const info = trackingInfoRef.current;
-    notificationService.startRest({
-      endTime: restTimerTarget.endTime,
-      totalSeconds: restTimerTarget.total || 90,
-      exerciseName: info.exerciseName,
-      setLabel: info.setLabel,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restTimerTarget?.endTime, restTimerTarget?.total]);
+    const start = new Date(session.startTime).getTime();
 
-  // Events coming back from the notification layer. Rest expiry / skip return us
-  // to tracking; lock-screen +/- buttons adjust the shared timer. None of these
-  // ever complete or advance a set — that only happens via the in-app tick.
+    const postStatusUpdate = () => {
+      navigator.serviceWorker.ready.then((reg) => {
+        if (!reg.active) return;
+
+        const currentSeconds = Math.max(0, Math.floor((Date.now() - start) / 1000));
+        const hrs = Math.floor(currentSeconds / 3600);
+        const mins = Math.floor((currentSeconds % 3600) / 60);
+        const secs = currentSeconds % 60;
+        const elapsedTime = hrs > 0 
+          ? `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
+          : `${mins}:${secs.toString().padStart(2, "0")}`;
+
+        let currentExerciseName = "";
+        let setDetails = "";
+
+        const currentEx = session.exercises && session.exercises.length > 0
+          ? (session.exercises.find((ex: any) => ex.sets.some((s: any) => !s.isCompleted)) || session.exercises[session.exercises.length - 1])
+          : null;
+        const exDef = currentEx ? exercisesList.find((e: any) => e.id === currentEx.exerciseId) : null;
+
+        if (currentEx) {
+          currentExerciseName = exDef ? exDef.name : "Exercise";
+          const unfinishedSetIdx = currentEx.sets.findIndex((s: any) => !s.isCompleted);
+          const currentSetNum = unfinishedSetIdx !== -1 ? unfinishedSetIdx + 1 : currentEx.sets.length;
+          const totalSets = currentEx.sets.length;
+          
+          const unfinishedSet = currentEx.sets.find((s: any) => !s.isCompleted) || currentEx.sets[currentEx.sets.length - 1];
+          if (unfinishedSet) {
+            setDetails = `Set ${currentSetNum} of ${totalSets} (${unfinishedSet.weight} kg × ${unfinishedSet.reps})`;
+          } else {
+            setDetails = `Set ${currentSetNum} of ${totalSets}`;
+          }
+        }
+
+        reg.active.postMessage({
+          type: "UPDATE_STATUS_NOTIFICATION",
+          elapsedTime,
+          exerciseName: currentExerciseName,
+          setDetails
+        });
+      }).catch((e) => console.warn("SW status update failed:", e));
+    };
+
+    postStatusUpdate();
+    const interval = setInterval(postStatusUpdate, 2000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [restTimerTarget, session.exercises, exercisesList, session.startTime]);
+
+  // Synchronise active session state to IndexedDB for lockscreen Service Worker access
   useEffect(() => {
-    const unsubscribe = notificationService.onEvent((evt) => {
-      if (evt.type === "rest_finished" || evt.type === "rest_skipped") {
-        setRestTimerTarget(null);
-      } else if (evt.type === "rest_adjusted") {
-        setRestTimerTarget((prev) =>
-          prev ? { ...prev, endTime: evt.endTime, total: evt.totalSeconds } : prev
-        );
+    let currentExerciseIndex = 0;
+    let currentSetIndex = 0;
+    for (let i = 0; i < session.exercises.length; i++) {
+      const ex = session.exercises[i];
+      const sIdx = ex.sets.findIndex((s: any) => !s.isCompleted);
+      if (sIdx !== -1) {
+        currentExerciseIndex = i;
+        currentSetIndex = sIdx;
+        break;
       }
-    });
-    return unsubscribe;
-  }, [setRestTimerTarget]);
+    }
+
+    const saveStateToIDB = async () => {
+      try {
+        const dbRequest = indexedDB.open('WorkoutTimerDB', 1);
+        dbRequest.onupgradeneeded = (e: any) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('workoutState')) {
+            db.createObjectStore('workoutState', { keyPath: 'key' });
+          }
+        };
+        dbRequest.onsuccess = (e: any) => {
+          const db = e.target.result;
+          const transaction = db.transaction('workoutState', 'readwrite');
+          const store = transaction.objectStore('workoutState');
+          store.put({ key: 'activeWorkout', value: session });
+          store.put({ key: 'currentExerciseIndex', value: currentExerciseIndex });
+          store.put({ key: 'currentSetIndex', value: currentSetIndex });
+          store.put({ key: 'exercisesList', value: exercisesList });
+        };
+      } catch (err) {
+        console.warn("Could not save active session indices to IndexedDB:", err);
+      }
+    };
+    saveStateToIDB();
+  }, [session, exercisesList]);
+
+  // Unified Foreground Broadcast Channel Synchronisation loop
+  useEffect(() => {
+    const channel = new BroadcastChannel('workout-lockscreeen-sync');
+
+    channel.onmessage = (event) => {
+      const data = event.data;
+      if (!data) return;
+
+      if (data.type === 'LOCKSCREEN_STATE_MUTATED') {
+        if (data.activeWorkout) {
+          onUpdateWorkout(data.activeWorkout);
+        }
+        if (data.restTimerTarget !== undefined) {
+          setRestTimerTarget(data.restTimerTarget);
+        }
+        if (data.completedWorkout) {
+          onFinish();
+        }
+      } else if (data.type === 'REST_TIMER_TICK') {
+        setRestTimerTarget({
+          endTime: data.endTime,
+          total: data.total || 90,
+          exerciseName: data.exerciseName || "Rest Period"
+        });
+      } else if (data.type === 'REST_TIMER_FINISHED' || data.type === 'REST_TIMER_CANCELLED') {
+        setRestTimerTarget(null);
+      } else if (data.type === 'ERROR') {
+        console.error("Lockscreen background synchronisation error:", data.message);
+      }
+    };
+
+    return () => {
+      channel.close();
+    };
+  }, [onUpdateWorkout, setRestTimerTarget, onFinish]);
 
   // Drag and Drop States for Grouping Supersets
   const [draggedExerciseId, setDraggedExerciseId] = useState<string | null>(null);

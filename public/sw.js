@@ -1,11 +1,7 @@
-// Author: SW3AT Workouts
+// Author: Google AI Studio Coding Agent
 // OS support: All (Web, Android, iOS)
-// Description: Service Worker for offline asset caching and the lock-screen
-//   workout notification. The notification engine is a *renderer*: it shows a
-//   single "tracking" or "resting" notification and runs the rest countdown.
-//   It NEVER advances the workout or completes sets — rest expiry only fires one
-//   alert and returns to tracking. All set/workout progression lives in the app.
-const CACHE_NAME = 'sw3at-cache-v3';
+// Description: Service Worker for local offline asset caching and background lockscreen timer management.
+const CACHE_NAME = 'sw3at-cache-v2';
 const PRE_CACHE_ASSETS = [
   '/',
   '/index.html',
@@ -46,7 +42,7 @@ self.addEventListener('activate', (event) => {
 // Fetch: serving requests offline with a smart cache-falling-back-to-network-or-vice-versa policy
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-
+  
   // Skip non-GET requests (e.g. POST, PUT, DELETE or other scopes like Firebase API endpoints)
   if (req.method !== 'GET') {
     return;
@@ -167,53 +163,11 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 });
 
 
-// =============================================================================
-// Workout Notification Engine
-//
-// A single notification (tag NOTIF_TAG) is shown for the whole session and
-// flips between two modes:
-//   - 'tracking': persistent notification with the workout duration + current
-//     set. No timer, no alert.
-//   - 'resting' : a live countdown. On Android it updates in place every second
-//     and carries Skip / +30s / -30s buttons; on iOS it is shown once (iOS PWAs
-//     cannot live-update or render buttons).
-//
-// When rest reaches zero we fire EXACTLY ONE alert and return to 'tracking'.
-// We never advance sets — that is the app's job. This is what eliminates the
-// old cascade where every expiry auto-completed the next set and spammed
-// notifications.
-// =============================================================================
-
-const NOTIF_TAG = 'workout-timer';        // the single tracking/resting notification
-const ALERT_TAG = 'workout-timer-alert';  // the one-shot "rest over" alert
-const SYNC_CHANNEL = 'sw3at-timer-sync';  // matches webNotificationService.ts
-
+// Timer Service and Lockscreeen Background Management Engine
 const DB_NAME = 'WorkoutTimerDB';
 const STORE_NAME = 'workoutState';
-const STATE_KEY = 'notif-engine-state';
 
-// In-memory engine state. Mirrored to IndexedDB so it survives the SW being
-// killed and later woken by a notification button tap.
-let intervalId = null;   // single timer for either the tracking or rest loop
-let iosFinishId = null;  // iOS-only setTimeout used to fire the rest-over alert
-let state = {
-  mode: 'idle',          // 'idle' | 'tracking' | 'resting'
-  platform: 'android',
-  workoutStartTime: null,
-  exerciseName: '',
-  setLabel: '',
-  restEndTime: null,
-  restTotalSeconds: null,
-};
-
-function isIOS() {
-  if (state.platform === 'ios') return true;
-  const ua = (self.navigator && self.navigator.userAgent) || '';
-  return /iPad|iPhone|iPod/.test(ua) ||
-    (self.navigator && self.navigator.platform === 'MacIntel' && self.navigator.maxTouchPoints > 1);
-}
-
-// --- IndexedDB persistence (so button taps work after the SW is recycled) -----
+// Helper to open the database securely across worker threads, avoiding any transaction blockages
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -223,305 +177,853 @@ function openDB() {
         db.createObjectStore(STORE_NAME, { keyPath: 'key' });
       }
     };
-    request.onsuccess = (event) => resolve(event.target.result);
-    request.onerror = (event) => reject(event.target.error);
+    request.onsuccess = (event) => {
+      resolve(event.target.result);
+    };
+    request.onerror = (event) => {
+      reject(event.target.error);
+    };
   });
 }
 
-function idbGet(key) {
-  return openDB().then((db) => new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(key);
-    req.onsuccess = () => resolve(req.result ? req.result.value : null);
-    req.onerror = () => reject(req.error);
-  }));
+// Transaction-safe key-value setters to prevent data corruption isomorphically
+function getStoredValue(key) {
+  return openDB().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result ? request.result.value : null);
+      request.onerror = () => reject(request.error);
+    });
+  });
 }
 
-function idbSet(key, value) {
-  return openDB().then((db) => new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const req = tx.objectStore(STORE_NAME).put({ key, value });
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  }));
+function setStoredValue(key, value) {
+  return openDB().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.put({ key: key, value: value });
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  });
 }
 
-async function persistState() {
-  try { await idbSet(STATE_KEY, state); } catch (e) { /* best-effort */ }
+// Get and set active general tracking settings 
+function getStoredState() {
+  return getStoredValue('active-workout-settings');
 }
 
-async function restoreState() {
-  try {
-    const saved = await idbGet(STATE_KEY);
-    if (saved) state = { ...state, ...saved };
-  } catch (e) { /* best-effort */ }
+function setStoredState(value) {
+  return setStoredValue('active-workout-settings', value);
 }
 
-function broadcast(message) {
-  try {
-    const bc = new BroadcastChannel(SYNC_CHANNEL);
-    bc.postMessage(message);
-    bc.close();
-  } catch (e) { /* channel may be unavailable */ }
-}
+// Global Timer PWA Background State
+let timerId = null;
+let iosTimerId = null;
+let currentEndTime = null;
+let currentExerciseName = null;
+let currentNextExText = null;
 
-function clearLoops() {
-  if (intervalId) { clearInterval(intervalId); intervalId = null; }
-  if (iosFinishId) { clearTimeout(iosFinishId); iosFinishId = null; }
-}
+// Wrapper for iOS / Safari platform check
+const isIOSUserAgent = () => {
+  return /iPad|iPhone|iPod/.test(self.navigator.userAgent) || 
+         (self.navigator.platform === 'MacIntel' && self.navigator.maxTouchPoints > 1);
+};
 
-function formatMMSS(totalSecs) {
-  const s = Math.max(0, Math.floor(totalSecs));
-  const mins = Math.floor(s / 60);
-  const secs = s % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
+// Display lockscreen notifications with strict platform-dependent layout parameters
+const showLockscreeenNotification = async (options) => {
+  const { 
+    state, // 'active' (Rest Active) or 'inactive' (Rest Inactive)
+    platform, // 'android' or 'ios'
+    endTime, // absolute millisecond epoch when the rest ends
+    exerciseName, // e.g. "Dumbbell Press"
+    nextExText, // e.g. "Set 2 of 4"
+    remainingSecs // if ticking/Android
+  } = options;
 
-function formatElapsed(totalSecs) {
-  const s = Math.max(0, Math.floor(totalSecs));
-  const hrs = Math.floor(s / 3600);
-  const mins = Math.floor((s % 3600) / 60);
-  const secs = s % 60;
-  if (hrs > 0) {
-    return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const tag = 'workout-timer';
+  const isIOS = platform === 'ios' || isIOSUserAgent();
+
+  // CASE iOS: Completely ban per-second interval notification pushes.
+  // Trigger exactly ONE static notification populating standard 'timestamp' to display a native, system-level countdown clock inside the notification block
+  if (isIOS) {
+    if (state === 'active') {
+      const timestampEpoch = Number(endTime);
+      await self.registration.showNotification(`⏳ Rest Period Active`, {
+        body: `Up next: ${exerciseName || "Next Exercise"}${nextExText ? ' — ' + nextExText : ''}`,
+        tag: tag,
+        renotify: false,
+        silent: true,
+        badge: '/icon-192.png',
+        icon: '/icon-192.png',
+        timestamp: timestampEpoch, // commands native countdown layout safely
+        actions: [] // strictly avoiding secondary action button-clicks on iOS to prevent per-second push updates
+      });
+    } else {
+      // Rest Inactive (Work mode or Ready to Complete Set)
+      await self.registration.showNotification(`🏋️ Active: ${exerciseName || "Exercise"}`, {
+        body: `Ready in place • ${nextExText || "Complete your set!"}`,
+        tag: tag,
+        renotify: false,
+        silent: true,
+        badge: '/icon-192.png',
+        icon: '/icon-192.png',
+        actions: []
+      });
+    }
+    return;
   }
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
-// --- Rendering ---------------------------------------------------------------
-async function renderTracking() {
-  const name = state.exerciseName || 'Workout';
-  let body;
-  if (isIOS()) {
-    // iOS cannot live-update; show a static snapshot without a ticking clock.
-    body = state.setLabel ? `${state.setLabel} • In progress` : 'Workout in progress';
+  // CASE ANDROID: Send periodic progress pushes, ensuring payload strictly contains tag 'workout-timer' and renotify: false
+  if (state === 'active') {
+    const mins = Math.floor(Number(remainingSecs) / 60);
+    const secs = Number(remainingSecs) % 60;
+    const formattedTime = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+    await self.registration.showNotification(`⏳ Rest Timer: ${formattedTime}`, {
+      body: `Up next: ${exerciseName || "Exercise"}${nextExText ? ' — ' + nextExText : ''}`,
+      tag: tag,
+      renotify: false, // silent in-place overwrite
+      silent: true,
+      badge: '/icon-192.png',
+      icon: '/icon-192.png',
+      actions: [
+        { action: 'add_30', title: '+30s' },
+        { action: 'skip_rest', title: 'Skip' },
+        { action: 'sub_30', title: '-30s' }
+      ]
+    });
   } else {
-    const elapsed = state.workoutStartTime
-      ? formatElapsed((Date.now() - state.workoutStartTime) / 1000)
-      : '0:00';
-    body = `${state.setLabel ? state.setLabel + ' • ' : ''}Duration ${elapsed}`;
-  }
-
-  await self.registration.showNotification(`🏋️ ${name}`, {
-    tag: NOTIF_TAG,
-    body,
-    renotify: false,
-    silent: true,
-    badge: '/icon-192.png',
-    icon: '/icon-192.png',
-    // A non-resting notification has no actions on either platform.
-    actions: [],
-  });
-}
-
-async function renderRest(remainingSecs) {
-  const name = state.exerciseName || 'Exercise';
-  const upNext = `Up next: ${name}${state.setLabel ? ' — ' + state.setLabel : ''}`;
-
-  if (isIOS()) {
-    // One static notification; iOS PWAs support neither live countdowns nor
-    // action buttons. The live countdown + buttons live in the in-app overlay.
-    await self.registration.showNotification('⏳ Rest period', {
-      tag: NOTIF_TAG,
-      body: upNext,
+    // State 2 (Rest Inactive Buttons): Render exactly one full-width button
+    await self.registration.showNotification(`🏋️ Working Set: ${exerciseName || "Exercise"}`, {
+      body: nextExText || "Perform your set, then complete!",
+      tag: tag,
       renotify: false,
       silent: true,
       badge: '/icon-192.png',
       icon: '/icon-192.png',
-      actions: [],
+      actions: [
+        { action: 'complete_set', title: 'Complete set' }
+      ]
     });
-    return;
   }
+};
 
-  await self.registration.showNotification(`⏳ Rest ${formatMMSS(remainingSecs)}`, {
-    tag: NOTIF_TAG,
-    body: upNext,
-    renotify: false,   // update the SAME notification in place — no re-alert
-    silent: true,      // never make noise on a per-second update
-    badge: '/icon-192.png',
-    icon: '/icon-192.png',
-    actions: [
-      { action: 'add_30', title: '+30s' },
-      { action: 'skip_rest', title: 'Skip' },
-      { action: 'sub_30', title: '-30s' },
-    ],
-  });
-}
-
-// --- Loops -------------------------------------------------------------------
-function startTrackingLoop() {
-  clearLoops();
-  state.mode = 'tracking';
-  renderTracking();
-  // Only Android benefits from a ticking duration; iOS stays static.
-  if (!isIOS()) {
-    intervalId = setInterval(() => { renderTracking(); }, 1000);
-  }
-}
-
-async function finishRest() {
-  clearLoops();
-  // Switch the persistent notification back to tracking for the SAME set the
-  // user is now about to perform. No set is completed or advanced here.
-  state.mode = 'tracking';
-  state.restEndTime = null;
-  state.restTotalSeconds = null;
-  await persistState();
-
-  // Only alert on the lock screen if the app is not already in the foreground
-  // (the in-app overlay plays its own sound/haptics when visible).
-  let appFocused = false;
+// Conditional Index Progression Machine to update state and trigger next notifications
+async function runIndexProgression() {
+  const bc = new BroadcastChannel('workout-lockscreeen-sync');
   try {
-    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    appFocused = clients.some((c) => c.focused || c.visibilityState === 'visible');
-  } catch (e) { /* ignore */ }
+    // 1. Read current active workout routine array and indices from localized browser storage (IndexedDB)
+    const activeWorkout = await getStoredValue('activeWorkout');
+    let currentExerciseIndexRaw = await getStoredValue('currentExerciseIndex');
+    let currentSetIndexRaw = await getStoredValue('currentSetIndex');
 
-  if (!appFocused) {
-    await self.registration.showNotification('💪 Rest over!', {
-      tag: ALERT_TAG,
-      body: `Time for ${state.setLabel || 'your next set'}${state.exerciseName ? ' — ' + state.exerciseName : ''}`,
-      renotify: true,
-      silent: false,
-      requireInteraction: true,
-      vibrate: [400, 120, 400, 120, 400],
-      badge: '/icon-192.png',
-      icon: '/icon-192.png',
-    });
-  }
-
-  broadcast({ type: 'rest_finished' });
-  startTrackingLoop();
-}
-
-function startRestLoop() {
-  clearLoops();
-  state.mode = 'resting';
-
-  if (isIOS()) {
-    // Static render now + a single timeout to fire the finish alert. (Background
-    // timers are unreliable on iOS, so this is best-effort until a push backend
-    // is added in a later step.)
-    renderRest(Math.max(0, Math.ceil((state.restEndTime - Date.now()) / 1000)));
-    const delay = Math.max(0, state.restEndTime - Date.now());
-    iosFinishId = setTimeout(() => { iosFinishId = null; finishRest(); }, delay);
-    return;
-  }
-
-  const tick = () => {
-    const remaining = Math.max(0, Math.ceil((state.restEndTime - Date.now()) / 1000));
-    if (remaining <= 0) {
-      finishRest();
-    } else {
-      renderRest(remaining);
+    // STRICT TYPE CASTING & BOUNDARY GAURDS
+    if (!activeWorkout || !activeWorkout.exercises) {
+      bc.postMessage({ type: 'ERROR', message: 'Active workout is missing or invalid in IndexedDB.' });
+      return;
     }
-  };
-  tick();
-  intervalId = setInterval(tick, 1000);
+
+    if (currentExerciseIndexRaw === null || currentExerciseIndexRaw === undefined) {
+      currentExerciseIndexRaw = 0;
+    }
+    if (currentSetIndexRaw === null || currentSetIndexRaw === undefined) {
+      currentSetIndexRaw = 0;
+    }
+
+    const currentExerciseIndex = Number(currentExerciseIndexRaw);
+    const currentSetIndex = Number(currentSetIndexRaw);
+
+    if (isNaN(currentExerciseIndex) || isNaN(currentSetIndex)) {
+      bc.postMessage({ type: 'ERROR', message: 'Progression indices parsed as NaN.' });
+      return;
+    }
+
+    const activeExercise = activeWorkout.exercises[currentExerciseIndex];
+    if (!activeExercise || !activeExercise.sets) {
+      bc.postMessage({ type: 'ERROR', message: 'Current active exercise is undefined.' });
+      return;
+    }
+
+    // Mark the targeted set as completed in the database
+    const set = activeExercise.sets[currentSetIndex];
+    if (!set) {
+      bc.postMessage({ type: 'ERROR', message: 'Current targeted set is undefined at index.' });
+      return;
+    }
+    set.isCompleted = true;
+
+    // Persist immediately to prevent loss or data corruption
+    await setStoredValue('activeWorkout', activeWorkout);
+
+    // Ingest the target client platform type
+    let platform = 'android';
+    const idbState = await getStoredState();
+    if (idbState && idbState.platform) {
+      platform = idbState.platform;
+    }
+    if (/iPad|iPhone|iPod/.test(self.navigator.userAgent) || isIOSUserAgent()) {
+      platform = 'ios';
+    }
+
+    // Android/iOS absolute lockscreeen countdown math
+    const nextSet = Number(currentSetIndex) + 1;
+    const totalSets = Number(activeExercise.sets.length);
+
+    if (isNaN(nextSet) || isNaN(totalSets)) {
+      bc.postMessage({ type: 'ERROR', message: 'Boundary checks resulted in unexpected NaN bounds.' });
+      return;
+    }
+
+    if (nextSet < totalSets) {
+      // --- SUB-CASE A: Current exercise has more sets remaining, increment set index by 1 ---
+      const newSetIdx = nextSet;
+      await setStoredValue('currentSetIndex', newSetIdx);
+
+      // Fetch customizable rest time or default to 90 seconds
+      const restSeconds = activeExercise.restTime !== undefined ? Number(activeExercise.restTime) : 90;
+      if (isNaN(restSeconds)) {
+        bc.postMessage({ type: 'ERROR', message: 'Rest duration is unexpectedly NaN.' });
+        return;
+      }
+      
+      const nextEndTime = Date.now() + restSeconds * 1000;
+      currentEndTime = nextEndTime;
+      
+      // Resolve name of active exercise via exercisesList if available
+      const exercisesList = await getStoredValue('exercisesList') || [];
+      const exerciseDetails = exercisesList.find((e) => e.id === activeExercise.exerciseId);
+      currentExerciseName = exerciseDetails ? exerciseDetails.name : (activeExercise.name || "Next Exercise");
+      currentNextExText = `Set ${newSetIdx + 1} of ${totalSets}`;
+
+      const isIOS = platform === 'ios' || isIOSUserAgent();
+
+      if (isIOS) {
+        // iOS Loop Terminator - explicitly block, clear, destroy any intervals & push timers
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        if (iosTimerId) {
+          clearTimeout(iosTimerId);
+          iosTimerId = null;
+        }
+
+        // Trigger EXACTLY ONE static iOS notification with future completion target
+        await showLockscreeenNotification({
+          state: 'active',
+          platform: 'ios',
+          endTime: currentEndTime,
+          exerciseName: currentExerciseName,
+          nextExText: currentNextExText
+        });
+
+        // Setup a single isolated setTimeout tracker to fire the timer expiration alert
+        const delayMs = Math.max(0, currentEndTime - Date.now());
+        iosTimerId = setTimeout(async () => {
+          iosTimerId = null;
+          await self.registration.showNotification(`Rest Period Finished! ⚡`, {
+            body: `Time to hit the next set of ${currentExerciseName || "your exercise"}!`,
+            tag: 'workout-timer',
+            renotify: true,
+            silent: false,
+            requireInteraction: true,
+            vibrate: [500, 110, 500, 110, 500],
+            badge: '/icon-192.png',
+            icon: '/icon-192.png'
+          });
+
+          bc.postMessage({ type: 'REST_TIMER_FINISHED' });
+          await runIndexProgression();
+        }, delayMs);
+
+      } else {
+        // Standard Android interval updater
+        if (timerId) {
+          clearInterval(timerId);
+        }
+        
+        if (idbState) {
+          idbState.endTime = currentEndTime;
+          idbState.total = restSeconds;
+          idbState.exerciseName = currentExerciseName;
+          idbState.nextExText = currentNextExText;
+          idbState.platform = platform;
+          await setStoredState(idbState);
+        }
+
+        const tick = async () => {
+          const remainingSecs = Math.max(0, Math.ceil((currentEndTime - Date.now()) / 1000));
+          if (remainingSecs <= 0) {
+            clearInterval(timerId);
+            timerId = null;
+            currentEndTime = null;
+
+            bc.postMessage({ type: 'REST_TIMER_FINISHED' });
+
+            // Timer naturally ran out: invoke progression recursion
+            await runIndexProgression();
+          } else {
+            await showLockscreeenNotification({
+              state: 'active',
+              platform: 'android',
+              endTime: currentEndTime,
+              exerciseName: currentExerciseName,
+              nextExText: currentNextExText,
+              remainingSecs: remainingSecs
+            });
+
+            // Feed live live ticker updates through broadcast channels
+            bc.postMessage({
+              type: 'REST_TIMER_TICK',
+              remainingSecs,
+              endTime: currentEndTime,
+              total: restSeconds,
+              exerciseName: currentExerciseName
+            });
+          }
+        };
+
+        await tick();
+        timerId = setInterval(tick, 1000);
+      }
+
+      // Broadcast the adjusted indexes and active timer target instantly to the main thread
+      bc.postMessage({
+        type: 'LOCKSCREEN_STATE_MUTATED',
+        activeWorkout: activeWorkout,
+        currentExerciseIndex: currentExerciseIndex,
+        currentSetIndex: newSetIdx,
+        restTimerTarget: {
+          endTime: currentEndTime,
+          total: restSeconds,
+          exerciseName: currentExerciseName
+        }
+      });
+
+    } else {
+      // The final set of this specific exercise is finished. Check for next exercise bounds
+      const totalExercises = Number(activeWorkout.exercises.length);
+      const nextExerciseIndex = Number(currentExerciseIndex) + 1;
+
+      if (isNaN(totalExercises) || isNaN(nextExerciseIndex)) {
+        bc.postMessage({ type: 'ERROR', message: 'Exercises totals evaluated to NaN.' });
+        return;
+      }
+
+      if (nextExerciseIndex < totalExercises) {
+        // --- SUB-CASE B: Another exercise available, reset set index, increment exercise index ---
+        const newExIdx = nextExerciseIndex;
+        const newSetIdx = 0;
+
+        await setStoredValue('currentExerciseIndex', newExIdx);
+        await setStoredValue('currentSetIndex', newSetIdx);
+
+        // Cancel running timer since work mode activates
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        if (iosTimerId) {
+          clearTimeout(iosTimerId);
+          iosTimerId = null;
+        }
+        currentEndTime = null;
+
+        // Trigger a fresh 'Rest Timer Inactive' layout with a prominent 'Complete set' action button
+        const nextEx = activeWorkout.exercises[newExIdx];
+        if (!nextEx || !nextEx.sets) {
+          bc.postMessage({ type: 'ERROR', message: 'Next exercise boundaries evaluate to undefined' });
+          return;
+        }
+
+        const exercisesList = await getStoredValue('exercisesList') || [];
+        const nextExDetails = exercisesList.find((e) => e.id === nextEx.exerciseId);
+        const nextExName = nextExDetails ? nextExDetails.name : (nextEx.name || "Next Exercise");
+        const nextExText = `Set 1 of ${Number(nextEx.sets.length)}`;
+
+        await showLockscreeenNotification({
+          state: 'inactive',
+          platform: platform,
+          endTime: 0,
+          exerciseName: nextExName,
+          nextExText: nextExText
+        });
+
+        // Broadcast index progression to keep foreground thread perfectly synchronized
+        bc.postMessage({
+          type: 'LOCKSCREEN_STATE_MUTATED',
+          activeWorkout: activeWorkout,
+          currentExerciseIndex: newExIdx,
+          currentSetIndex: newSetIdx,
+          restTimerTarget: null
+        });
+
+      } else {
+        // --- SUB-CASE C: All sets and exercises completed. Mark routine fully complete ---
+        activeWorkout.endTime = new Date().toISOString();
+        
+        await setStoredValue('activeWorkout', activeWorkout);
+        await setStoredValue('currentExerciseIndex', null);
+        await setStoredValue('currentSetIndex', null);
+
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        if (iosTimerId) {
+          clearTimeout(iosTimerId);
+          iosTimerId = null;
+        }
+        currentEndTime = null;
+
+        // Clear the active workout-timer notification tag cleanly
+        await self.registration.getNotifications({ tag: 'workout-timer' }).then((notifications) => {
+          for (const notif of notifications) {
+            notif.close();
+          }
+        });
+
+        // Trigger a complete congratulatory push
+        await self.registration.showNotification(`🎉 Workout Routine Completed!`, {
+          body: `Superb effort utilised today. Fitness session is safely saved to your history dashboard!`,
+          tag: 'workout-timer-complete',
+          renotify: true,
+          silent: false,
+          badge: '/icon-192.png',
+          icon: '/icon-192.png'
+        });
+
+        // Broadcast details to main application thread
+        bc.postMessage({
+          type: 'LOCKSCREEN_STATE_MUTATED',
+          activeWorkout: null,
+          currentExerciseIndex: null,
+          currentSetIndex: null,
+          restTimerTarget: null,
+          completedWorkout: activeWorkout
+        });
+      }
+    }
+  } catch (error) {
+    console.error("💥 [Progression Machine] Severe error while updating lockscreen state:", error);
+    bc.postMessage({ type: 'ERROR', message: `Progression system failure details: ${error.message || error}` });
+  }
 }
 
-async function clearAll() {
-  clearLoops();
-  state = {
-    mode: 'idle',
-    platform: state.platform,
-    workoutStartTime: null,
-    exerciseName: '',
-    setLabel: '',
-    restEndTime: null,
-    restTotalSeconds: null,
-  };
-  await persistState();
-  try {
-    const notifs = await self.registration.getNotifications();
-    notifs.forEach((n) => {
-      if (n.tag === NOTIF_TAG || n.tag === ALERT_TAG) n.close();
-    });
-  } catch (e) { /* ignore */ }
-}
-
-// --- Command handling (app -> SW) --------------------------------------------
+// Service Worker postMessage Event Handling
 self.addEventListener('message', (event) => {
   const data = event.data;
-  if (!data || !data.type) return;
+  if (!data) return;
 
-  if (data.platform) state.platform = data.platform;
+  if (data.type === 'START_TIMER') {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+    if (iosTimerId) {
+      clearTimeout(iosTimerId);
+      iosTimerId = null;
+    }
 
-  if (data.type === 'SHOW_TRACKING') {
-    event.waitUntil((async () => {
-      state.workoutStartTime = Number(data.workoutStartTime) || state.workoutStartTime || Date.now();
-      state.exerciseName = data.exerciseName || '';
-      state.setLabel = data.setLabel || '';
-      // The app only sends this when it is NOT resting, so it authoritatively
-      // means "switch to tracking" — this is also how an in-app "Skip Rest"
-      // stops a running lock-screen countdown.
-      startTrackingLoop();
-      await persistState();
-    })());
-  } else if (data.type === 'START_REST') {
-    event.waitUntil((async () => {
-      state.restEndTime = Number(data.endTime);
-      state.restTotalSeconds = Number(data.totalSeconds) || 90;
-      state.exerciseName = data.exerciseName || state.exerciseName || '';
-      state.setLabel = data.setLabel || state.setLabel || '';
-      await persistState();
-      startRestLoop();
-    })());
-  } else if (data.type === 'END_SESSION') {
-    event.waitUntil(clearAll());
+    currentEndTime = Number(data.endTime);
+    currentExerciseName = data.exerciseName;
+    currentNextExText = data.nextExText;
+
+    let platform = data.platform || 'android';
+    if (/iPad|iPhone|iPod/.test(self.navigator.userAgent) || isIOSUserAgent()) {
+      platform = 'ios';
+    }
+
+    const startTimerAsync = async () => {
+      let currentSettings = await getStoredState() || {};
+      currentSettings.endTime = currentEndTime;
+      currentSettings.platform = platform;
+      currentSettings.total = Number(data.total) || 90;
+      currentSettings.exerciseName = currentExerciseName;
+      currentSettings.nextExText = currentNextExText;
+      await setStoredState(currentSettings);
+
+      const isIOS = platform === 'ios' || isIOSUserAgent();
+
+      if (!isIOS) {
+        const tick = async () => {
+          if (!currentEndTime) {
+            if (timerId) {
+              clearInterval(timerId);
+              timerId = null;
+            }
+            return;
+          }
+          const remainingSecs = Math.max(0, Math.ceil((currentEndTime - Date.now()) / 1000));
+          if (remainingSecs <= 0) {
+            if (timerId) {
+              clearInterval(timerId);
+              timerId = null;
+            }
+            currentEndTime = null;
+
+            const bc = new BroadcastChannel('workout-lockscreeen-sync');
+            bc.postMessage({ type: 'REST_TIMER_FINISHED' });
+
+            await runIndexProgression();
+          } else {
+            await showLockscreeenNotification({
+              state: 'active',
+              platform: 'android',
+              endTime: currentEndTime,
+              exerciseName: currentExerciseName,
+              nextExText: currentNextExText,
+              remainingSecs: remainingSecs
+            });
+
+            const bc = new BroadcastChannel('workout-lockscreeen-sync');
+            bc.postMessage({
+              type: 'REST_TIMER_TICK',
+              remainingSecs,
+              endTime: currentEndTime,
+              total: currentSettings.total,
+              exerciseName: currentExerciseName
+            });
+          }
+        };
+
+        if (timerId) {
+          clearInterval(timerId);
+        }
+        timerId = setInterval(tick, 1000);
+        await tick();
+      } else {
+        // CASE iOS countdown mechanics (explicit static rendering)
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        if (iosTimerId) {
+          clearTimeout(iosTimerId);
+          iosTimerId = null;
+        }
+
+        await showLockscreeenNotification({
+          state: 'active',
+          platform: 'ios',
+          endTime: currentEndTime,
+          exerciseName: currentExerciseName,
+          nextExText: currentNextExText
+        });
+
+        const bc = new BroadcastChannel('workout-lockscreeen-sync');
+        bc.postMessage({
+          type: 'LOCKSCREEN_STATE_MUTATED',
+          restTimerTarget: {
+            endTime: currentEndTime,
+            total: currentSettings.total || 90,
+            exerciseName: currentExerciseName
+          }
+        });
+
+        // Trigger the final timer expiration alert on iOS
+        const delayMs = Math.max(0, currentEndTime - Date.now());
+        iosTimerId = setTimeout(async () => {
+          iosTimerId = null;
+          await self.registration.showNotification(`Rest Period Finished! ⚡`, {
+            body: `Time to hit the next set of ${currentExerciseName || "your exercise"}!`,
+            tag: 'workout-timer',
+            renotify: true,
+            silent: false,
+            requireInteraction: true,
+            vibrate: [500, 110, 500, 110, 500],
+            badge: '/icon-192.png',
+            icon: '/icon-192.png'
+          });
+
+          const bc2 = new BroadcastChannel('workout-lockscreeen-sync');
+          bc2.postMessage({ type: 'REST_TIMER_FINISHED' });
+
+          await runIndexProgression();
+        }, delayMs);
+      }
+    };
+
+    event.waitUntil(startTimerAsync());
+  }
+
+  if (data.type === 'CANCEL_TIMER') {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+    if (iosTimerId) {
+      clearTimeout(iosTimerId);
+      iosTimerId = null;
+    }
+    currentEndTime = null;
+
+    const cancelTimerAsync = async () => {
+      await self.registration.getNotifications({ tag: 'workout-timer' }).then((notifications) => {
+        for (const notif of notifications) {
+          notif.close();
+        }
+      });
+
+      const bc = new BroadcastChannel('workout-lockscreeen-sync');
+      bc.postMessage({ type: 'REST_TIMER_CANCELLED' });
+    };
+
+    event.waitUntil(cancelTimerAsync());
+  }
+
+  if (data.type === 'UPDATE_STATUS_NOTIFICATION') {
+    if (timerId !== null || iosTimerId !== null || currentEndTime !== null) return;
+
+    const { elapsedTime, exerciseName, setDetails } = data;
+    
+    let title = exerciseName || "Working Set";
+    let body = setDetails || `Duration: ${elapsedTime || "00:00"}`;
+
+    const showStatusAsync = async () => {
+      let platform = 'android';
+      const idbState = await getStoredState();
+      if (idbState && idbState.platform) {
+        platform = idbState.platform;
+      }
+      if (/iPad|iPhone|iPod/.test(self.navigator.userAgent) || isIOSUserAgent()) {
+        platform = 'ios';
+      }
+
+      await showLockscreeenNotification({
+        state: 'inactive',
+        platform: platform,
+        endTime: 0,
+        exerciseName: title,
+        nextExText: body
+      });
+    };
+
+    event.waitUntil(showStatusAsync());
   }
 });
 
-// --- Notification button + tap handling (SW -> app) --------------------------
+// Service Worker Lockscreeen Event Hook Action Router
 self.addEventListener('notificationclick', (event) => {
   const action = event.action;
+  
   event.notification.close();
 
-  event.waitUntil((async () => {
-    // The SW may have been recycled since the timer started; rebuild state.
-    if (state.mode === 'idle') await restoreState();
-
-    if (action === 'add_30' && state.restEndTime) {
-      state.restEndTime += 30000;
-      state.restTotalSeconds = (state.restTotalSeconds || 90) + 30;
-      await persistState();
-      startRestLoop();
-      broadcast({ type: 'rest_adjusted', endTime: state.restEndTime, totalSeconds: state.restTotalSeconds });
-      return;
-    }
-
-    if (action === 'sub_30' && state.restEndTime) {
-      state.restEndTime -= 30000;
-      state.restTotalSeconds = Math.max(1, (state.restTotalSeconds || 90) - 30);
-      const remaining = Math.ceil((state.restEndTime - Date.now()) / 1000);
-      await persistState();
-      if (remaining <= 0) {
-        await finishRest();
-      } else {
-        startRestLoop();
-        broadcast({ type: 'rest_adjusted', endTime: state.restEndTime, totalSeconds: state.restTotalSeconds });
+  event.waitUntil(
+    (async () => {
+      let platform = 'android';
+      const idbState = await getStoredState();
+      if (idbState && idbState.platform) {
+        platform = idbState.platform;
       }
-      return;
-    }
+      if (/iPad|iPhone|iPod/.test(self.navigator.userAgent) || isIOSUserAgent()) {
+        platform = 'ios';
+      }
 
-    if (action === 'skip_rest') {
-      clearLoops();
-      state.restEndTime = null;
-      state.restTotalSeconds = null;
-      await persistState();
-      broadcast({ type: 'rest_skipped' });
-      startTrackingLoop();
-      return;
-    }
+      // Restore active timer state on SW wake-up if in-memory variable was recycled/garbage collected
+      if (idbState) {
+        if (currentEndTime === null || currentEndTime === undefined) {
+          if (idbState.endTime) {
+            currentEndTime = Number(idbState.endTime);
+          }
+        }
+        if (currentExerciseName === null || currentExerciseName === undefined) {
+          currentExerciseName = idbState.exerciseName || null;
+        }
+        if (currentNextExText === null || currentNextExText === undefined) {
+          currentNextExText = idbState.nextExText || null;
+        }
+      }
 
-    // Plain tap (no action button): focus or open the app.
-    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const client of clients) {
-      if ('focus' in client) { await client.focus(); return; }
-    }
-    if (self.clients.openWindow) {
-      await self.clients.openWindow('/');
-    }
-  })());
+      const bc = new BroadcastChannel('workout-lockscreeen-sync');
+
+      const startTickingIfStopped = async () => {
+        if (!timerId && currentEndTime && currentEndTime > Date.now()) {
+          const tick = async () => {
+            if (!currentEndTime) {
+              if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+              }
+              return;
+            }
+            const remainingSecs = Math.max(0, Math.ceil((currentEndTime - Date.now()) / 1000));
+            if (remainingSecs <= 0) {
+              if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+              }
+              currentEndTime = null;
+
+              bc.postMessage({ type: 'REST_TIMER_FINISHED' });
+              await runIndexProgression();
+            } else {
+              await showLockscreeenNotification({
+                state: 'active',
+                platform: 'android',
+                endTime: currentEndTime,
+                exerciseName: currentExerciseName,
+                nextExText: currentNextExText,
+                remainingSecs: remainingSecs
+              });
+
+              bc.postMessage({
+                type: 'REST_TIMER_TICK',
+                remainingSecs,
+                endTime: currentEndTime,
+                total: idbState ? idbState.total : 90,
+                exerciseName: currentExerciseName
+              });
+            }
+          };
+          timerId = setInterval(tick, 1000);
+          await tick();
+        }
+      };
+
+      if (action === 'add_30') {
+        const isIOS = platform === 'ios' || isIOSUserAgent();
+        if (!isIOS && currentEndTime) {
+          if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+          }
+          currentEndTime += 30000;
+          if (idbState) {
+            idbState.endTime = currentEndTime;
+            idbState.total = (idbState.total || 90) + 30;
+            await setStoredState(idbState);
+          }
+          const remainingSecs = Math.max(0, Math.ceil((currentEndTime - Date.now()) / 1000));
+          await showLockscreeenNotification({
+            state: 'active',
+            platform: 'android',
+            endTime: currentEndTime,
+            exerciseName: currentExerciseName,
+            nextExText: currentNextExText,
+            remainingSecs: remainingSecs
+          });
+
+          bc.postMessage({
+            type: 'LOCKSCREEN_STATE_MUTATED',
+            restTimerTarget: {
+              endTime: currentEndTime,
+              total: idbState ? idbState.total : 90,
+              exerciseName: currentExerciseName
+            }
+          });
+
+          await startTickingIfStopped();
+        }
+      } else if (action === 'sub_30') {
+        const isIOS = platform === 'ios' || isIOSUserAgent();
+        if (!isIOS && currentEndTime) {
+          if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+          }
+          currentEndTime -= 30000;
+          const remainingSecs = Math.max(0, Math.ceil((currentEndTime - Date.now()) / 1000));
+          
+          if (remainingSecs <= 0) {
+            if (timerId) {
+              clearInterval(timerId);
+              timerId = null;
+            }
+            if (iosTimerId) {
+              clearTimeout(iosTimerId);
+              iosTimerId = null;
+            }
+            currentEndTime = null;
+            if (idbState) {
+              idbState.endTime = null;
+              await setStoredState(idbState);
+            }
+            await runIndexProgression();
+          } else {
+            if (idbState) {
+              idbState.endTime = currentEndTime;
+              await setStoredState(idbState);
+            }
+            await showLockscreeenNotification({
+              state: 'active',
+              platform: 'android',
+              endTime: currentEndTime,
+              exerciseName: currentExerciseName,
+              nextExText: currentNextExText,
+              remainingSecs: remainingSecs
+            });
+
+            bc.postMessage({
+              type: 'LOCKSCREEN_STATE_MUTATED',
+              restTimerTarget: {
+                endTime: currentEndTime,
+                total: idbState ? idbState.total : 90,
+                exerciseName: currentExerciseName
+              }
+            });
+
+            await startTickingIfStopped();
+          }
+        }
+      } else if (action === 'skip_rest') {
+        // Explicitly cancel the Rest Timer WITHOUT completing/advancing any active set index!
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        if (iosTimerId) {
+          clearTimeout(iosTimerId);
+          iosTimerId = null;
+        }
+        currentEndTime = null;
+
+        if (idbState) {
+          idbState.endTime = null;
+          await setStoredState(idbState);
+        }
+
+        // Show the Working Set inactive notification to let user complete the set later
+        await showLockscreeenNotification({
+          state: 'inactive',
+          platform: platform,
+          endTime: 0,
+          exerciseName: currentExerciseName,
+          nextExText: currentNextExText
+        });
+
+        // Broadcast rest timer target removal to the React frontend
+        bc.postMessage({
+          type: 'LOCKSCREEN_STATE_MUTATED',
+          restTimerTarget: null
+        });
+      } else if (action === 'complete_set') {
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        if (iosTimerId) {
+          clearTimeout(iosTimerId);
+          iosTimerId = null;
+        }
+        currentEndTime = null;
+        await runIndexProgression();
+      } else {
+        // Handle general tap clicks: focus window client
+        const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const client of clientList) {
+          if ('focus' in client) {
+            await client.focus();
+            break;
+          }
+        }
+      }
+    })()
+  );
 });
 
 // --- End of sw.js ---

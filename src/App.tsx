@@ -13,7 +13,6 @@ import WorkoutSplashScene from "./components/WorkoutSplashScene";
 import IntroSplash from "./components/IntroSplash";
 import OnboardingProfile from "./components/OnboardingProfile";
 import { WorkoutSession, UserProfile } from "./types";
-import { getNotificationService } from "./services/notifications";
 import { isFirebaseReady, auth } from "./firebase";
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import {
@@ -214,10 +213,23 @@ export default function App() {
   const state = useWorkoutState();
   const [restTimerTarget, setRestTimerTarget] = useState<{ endTime: number; total: number; exerciseName: string } | null>(null);
 
-  // Tear down all workout notifications (tracking + rest). Used when a session
-  // starts, finishes, or is discarded so no stale lock-screen timer lingers.
   const cancelServiceWorkerTimer = () => {
-    getNotificationService().endSession();
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: "CANCEL_TIMER" });
+      }
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.getNotifications({ tag: "workout-timer-alert" }).then((list) => {
+          list.forEach((n) => n.close());
+        });
+        registration.getNotifications({ tag: "workout-timer" }).then((list) => {
+          list.forEach((n) => n.close());
+        });
+        if (registration.active) {
+          registration.active.postMessage({ type: "CANCEL_TIMER" });
+        }
+      }).catch(() => {});
+    }
   };
   const [showSwipeUpInfo, setShowSwipeUpInfo] = useState(false);
   const [showIntro, setShowIntro] = useState(() => {
