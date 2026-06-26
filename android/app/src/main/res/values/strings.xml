@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SW3AT Workouts</string>
+    <string name="title_activity_main">SW3AT Workouts</string>
+    <string name="package_name">com.sw3at.workouts</string>
+    <string name="custom_url_scheme">com.sw3at.workouts</string>
+</resources>
