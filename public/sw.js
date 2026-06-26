@@ -258,12 +258,31 @@ async function restoreState() {
   } catch (e) { /* best-effort */ }
 }
 
+// Keep a single long-lived BroadcastChannel. Creating one per message and
+// closing it immediately can drop the message before it is delivered.
+let syncChannel = null;
+function getSyncChannel() {
+  if (!syncChannel && typeof BroadcastChannel !== 'undefined') {
+    try { syncChannel = new BroadcastChannel(SYNC_CHANNEL); } catch (e) { syncChannel = null; }
+  }
+  return syncChannel;
+}
+
 function broadcast(message) {
+  // Path 1: BroadcastChannel (kept open).
   try {
-    const bc = new BroadcastChannel(SYNC_CHANNEL);
-    bc.postMessage(message);
-    bc.close();
-  } catch (e) { /* channel may be unavailable */ }
+    const ch = getSyncChannel();
+    if (ch) ch.postMessage(message);
+  } catch (e) { /* ignore */ }
+  // Path 2: direct postMessage to every window client — the most reliable
+  // delivery for live clients, and our safety net when BroadcastChannel is flaky.
+  try {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const c of clients) {
+        try { c.postMessage({ __sw3atTimer: true, ...message }); } catch (e) { /* ignore */ }
+      }
+    });
+  } catch (e) { /* ignore */ }
 }
 
 function clearLoops() {

@@ -95,21 +95,37 @@ export class WebNotificationService implements NotificationService {
     }
   }
 
-  /** Lazily open the broadcast channel and start relaying SW events. */
+  private swListenerAttached = false;
+
+  /** Route a raw message payload to subscribers if it's a timer event. */
+  private dispatch(data: any) {
+    if (!data || typeof data.type !== "string") return;
+    if (
+      data.type === "rest_finished" ||
+      data.type === "rest_skipped" ||
+      data.type === "rest_adjusted"
+    ) {
+      for (const handler of this.handlers) handler(data as NotificationEvent);
+    }
+  }
+
+  /**
+   * Open both SW->app delivery paths and start relaying events. We listen on a
+   * BroadcastChannel AND on direct serviceWorker messages; whichever arrives
+   * first wins (handlers are idempotent), so a drop on one path is covered.
+   */
   private ensureChannel() {
-    if (this.channel || typeof BroadcastChannel === "undefined") return;
-    this.channel = new BroadcastChannel(TIMER_SYNC_CHANNEL);
-    this.channel.onmessage = (event) => {
-      const data = event.data as NotificationEvent | { type?: string } | null;
-      if (!data || typeof data.type !== "string") return;
-      if (
-        data.type === "rest_finished" ||
-        data.type === "rest_skipped" ||
-        data.type === "rest_adjusted"
-      ) {
-        for (const handler of this.handlers) handler(data as NotificationEvent);
-      }
-    };
+    if (typeof BroadcastChannel !== "undefined" && !this.channel) {
+      this.channel = new BroadcastChannel(TIMER_SYNC_CHANNEL);
+      this.channel.onmessage = (event) => this.dispatch(event.data);
+    }
+    if (!this.swListenerAttached && typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", (event: MessageEvent) => {
+        const data = event.data;
+        if (data && data.__sw3atTimer) this.dispatch(data);
+      });
+      this.swListenerAttached = true;
+    }
   }
 
   /** Post a command to the active service worker (no-op if SW unavailable). */
