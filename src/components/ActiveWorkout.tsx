@@ -1014,6 +1014,22 @@ export default function ActiveWorkout({
     setRestTimerTarget(null);
   }, [setRestTimerTarget]);
 
+  // Complete the current (first uncompleted) set and start its rest timer.
+  // Mirrors the in-app tick button; used by the native "Done" notification action.
+  const completeCurrentSet = useCallback(() => {
+    const exercises = session.exercises || [];
+    for (const ex of exercises) {
+      const idx = ex.sets.findIndex((s: any) => !s.isCompleted);
+      if (idx !== -1) {
+        onUpdateSet(ex.exerciseId, idx, { isCompleted: true });
+        const restSec = ex.restTime !== undefined ? ex.restTime : 90;
+        const exDef = exercisesList.find((e: any) => e.id === ex.exerciseId);
+        triggerRestTimer(restSec, exDef?.name || "Exercise");
+        return;
+      }
+    }
+  }, [session.exercises, exercisesList, onUpdateSet, triggerRestTimer]);
+
   // Derive the current exercise + set label (the set the user is on, or — once
   // a set is completed — the set they are about to do). Shared by the tracking
   // notification and the rest "up next" text.
@@ -1075,10 +1091,16 @@ export default function ActiveWorkout({
         setRestTimerTarget((prev) =>
           prev ? { ...prev, endTime: evt.endTime, total: evt.totalSeconds } : prev
         );
+      } else if (evt.type === "set_completed") {
+        // Native "Done" button: complete the current set and start its rest.
+        completeCurrentSet();
+      } else if (evt.type === "end_workout") {
+        // Native "End" button already foregrounds the app; nothing else to do
+        // here — the user finishes the workout from the in-app controls.
       }
     });
     return unsubscribe;
-  }, [setRestTimerTarget]);
+  }, [setRestTimerTarget, completeCurrentSet]);
 
   // Reconcile the app's rest timer against the service worker's authoritative
   // state. Used when the app regains focus (a lock-screen +/- may have changed

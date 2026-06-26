@@ -57,7 +57,11 @@ export type NotificationEvent =
   /** User skipped rest (lock-screen "Skip" button). App should return to tracking. */
   | { type: "rest_skipped" }
   /** Rest length changed via a lock-screen +/- button. App should sync its timer. */
-  | { type: "rest_adjusted"; endTime: number; totalSeconds: number };
+  | { type: "rest_adjusted"; endTime: number; totalSeconds: number }
+  /** Native "Done" button: complete the current set and start its rest timer. */
+  | { type: "set_completed" }
+  /** Native "End" button: the user wants to finish the workout in-app. */
+  | { type: "end_workout" };
 
 export interface NotificationService {
   /** Whether notifications are available at all on this platform/browser. */

@@ -11,14 +11,18 @@
  * Nothing else in the app needs to change to gain native notifications.
  */
 
+import { Capacitor } from "@capacitor/core";
 import type { NotificationService } from "./types";
 import { WebNotificationService } from "./webNotificationService";
+import { NativeNotificationService } from "./nativeNotificationService";
 
 let instance: NotificationService | null = null;
 
 export function getNotificationService(): NotificationService {
   if (!instance) {
-    instance = new WebNotificationService();
+    instance = Capacitor.isNativePlatform()
+      ? new NativeNotificationService()
+      : new WebNotificationService();
   }
   return instance;
 }
