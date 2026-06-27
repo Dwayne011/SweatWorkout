@@ -314,9 +314,13 @@ html, body {
 .m3-appbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .m3-brand { display: flex; gap: 12px; align-items: center; }
 .m3-logo { width: 44px; height: 44px; border-radius: 14px; flex: none; display: grid; place-items: center; background: linear-gradient(150deg, var(--m3-primary-fill), #a06bff); color: #fff; }
-.m3-wordmark { font-family: var(--m3-display-font); font-weight: 700; font-size: var(--m3-title-lg); line-height: 1; letter-spacing: -.01em; color: var(--m3-on); }
+.m3-wordmark { font-family: var(--m3-display-font); font-weight: 700; font-size: var(--m3-title-lg); line-height: 1; letter-spacing: -.01em; color: var(--m3-on); white-space: nowrap; }
 .m3-wordmark span { color: var(--m3-primary); }
-.m3-sub { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .1em; color: var(--m3-on-dim); margin-top: 4px; text-transform: uppercase; }
+.m3-sub { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .1em; color: var(--m3-on-dim); margin-top: 5px; text-transform: uppercase; white-space: nowrap; }
+
+/* Fill the viewport background so overscroll / past-content area isn't black */
+html.dark { background-color: #0b0910; }
+html.light { background-color: #fcfaff; }
 .m3-gsync { display: inline-flex; align-items: center; gap: 7px; flex: none; border: 1.5px solid var(--m3-outline); color: var(--m3-on); background: transparent; padding: 9px 14px; border-radius: var(--m3-r-full); font-size: var(--m3-label-lg); font-weight: 500; cursor: pointer; }
 
 /* floating bottom nav (the wrapper handles fixed placement) */
