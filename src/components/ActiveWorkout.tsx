@@ -937,7 +937,7 @@ export default function ActiveWorkout({
   const [pendingDeleteExerciseId, setPendingDeleteExerciseId] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("sw3at_next_session_recommendations");
+    const stored = localStorage.getItem("projectpb_next_session_recommendations");
     if (stored) {
       setSavedRecommendations(stored);
     }

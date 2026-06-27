@@ -5,7 +5,7 @@
 //   single "tracking" or "resting" notification and runs the rest countdown.
 //   It NEVER advances the workout or completes sets — rest expiry only fires one
 //   alert and returns to tracking. All set/workout progression lives in the app.
-const CACHE_NAME = 'sw3at-cache-v3';
+const CACHE_NAME = 'projectpb-cache-v3';
 const PRE_CACHE_ASSETS = [
   '/',
   '/index.html',
@@ -143,7 +143,7 @@ self.addEventListener('push', (event) => {
       body: payload.body,
       icon: payload.icon || '/icon-192.png',
       badge: payload.badge || '/icon-192.png',
-      tag: payload.tag || 'sw3at-push-general',
+      tag: payload.tag || 'projectpb-push-general',
       vibrate: [200, 100, 200],
       actions: payload.actions || []
     })
@@ -186,7 +186,7 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 
 const NOTIF_TAG = 'workout-timer';        // the single tracking/resting notification
 const ALERT_TAG = 'workout-timer-alert';  // the one-shot "rest over" alert
-const SYNC_CHANNEL = 'sw3at-timer-sync';  // matches webNotificationService.ts
+const SYNC_CHANNEL = 'projectpb-timer-sync';  // matches webNotificationService.ts
 
 const DB_NAME = 'WorkoutTimerDB';
 const STORE_NAME = 'workoutState';
@@ -279,7 +279,7 @@ function broadcast(message) {
   try {
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const c of clients) {
-        try { c.postMessage({ __sw3atTimer: true, ...message }); } catch (e) { /* ignore */ }
+        try { c.postMessage({ __projectpbTimer: true, ...message }); } catch (e) { /* ignore */ }
       }
     });
   } catch (e) { /* ignore */ }

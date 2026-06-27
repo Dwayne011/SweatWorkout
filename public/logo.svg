@@ -42,7 +42,7 @@
     <rect x="80" y="-45" width="20" height="90" rx="8" fill="url(#themeGrad)" />
     <rect x="103" y="-30" width="12" height="60" rx="6" fill="#ea580c" stroke="#ea580c" />
 
-    <!-- Center active sweat sweat droplet/flame motif -->
+    <!-- Center active flame droplet/flame motif -->
     <path d="M 0 -70 
              C 25 -40, 35 -15, 35 15 
              C 35 45, -35 45, -35 15 

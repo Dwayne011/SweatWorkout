@@ -1,4 +1,4 @@
-package com.sw3at.workouts;
+package com.projectpb.workouts;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -34,14 +34,14 @@ import androidx.core.app.NotificationCompat;
 public class WorkoutTimerService extends Service {
 
     // Commands (from JS) and button actions (from the notification)
-    public static final String ACTION_SHOW_TRACKING = "com.sw3at.workouts.SHOW_TRACKING";
-    public static final String ACTION_START_REST = "com.sw3at.workouts.START_REST";
-    public static final String ACTION_END_SESSION = "com.sw3at.workouts.END_SESSION";
-    public static final String ACTION_ADD_30 = "com.sw3at.workouts.ADD_30";
-    public static final String ACTION_SUB_30 = "com.sw3at.workouts.SUB_30";
-    public static final String ACTION_SKIP = "com.sw3at.workouts.SKIP";
-    public static final String ACTION_DONE = "com.sw3at.workouts.DONE";
-    public static final String ACTION_END = "com.sw3at.workouts.END";
+    public static final String ACTION_SHOW_TRACKING = "com.projectpb.workouts.SHOW_TRACKING";
+    public static final String ACTION_START_REST = "com.projectpb.workouts.START_REST";
+    public static final String ACTION_END_SESSION = "com.projectpb.workouts.END_SESSION";
+    public static final String ACTION_ADD_30 = "com.projectpb.workouts.ADD_30";
+    public static final String ACTION_SUB_30 = "com.projectpb.workouts.SUB_30";
+    public static final String ACTION_SKIP = "com.projectpb.workouts.SKIP";
+    public static final String ACTION_DONE = "com.projectpb.workouts.DONE";
+    public static final String ACTION_END = "com.projectpb.workouts.END";
 
     private static final String TAG = "WorkoutTimer";
     // Single high-importance channel so the one notification can buzz on demand

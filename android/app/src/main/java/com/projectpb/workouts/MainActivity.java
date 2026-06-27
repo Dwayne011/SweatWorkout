@@ -1,4 +1,4 @@
-package com.sw3at.workouts;
+package com.projectpb.workouts;
 
 import android.os.Bundle;
 import android.view.View;

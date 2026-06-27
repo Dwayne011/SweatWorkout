@@ -21,7 +21,7 @@ import type {
 } from "./types";
 
 /** Shared name for the SW <-> app event channel. Must match sw.js. */
-export const TIMER_SYNC_CHANNEL = "sw3at-timer-sync";
+export const TIMER_SYNC_CHANNEL = "projectpb-timer-sync";
 
 // IndexedDB coordinates — must match the persistence in sw.js.
 const DB_NAME = "WorkoutTimerDB";
@@ -122,7 +122,7 @@ export class WebNotificationService implements NotificationService {
     if (!this.swListenerAttached && typeof navigator !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("message", (event: MessageEvent) => {
         const data = event.data;
-        if (data && data.__sw3atTimer) this.dispatch(data);
+        if (data && data.__projectpbTimer) this.dispatch(data);
       });
       this.swListenerAttached = true;
     }

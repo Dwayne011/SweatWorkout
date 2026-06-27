@@ -46,7 +46,7 @@ const getExerciseModalityMetrics = (
 ) => {
   let userBodyWeight = 85; // Standard fallback body weight constant
   try {
-    const profileStr = localStorage.getItem("sw3at_user_profile");
+    const profileStr = localStorage.getItem("projectpb_user_profile");
     if (profileStr) {
       const profile = JSON.parse(profileStr);
       if (profile && profile.weightKg) {
@@ -376,7 +376,7 @@ export default function WorkoutSplashScene({
   // Save next session recommendations to local storage when analysis is loaded
   useEffect(() => {
     if (analysis && analysis.nextSessionRecommendations) {
-      localStorage.setItem("sw3at_next_session_recommendations", analysis.nextSessionRecommendations);
+      localStorage.setItem("projectpb_next_session_recommendations", analysis.nextSessionRecommendations);
     }
   }, [analysis]);
 

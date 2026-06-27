@@ -3,6 +3,22 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
+// One-time rebrand migration: copy any legacy `sw3at_*` localStorage keys to
+// `projectpb_*` so saved data (profile, sheet link, recommendations) survives the
+// rename. Native installs start fresh under the new package id, so this is mainly
+// for the web/PWA build where the origin (and its localStorage) is unchanged.
+try {
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('sw3at_')) {
+      const nk = 'projectpb_' + k.slice(6);
+      const v = localStorage.getItem(k);
+      if (v !== null && localStorage.getItem(nk) === null) localStorage.setItem(nk, v);
+      localStorage.removeItem(k);
+    }
+  }
+} catch { /* ignore storage access errors (private mode, etc.) */ }
+
 // Register the PWA service worker for background rest-timer notifications.
 // Skip it when running inside the Capacitor native shell: there we use a native
 // notification plugin, and a service worker inside the WebView can interfere

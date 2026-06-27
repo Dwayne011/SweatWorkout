@@ -94,7 +94,7 @@ export function useWorkoutState() {
   const [activeWorkout, setActiveWorkout] = useState<WorkoutSession | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
     try {
-      const stored = localStorage.getItem("sw3at_user_profile");
+      const stored = localStorage.getItem("projectpb_user_profile");
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
@@ -108,17 +108,17 @@ export function useWorkoutState() {
 
   const updateUserProfile = useCallback((profile: UserProfile) => {
     try {
-      localStorage.setItem("sw3at_user_profile", JSON.stringify(profile));
+      localStorage.setItem("projectpb_user_profile", JSON.stringify(profile));
     } catch (e) {
       console.error("Failed to save user profile:", e);
     }
     setUserProfile(profile);
   }, []);
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(() => {
-    return localStorage.getItem("sw3at_spreadsheet_id");
+    return localStorage.getItem("projectpb_spreadsheet_id");
   });
   const [isSheetsSyncEnabled, setIsSheetsSyncEnabled] = useState<boolean>(() => {
-    return localStorage.getItem("sw3at_sheets_sync_enabled") === "true";
+    return localStorage.getItem("projectpb_sheets_sync_enabled") === "true";
   });
 
   // Monitor Auth Changes
@@ -228,7 +228,7 @@ export function useWorkoutState() {
 
     const debouncedSetSpreadsheetId = debounce((id: string) => {
       setSpreadsheetId(id);
-      localStorage.setItem("sw3at_spreadsheet_id", id);
+      localStorage.setItem("projectpb_spreadsheet_id", id);
     }, 150);
 
     // Sync Custom Exercises

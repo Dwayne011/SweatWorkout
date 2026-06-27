@@ -27,21 +27,21 @@
   "related_applications": [
     {
       "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.sw3at.workouts",
-      "id": "com.sw3at.workouts"
+      "url": "https://play.google.com/store/apps/details?id=com.projectpb.workouts",
+      "id": "com.projectpb.workouts"
     },
     {
       "platform": "itunes",
-      "url": "https://apps.apple.com/app/sw3at-workouts/id123456789",
-      "id": "com.sw3at.workouts"
+      "url": "https://apps.apple.com/app/projectpb-workouts/id123456789",
+      "id": "com.projectpb.workouts"
     }
   ],
   "scope_extensions": [
     {
-      "origin": "https://*.sw3at.io"
+      "origin": "https://*.projectpb.io"
     },
     {
-      "origin": "https://*.sw3at.app"
+      "origin": "https://*.projectpb.app"
     }
   ],
   "iarc_rating_id": "76ec2a66-70eb-40bd-b65a-07204f1a26d2",
@@ -130,7 +130,7 @@
       "action": "/?action=open_file",
       "accept": {
         "application/json": [".json"],
-        "application/x-sw3at": [".sw3at"]
+        "application/x-projectpb": [".projectpb"]
       },
       "icons": [
         {
@@ -147,7 +147,7 @@
   },
   "protocol_handlers": [
     {
-      "protocol": "web+sw3at",
+      "protocol": "web+projectpb",
       "url": "/?uri=%s"
     }
   ],

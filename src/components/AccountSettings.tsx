@@ -243,7 +243,7 @@ export default function AccountSettings({
                             onChange={(e) => {
                               const newVal = e.target.checked;
                               state.setIsSheetsSyncEnabled(newVal);
-                              localStorage.setItem("sw3at_sheets_sync_enabled", newVal ? "true" : "false");
+                              localStorage.setItem("projectpb_sheets_sync_enabled", newVal ? "true" : "false");
                             }}
                             className="sr-only peer"
                           />
@@ -275,7 +275,7 @@ export default function AccountSettings({
                           onClick={() => {
                             if (confirm("Disconnect currently linked Google Sheet? This stops cloud sheets sync.")) {
                               state.setSpreadsheetId(null);
-                              localStorage.removeItem("sw3at_spreadsheet_id");
+                              localStorage.removeItem("projectpb_spreadsheet_id");
                               if (isFirebaseReady && auth && auth.currentUser) {
                                 import("firebase/firestore").then(async ({ doc, setDoc }) => {
                                   const { db } = await import("../firebase");

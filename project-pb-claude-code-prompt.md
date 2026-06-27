@@ -1,4 +1,4 @@
-# SW3AT Workouts — Performance Fix + M3 Expressive Reskin
+# PROJECT PB Workouts — Performance Fix + M3 Expressive Reskin
 
 ## Context
 
@@ -37,8 +37,8 @@ The app reads these keys frequently — some likely inside render paths or useEf
 - `workout_tracker_custom_exercises`
 - `workout_tracker_templates`
 - `workout_tracker_exercise_notes`
-- `sw3at_user_profile`
-- `sw3at_next_session_recommendations`
+- `projectpb_user_profile`
+- `projectpb_next_session_recommendations`
 
 **Fix:** Create a simple `useLocalStorage` hook or context that reads once on mount and writes on a debounced basis (e.g. 500ms for active workout). Never call `localStorage.getItem` inside a render path. Consider `useSyncExternalStore` for shared state that multiple components read.
 
@@ -232,7 +232,7 @@ Build these shared components, then swap them in one screen at a time:
 ## Reference
 
 The complete M3 Expressive mockup of all 7 screens as static HTML is at:
-`sw3at-m3-expressive.html` (should be in the project root or downloads — it contains the exact CSS tokens, component patterns, and icon SVGs to reference during implementation).
+`projectpb-m3-expressive.html` (should be in the project root or downloads — it contains the exact CSS tokens, component patterns, and icon SVGs to reference during implementation).
 
 ## Key design rules from M3 Expressive research
 

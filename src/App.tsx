@@ -226,10 +226,10 @@ export default function App() {
   };
   const [showSwipeUpInfo, setShowSwipeUpInfo] = useState(false);
   const [showIntro, setShowIntro] = useState(() => {
-    return !sessionStorage.getItem("sw3at_intro_played");
+    return !sessionStorage.getItem("projectpb_intro_played");
   });
   const [showOnboarding, setShowOnboarding] = useState(() => {
-    return !localStorage.getItem("sw3at_user_profile");
+    return !localStorage.getItem("projectpb_user_profile");
   });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   
@@ -328,7 +328,7 @@ export default function App() {
   const [sheetsSyncMessage, setSheetsSyncMessage] = useState<{ text: string; error: boolean } | null>(null);
 
   const [hasDismissedGate, setHasDismissedGate] = useState(() => {
-    return sessionStorage.getItem("sw3at_dismissed_gate") === "true";
+    return sessionStorage.getItem("projectpb_dismissed_gate") === "true";
   });
   
   const [notificationPermission, setNotificationPermission] = useState<"default" | "granted" | "denied" | "unsupported">(() => {
@@ -337,7 +337,7 @@ export default function App() {
   });
 
   const [dismissedNotificationBanner, setDismissedNotificationBanner] = useState(() => {
-    return sessionStorage.getItem("sw3at_dismissed_noti_banner") === "true";
+    return sessionStorage.getItem("projectpb_dismissed_noti_banner") === "true";
   });
   
   const [isAiExpanded, setIsAiExpanded] = useState(false);
@@ -420,7 +420,7 @@ export default function App() {
       const sheetId = await createWorkoutSpreadsheet(state.googleAccessToken);
       
       state.setSpreadsheetId(sheetId);
-      localStorage.setItem("sw3at_spreadsheet_id", sheetId);
+      localStorage.setItem("projectpb_spreadsheet_id", sheetId);
       
       if (isFirebaseReady && auth && auth.currentUser) {
         const { doc, setDoc } = await import("firebase/firestore");
@@ -474,7 +474,7 @@ export default function App() {
       {showIntro && (
         <IntroSplash
           onComplete={() => {
-            sessionStorage.setItem("sw3at_intro_played", "true");
+            sessionStorage.setItem("projectpb_intro_played", "true");
             setShowIntro(false);
           }}
         />
@@ -615,7 +615,7 @@ export default function App() {
               
               <button
                 onClick={() => {
-                  sessionStorage.setItem("sw3at_dismissed_gate", "true");
+                  sessionStorage.setItem("projectpb_dismissed_gate", "true");
                   setHasDismissedGate(true);
                 }}
                 className="text-xs text-slate-500 hover:text-gray-600 dark:text-slate-300 underline font-mono tracking-wide uppercase transition-colors"
@@ -727,7 +727,7 @@ export default function App() {
                     </button>
                     <button
                       onClick={() => {
-                        sessionStorage.setItem("sw3at_dismissed_noti_banner", "true");
+                        sessionStorage.setItem("projectpb_dismissed_noti_banner", "true");
                         setDismissedNotificationBanner(true);
                       }}
                       className="flex-1 sm:flex-initial px-3 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 hover:text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-slate-400 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer text-center"
