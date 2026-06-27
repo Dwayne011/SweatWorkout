@@ -1247,61 +1247,31 @@ export default function ActiveWorkout({
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="bg-white/70 dark:bg-zinc-950/75 backdrop-blur-2xl rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-2xl overflow-hidden relative z-10 w-full max-w-full">
-      {/* Top Banner Status (Dynamic rest-timer highlights) */}
-      <div className={`border-b px-3 py-3 sm:p-4 shrink-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 text-gray-900 dark:text-gray-100 transition-all duration-300 ${
-        restTimerTarget 
-          ? "bg-indigo-500/10 dark:bg-indigo-950/30 border-indigo-300 dark:border-indigo-500/20" 
-          : "bg-white/40 dark:bg-black/30 border-gray-200/50 dark:border-white/10"
-      }`}>
-        <div className="flex items-center space-x-3 min-w-0 w-full sm:flex-1">
-          <div className={`p-2 rounded-xl shrink-0 hidden sm:block transition-colors duration-300 ${
-            restTimerTarget 
-              ? "bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30" 
-              : "bg-gradient-to-tr from-indigo-500/10 to-purple-500/10 rounded-xl text-indigo-400 ring-1 ring-indigo-500/20"
-          }`}>
-            <Clock className={`w-5 h-5 text-indigo-400 ${restTimerTarget ? 'animate-bounce' : 'animate-pulse'}`} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="font-extrabold text-gray-900 dark:text-gray-100 text-sm md:text-base leading-none mb-1 truncate whitespace-nowrap">
-              {session.name}
-            </h3>
-            {restTimerTarget ? (
-              <p className="text-xs font-mono font-bold flex items-center gap-1.5 truncate">
-                <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-ping shrink-0" />
-                <span className="truncate bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-500/30 font-extrabold">
-                  ⏳ Rest: <ActiveRestCountdown target={restTimerTarget} />
-                </span>
-                <span className="text-gray-500 dark:text-gray-400 border-l border-gray-300 dark:border-white/10 pl-2.5 ml-1">
-                  Tracked: <ActiveWorkoutDuration startTime={session.startTime} />
-                </span>
-              </p>
-            ) : (
-              <p className="text-xs text-indigo-600 dark:text-indigo-300/80 font-mono font-bold flex items-center gap-1.5 truncate">
-                <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping shrink-0" />
-                <span className="truncate">Active Session Tracked • <ActiveWorkoutDuration startTime={session.startTime} /></span>
-              </p>
-            )}
-            {typeof window !== "undefined" && "Notification" in window && Notification.permission !== "granted" && (
-              <span className="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-lg text-[9px] mt-1 inline-block">Notifications Off</span>
-            )}
-          </div>
+    <div className="relative z-10 w-full max-w-full space-y-4">
+      {/* M3 active-session header */}
+      <div className="m3-session">
+        <div className="m3-session-top">
+          <h3 className="m3-session-title">{session.name}</h3>
+          <span className="m3-livedot" />
         </div>
-
-        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-center sm:justify-end mt-2 sm:mt-0">
+        <div className="m3-stat">
+          <span>Active session tracked</span> · <b><ActiveWorkoutDuration startTime={session.startTime} /></b>
+        </div>
+        <svg className="m3-wave" viewBox="0 0 320 20" preserveAspectRatio="none">
+          <path d="M0 10 Q10 1 20 10 T40 10 T60 10 T80 10 T100 10 T120 10 T140 10 T160 10 T180 10 T200 10 T220 10 T240 10 T260 10 T280 10 T300 10 T320 10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+        <div style={{ display: "flex", gap: "10px" }}>
           <button
             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setShowDiscardConfirm(true); }}
-            className="flex-1 sm:flex-none w-1/2 sm:w-auto flex items-center justify-center space-x-1 sm:space-x-1.5 px-2 sm:px-4 md:px-6 py-2 bg-rose-500 hover:bg-rose-400 text-white text-[10px] md:text-xs font-black rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all cursor-pointer whitespace-nowrap"
+            className="m3-btn error sm"
+            style={{ flex: 1 }}
           >
-            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span>Discard Workout</span>
+            <Trash2 className="w-4 h-4" />
+            Discard
           </button>
-          <button
-            onClick={handleFinishClick}
-            className="flex-1 sm:flex-none w-1/2 sm:w-auto flex items-center justify-center space-x-1 sm:space-x-1.5 px-2 sm:px-4 md:px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] md:text-xs font-black rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all cursor-pointer whitespace-nowrap"
-          >
-            <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span>Finish Workout</span>
+          <button onClick={handleFinishClick} className="m3-btn success sm" style={{ flex: 1.3 }}>
+            <CheckCircle className="w-4 h-4" />
+            Finish workout
           </button>
         </div>
       </div>
@@ -1340,43 +1310,40 @@ export default function ActiveWorkout({
         )}
       </AnimatePresence>
 
-      {/* Inputs block for general notes - collapsible to fit 1 screen on mobile */}
-      <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-white/5 bg-white/3">
-        <button
-          onClick={() => setIsNotesExpanded(!isNotesExpanded)}
-          className="w-full flex items-center justify-between text-[10px] font-extrabold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest font-mono cursor-pointer"
-        >
-          <span>Workout Notes {session.notes ? "✓" : ""}</span>
-          <span className="text-[9px] text-gray-500 dark:text-slate-400 font-extrabold normal-case bg-white dark:bg-black dark:border-white/10 shadow-sm px-2 py-0.5 rounded-lg border border-gray-200 dark:border-white/5">
-            {isNotesExpanded ? "Collapse" : "Expand / Add"}
-          </span>
-        </button>
+      {/* Workout notes */}
+      <div>
+        <div className="m3-seclabel">
+          <span className="l">Workout notes {session.notes ? "✓" : ""}</span>
+          <button onClick={() => setIsNotesExpanded(!isNotesExpanded)} className="m3-txtbtn">
+            {isNotesExpanded ? "Collapse" : "Expand / add"}
+          </button>
+        </div>
         {isNotesExpanded && (
           <textarea
             value={session.notes || ""}
             onChange={(e) => onUpdateNotes(e.target.value)}
             placeholder="Add comments, pre-workout details, or overall target motivation..."
             rows={2}
-            className="w-full text-gray-900 dark:text-gray-100 text-xs bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl p-2 mt-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 placeholder-gray-500"
+            className="w-full text-sm rounded-2xl p-3 focus:outline-none"
+            style={{ background: "var(--m3-sc-low)", color: "var(--m3-on)", border: "1px solid var(--m3-outline-q)" }}
           />
         )}
       </div>
 
       {/* Exercises Added inside the Session */}
-      <div className="p-4 space-y-5">
+      <div className="space-y-5">
         {session.exercises.length === 0 ? (
-          <div className="text-center py-10 border border-dashed border-white/15 rounded-2xl bg-white/2">
-            <Dumbbell className="w-10 h-10 text-indigo-500/25 mx-auto mb-2" />
-            <p className="text-sm font-semibold text-slate-500">No exercises added yet</p>
-            <p className="text-xs text-gray-500 mb-4 max-w-xs mx-auto leading-relaxed">
-              Add exercises below or speak to Gemini: <br />"Add Bench Press 3 sets of 100kg"
-            </p>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-semibold rounded-xl flex items-center space-x-1.5 mx-auto transition-all shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Exercise</span>
+          <div className="m3-empty">
+            <div className="m3-shape lg center" style={{ marginBottom: "8px" }}>
+              <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-sc-high)" /></svg>
+              <span className="si"><Dumbbell size={34} style={{ color: "var(--m3-primary)" }} /></span>
+            </div>
+            <h2 className="m3-h center" style={{ fontSize: "var(--m3-title-lg)" }}>No exercises added yet</h2>
+            <p className="m3-body center">Add one below, or say to Gemini: "Add bench press, 3 sets of 100&nbsp;kg".</p>
+            <div style={{ height: "14px" }} />
+            <button onClick={() => setShowAddModal(true)} className="m3-btn fill" style={{ maxWidth: "260px", margin: "0 auto" }}>
+              <Plus className="w-5 h-5" />
+              Add exercise
             </button>
           </div>
         ) : (
