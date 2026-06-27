@@ -637,7 +637,7 @@ export default function App() {
             <div className="m3-logo"><FlexingArm className="w-5 h-5" /></div>
             <div>
               <div className="m3-wordmark">SW3AT <span>WORKOUTS</span></div>
-              <div className="m3-sub">Neural Hypertrophy Engine</div>
+              <div className="m3-sub">Neural Hypertrophy<br />Engine</div>
             </div>
           </div>
 

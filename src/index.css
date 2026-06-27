@@ -311,13 +311,13 @@ html, body {
 .m3-seg2 button.sel { background: var(--m3-primary-fill); color: #fff; }
 
 /* app bar (header) */
-.m3-appbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.m3-brand { display: flex; gap: 12px; align-items: center; }
+.m3-appbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.m3-brand { display: flex; gap: 12px; align-items: flex-start; }
 .m3-logo { width: 44px; height: 44px; border-radius: 14px; flex: none; display: grid; place-items: center; background: linear-gradient(150deg, var(--m3-primary-fill), #a06bff); color: #fff; }
-/* Verbatim mockup wordmark: "SW3AT WORKOUTS" inline on one line, sub on one line */
-.m3-wordmark { font-family: var(--m3-display-font); font-weight: 700; font-size: var(--m3-title-lg); line-height: 1; letter-spacing: -.01em; color: var(--m3-on); white-space: nowrap; }
-.m3-wordmark span { color: var(--m3-primary); }
-.m3-sub { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .1em; color: var(--m3-on-dim); margin-top: 4px; text-transform: uppercase; white-space: nowrap; }
+/* Stacked wordmark "SW3AT" / "WORKOUTS" (same size) + two-line sub */
+.m3-wordmark { font-family: var(--m3-display-font); font-weight: 700; font-size: var(--m3-title-lg); line-height: 1.02; letter-spacing: -.01em; color: var(--m3-on); }
+.m3-wordmark span { color: var(--m3-primary); display: block; }
+.m3-sub { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .1em; color: var(--m3-on-dim); margin-top: 6px; text-transform: uppercase; line-height: 1.4; }
 
 /* Fill the viewport background so overscroll / past-content area isn't black */
 html.dark { background-color: #0b0910; }
