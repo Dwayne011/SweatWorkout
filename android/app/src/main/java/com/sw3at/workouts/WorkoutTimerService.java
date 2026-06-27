@@ -232,90 +232,64 @@ public class WorkoutTimerService extends Service {
         boolean resting = "resting".equals(mode);
         boolean restOver = !resting && now < restOverUntil;
 
+        // Standard template (no custom view) so Android 16 promotes it to a Live
+        // Update (pinned + status-bar chip). Custom RemoteViews are NOT eligible.
         NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHANNEL_MAIN)
                 .setSmallIcon(R.drawable.ic_stat_workout)
-                .setColor(0xFF7B53F6)               // primary violet color matching M3 Expressive
+                .setColor(0xFF7B53F6)               // M3 primary violet
                 .setOngoing(true)
+                .setRequestPromotedOngoing(true)    // Android 16 Live Update
                 .setSilent(!alerting)               // silent except the one rest-over buzz
                 .setOnlyAlertOnce(!alerting)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(contentIntent());
 
-        RemoteViews collapsedView = new RemoteViews(getPackageName(), R.layout.notif_workout_collapsed);
-        RemoteViews expandedView = new RemoteViews(getPackageName(), R.layout.notif_workout_expanded);
-
         if (resting) {
             int total = restTotalSeconds > 0 ? restTotalSeconds : 90;
             int remainingSecs = (int) Math.max(0, Math.min(total, (restEndTime - now) / 1000));
-            String timerStr = formatMMSS(remainingSecs);
-            String detailText = "Up next: " + safe(exerciseName) + (setLabel.isEmpty() ? "" : " — " + setLabel);
 
-            // Collapsed view values
-            collapsedView.setTextViewText(R.id.notif_title, "⏳ Rest " + timerStr);
-            collapsedView.setTextViewText(R.id.notif_text, detailText);
-            applyProgress(collapsedView, true, total, remainingSecs);
+            b.setContentTitle("Rest")
+             .setContentText("Up next: " + safe(exerciseName) + (setLabel.isEmpty() ? "" : " — " + setLabel))
+             .setShortCriticalText(formatMMSS(remainingSecs))
+             .setWhen(restEndTime)
+             .setUsesChronometer(true)
+             .setChronometerCountDown(true);
 
-            // Expanded view values
-            expandedView.setTextViewText(R.id.notif_label, "REST");
-            expandedView.setTextViewText(R.id.notif_timer, timerStr);
-            applyProgress(expandedView, true, total, remainingSecs);
-            expandedView.setTextViewText(R.id.notif_text, detailText);
+            // Depleting countdown bar: violet "remaining" segment shrinks while a
+            // faint "elapsed" segment grows across the rest period (ProgressStyle).
+            int remainLen = Math.max(1, remainingSecs);
+            int elapsedLen = Math.max(1, total - remainingSecs);
+            NotificationCompat.ProgressStyle ps = new NotificationCompat.ProgressStyle()
+                    .setStyledByProgress(false)
+                    .setProgress(remainingSecs)
+                    .setProgressSegments(java.util.Arrays.asList(
+                            new NotificationCompat.ProgressStyle.Segment(remainLen).setColor(0xFF7B53F6),
+                            new NotificationCompat.ProgressStyle.Segment(elapsedLen).setColor(0x33FFFFFF)));
+            b.setStyle(ps);
 
-            setBtn(expandedView, R.id.notif_btn1, "+30s", ACTION_ADD_30, false);
-            setBtn(expandedView, R.id.notif_btn2, "Skip", ACTION_SKIP, true);
-            setBtn(expandedView, R.id.notif_btn3, "-30s", ACTION_SUB_30, false);
+            b.addAction(0, "+30s", actionIntent(ACTION_ADD_30));
+            b.addAction(0, "Skip", actionIntent(ACTION_SKIP));
+            b.addAction(0, "-30s", actionIntent(ACTION_SUB_30));
         } else {
             String elapsed = workoutStartTime > 0
                     ? formatElapsed((now - workoutStartTime) / 1000) : "0:00";
-            String titleText = restOver ? "Rest over!" : safe(exerciseName);
-            String detailText = restOver
-                    ? ("Time for " + (setLabel.isEmpty() ? "your next set" : setLabel)
-                        + (exerciseName.isEmpty() ? "" : " — " + exerciseName))
-                    : (setLabel.isEmpty() ? "Workout in progress" : setLabel);
-
-            // Collapsed view values
-            collapsedView.setTextViewText(R.id.notif_title, "🏋️ " + titleText);
-            collapsedView.setTextViewText(R.id.notif_text, detailText);
-            applyProgress(collapsedView, false, 0, 0);
-
-            // Expanded view values
-            expandedView.setTextViewText(R.id.notif_label, restOver ? "REST OVER!" : "WORKING");
-            expandedView.setTextViewText(R.id.notif_timer, elapsed);
-            applyProgress(expandedView, false, 0, 0);
-            expandedView.setTextViewText(R.id.notif_text, detailText);
-
-            setBtn(expandedView, R.id.notif_btn1, "Done", ACTION_DONE, true);
-            setBtn(expandedView, R.id.notif_btn2, "End", ACTION_END, false);
-            expandedView.setViewVisibility(R.id.notif_btn3, View.GONE);
+            b.setContentTitle(restOver ? "Rest over!" : safe(exerciseName))
+             .setContentText(restOver
+                     ? ("Time for " + (setLabel.isEmpty() ? "your next set" : setLabel)
+                         + (exerciseName.isEmpty() ? "" : " — " + exerciseName))
+                     : (setLabel.isEmpty() ? "Workout in progress" : setLabel))
+             .setShortCriticalText(elapsed);
+            if (workoutStartTime > 0) {
+                b.setWhen(workoutStartTime).setUsesChronometer(true).setChronometerCountDown(false);
+            }
+            b.addAction(0, "Done", actionIntent(ACTION_DONE));
+            b.addAction(0, "End", actionIntent(ACTION_END));
         }
-
-        b.setCustomContentView(collapsedView)
-         .setCustomBigContentView(expandedView)
-         .setStyle(new NotificationCompat.DecoratedCustomViewStyle());
 
         if (alerting) {
             b.setDefaults(NotificationCompat.DEFAULT_ALL);
         }
         return b.build();
-    }
-
-    private void applyProgress(RemoteViews rv, boolean showProgress, int max, int val) {
-        if (showProgress) {
-            rv.setProgressBar(R.id.notif_progress, max, val, false);
-            rv.setViewVisibility(R.id.notif_progress, View.VISIBLE);
-        } else {
-            rv.setViewVisibility(R.id.notif_progress, View.GONE);
-        }
-    }
-
-    /** Style a button: filled = primary (indigo bg, white text), else outlined. */
-    private void setBtn(RemoteViews rv, int id, String label, String action, boolean filled) {
-        rv.setViewVisibility(id, View.VISIBLE);
-        rv.setTextViewText(id, label);
-        rv.setOnClickPendingIntent(id, actionIntent(action));
-        rv.setInt(id, "setBackgroundResource",
-                filled ? R.drawable.notif_button_filled : R.drawable.notif_button_outline);
-        rv.setTextColor(id, filled ? 0xFFFFFFFF : 0xFF6366F1);
     }
 
     private void stopEverything() {
