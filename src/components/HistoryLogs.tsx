@@ -181,35 +181,15 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
 
   return (
     <div className="space-y-4">
-      {/* Tab Select View switch with Neural rounded aesthetics */}
-      <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/5 p-2 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
-        <span className="text-xs font-bold text-indigo-400 font-mono uppercase tracking-widest pl-2">Workout History</span>
-        
-        <div className="flex bg-purple-50/50 dark:bg-black p-1 rounded-xl w-full sm:w-auto border border-purple-100 dark:border-purple-500/20">
-          <button
-            onClick={() => setViewMode("logs")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center space-x-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              viewMode === "logs"
-                ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white ring-1 ring-purple-200 dark:ring-purple-500/50 shadow-sm"
-                : "text-purple-600/70 dark:text-purple-300/70 hover:text-purple-700 dark:hover:text-purple-200 hover:bg-purple-100/50 dark:hover:bg-purple-500/10"
-            }`}
-          >
-            <ListCollapse className="w-3.5 h-3.5" />
-            <span>Journals Timeline</span>
-          </button>
-          
-          <button
-            onClick={() => setViewMode("analytics")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center space-x-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              viewMode === "analytics"
-                ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white ring-1 ring-purple-200 dark:ring-purple-500/50 shadow-sm"
-                : "text-purple-600/70 dark:text-purple-300/70 hover:text-purple-700 dark:hover:text-purple-200 hover:bg-purple-100/50 dark:hover:bg-purple-500/10"
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Insights & Trends</span>
-          </button>
-        </div>
+      {/* History header + segmented tabs */}
+      <div><span className="m3-eyebrow primary">Workout history</span></div>
+      <div className="m3-seg2">
+        <button onClick={() => setViewMode("logs")} className={viewMode === "logs" ? "sel" : ""}>
+          <ListCollapse className="w-4 h-4" /> Journals timeline
+        </button>
+        <button onClick={() => setViewMode("analytics")} className={viewMode === "analytics" ? "sel" : ""}>
+          <BarChart3 className="w-4 h-4" /> Insights &amp; trends
+        </button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -228,12 +208,13 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
               onAskGemini={onAskGemini}
             />
           ) : history.length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl shadow-2xl">
-              <HistoryIcon className="w-10 h-10 text-indigo-500/20 mx-auto mb-2 animate-pulse" />
-              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">No workout logs found</p>
-              <p className="text-xs text-indigo-600 dark:text-indigo-300/40 max-w-xs mx-auto mt-1 leading-relaxed">
-                Complete an active session or ask Gemini: <br />"Log a squat workout from yesterday"
-              </p>
+            <div className="m3-empty" style={{ paddingTop: "34px", paddingBottom: "34px" }}>
+              <div className="m3-shape lg center" style={{ marginBottom: "10px" }}>
+                <svg className="sf" viewBox="0 0 100 100"><use href="#shape-clover" fill="var(--m3-primary-cont)" /></svg>
+                <span className="si"><HistoryIcon size={34} style={{ color: "var(--m3-primary)" }} /></span>
+              </div>
+              <h2 className="m3-h center">No workout logs yet</h2>
+              <p className="m3-body center">Finish a session, or tell Gemini "log a squat workout from yesterday" and it lands here.</p>
             </div>
           ) : (
             history.map((log) => {

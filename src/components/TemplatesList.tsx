@@ -125,74 +125,43 @@ export default function TemplatesList({
 
   return (
     <div className="space-y-6 pb-40">
-      {/* Starting Block Launcher controls - Expanded to 3 Columns Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between">
-          <div>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500/10 to-purple-500/10 text-indigo-455 flex items-center justify-center mb-3 ring-1 ring-indigo-500/20">
-              <Play className="w-4 h-4 fill-indigo-400 text-indigo-400" />
-            </div>
-            <h3 className="font-extrabold text-base md:text-lg text-gray-900 dark:text-gray-100 mb-1">Quick Logging Panel</h3>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mb-4 font-normal leading-relaxed">
-              Skip planning and initialize an active blank workout instantly to record whatever exercises you perform on the fly.
-            </p>
-          </div>
-          <button
-            onClick={onStartBlank}
-            className="w-full py-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl transition-all shadow-lg flex items-center justify-center space-x-1 ring-1 ring-white/10"
-          >
-            <Play className="w-4 h-4 fill-white" />
-            <span>Start Empty Workout</span>
-          </button>
+      {/* Launcher cards */}
+      <div className="m3-card">
+        <div className="m3-shape md" style={{ marginBottom: "8px" }}>
+          <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-primary-cont)" /></svg>
+          <span className="si"><Play className="w-5 h-5" style={{ color: "var(--m3-primary)" }} /></span>
         </div>
+        <h2 className="m3-h">Quick logging panel</h2>
+        <p className="m3-body">Skip planning and start a blank active workout instantly. Record whatever you perform, on the fly.</p>
+        <div style={{ height: "16px" }} />
+        <button onClick={onStartBlank} className="m3-btn fill"><Play className="w-5 h-5" /> Start empty workout</button>
+      </div>
 
-        <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between">
-          <div>
-            <div className="w-8 h-8 rounded-lg bg-white dark:bg-black dark:border-white/10 shadow-sm text-slate-350 flex items-center justify-center mb-3 ring-1 ring-white/10">
-              <Plus className="w-4 h-4" />
-            </div>
-            <h3 className="font-extrabold text-base md:text-lg text-gray-900 dark:text-gray-100 mb-1">Custom Routine Architect</h3>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mb-4 font-normal leading-relaxed">
-              Combine multiple barbell, dumbbell, or bodyweight exercises to pre-arrange sets and volume targets for automated start.
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              setShowAddTemplate(true);
-              setShowAIGenerator(false);
-            }}
-            className="w-full py-3 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/10 text-slate-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center space-x-1"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create New Template</span>
-          </button>
+      <div className="m3-card">
+        <div className="m3-shape md" style={{ marginBottom: "8px" }}>
+          <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-sc-highest)" /></svg>
+          <span className="si"><Plus className="w-5 h-5" style={{ color: "var(--m3-on-var)" }} /></span>
         </div>
+        <h2 className="m3-h">Custom routine architect</h2>
+        <p className="m3-body">Combine barbell, dumbbell or bodyweight exercises to pre-arrange sets and volume targets.</p>
+        <div style={{ height: "16px" }} />
+        <button onClick={() => { setShowAddTemplate(true); setShowAIGenerator(false); }} className="m3-btn outline"><Plus className="w-5 h-5" /> Create new template</button>
+      </div>
 
-        <div className="bg-gradient-to-tr from-indigo-50 via-white to-purple-50 dark:from-indigo-950/20 dark:via-[#111119]/90 dark:to-purple-950/20 rounded-2xl border border-indigo-100 dark:border-[#818cf8]/15 p-5 shadow-xl dark:shadow-2xl flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-2xl animate-pulse" />
-          <div>
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-yellow-300 flex items-center justify-center mb-3 ring-1 ring-indigo-500/20">
-              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-yellow-300 fill-indigo-600 dark:fill-yellow-300 animate-pulse" />
-            </div>
-            <h3 className="font-extrabold text-base md:text-lg text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-1.5">
-              <span>Gemini AI Composer</span>
-              <span className="text-[9px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded px-1 py-0.5 leading-none uppercase font-bold tracking-wider font-mono">LAB</span>
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 font-normal leading-relaxed">
-              Let Gemini S&C intelligence generate custom warmups, set progressions, and volume targets aligned to your goals.
-            </p>
+      <div className="m3-card" style={{ background: "var(--m3-tertiary-cont)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+          <div className="m3-shape" style={{ width: "48px", height: "48px" }}>
+            <svg className="sf" viewBox="0 0 100 100"><use href="#shape-wavy" fill="rgba(255,255,255,.18)" /></svg>
+            <span className="si"><Sparkles className="w-5 h-5" style={{ color: "#fff" }} /></span>
           </div>
-          <button
-            onClick={() => {
-              setShowAIGenerator(!showAIGenerator);
-              setShowAddTemplate(false);
-            }}
-            className="w-full py-3 font-extrabold text-xs rounded-xl transition-all flex items-center justify-center space-x-1 bg-gradient-to-tr from-indigo-650 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-555 text-white shadow-lg ring-1 ring-white/10"
-          >
-            <Sparkles className="w-4 h-4 text-yellow-350 fill-yellow-350" />
-            <span>{showAIGenerator ? "Hide AI Composer" : "Launch AI Composer"}</span>
-          </button>
+          <span className="m3-eyebrow" style={{ background: "rgba(0,0,0,.25)", color: "#fff" }}>Lab</span>
         </div>
+        <h2 className="m3-h" style={{ color: "#fff" }}>Gemini AI composer</h2>
+        <p className="m3-body" style={{ color: "var(--m3-on-tertiary-cont)" }}>Let Gemini S&C intelligence generate custom warm-ups, accessory work and progression targets.</p>
+        <div style={{ height: "16px" }} />
+        <button onClick={() => { setShowAIGenerator(!showAIGenerator); setShowAddTemplate(false); }} className="m3-btn" style={{ background: "linear-gradient(95deg, var(--m3-primary-fill), #d566c8 90%)", color: "#fff" }}>
+          <Sparkles className="w-5 h-5" /> {showAIGenerator ? "Hide AI composer" : "Launch AI composer"}
+        </button>
       </div>
 
       <AnimatePresence mode="wait">

@@ -320,76 +320,50 @@ export default function ExerciseLibrary({
           }
         `}
       </style>
-      {/* Search Header Banner & Quick Actions */}
-      <div className="bg-white dark:bg-black w-full overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-3 flex flex-col xl:flex-row xl:items-center justify-between gap-3 min-w-0">
-        <div className="relative flex-1 min-w-0 w-full">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-indigo-400 pointer-events-none">
-            <Search className="w-4 h-4" />
+      {/* Search */}
+      <div className="m3-search">
+        <Search />
+        <input
+          type="text"
+          placeholder="Search exercises…"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Create + Export/Import */}
+      <div className="m3-stack" style={{ marginBottom: "16px" }}>
+        <button onClick={() => setShowAddForm(true)} className="m3-btn fill">
+          <Plus className="w-5 h-5" />
+          Create custom
+        </button>
+        <div className="m3-bgroup">
+          <button onClick={handleExport} className="seg" title="Export collection as JSON">
+            <Download className="w-4 h-4" /> Export
+          </button>
+          <button onClick={() => setShowImportForm(true)} className="seg" title="Import custom exercises">
+            <Upload className="w-4 h-4" /> Import
+          </button>
+        </div>
+      </div>
+
+      {/* Category chips */}
+      <div className="m3-chips" style={{ marginBottom: "16px" }}>
+        {categories.map((cat) => (
+          <span
+            key={cat}
+            onClick={() => setCategoryFilter(cat)}
+            className={`m3-chip${categoryFilter === cat ? " sel" : ""}`}
+          >
+            {cat}
           </span>
-          <input
-            type="text"
-            placeholder="Search exercises..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full text-xs md:text-sm bg-black/5 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 font-semibold font-mono"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="px-4 py-2.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border border-gray-200 dark:border-white/10 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center space-x-1.5 transition-all hover:scale-[1.01] cursor-pointer"
-          >
-            <Plus className="w-4 h-4 text-white" />
-            <span>Create Custom</span>
-          </button>
-
-          <button
-            onClick={handleExport}
-            className="px-3.5 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl shadow flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
-            title="Download your custom exercises collections as JSON"
-          >
-            <Download className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-            <span>Export Collection</span>
-          </button>
-
-          <button
-            onClick={() => setShowImportForm(true)}
-            className="px-3.5 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl shadow flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
-            title="Import custom exercise guides"
-          >
-            <Upload className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-            <span>Import</span>
-          </button>
-        </div>
+        ))}
       </div>
 
-      {/* Categories Horizontal Scrolling tabs */}
-      <div className="w-full max-w-[calc(100vw-2rem)] sm:max-w-full relative min-w-0 group rounded-xl">
-        <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white/80 dark:from-black/80 to-transparent pointer-events-none z-10 flex items-center justify-end pr-1 md:hidden">
-            <ChevronRight className="w-4 h-4 text-indigo-500 opacity-60 animate-swipe-wiggle" />
-        </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 invisible-scrollbar w-full touch-pan-x min-w-0 overflow-y-hidden" style={{ WebkitOverflowScrolling: "touch", paddingRight: "40px" }}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategoryFilter(cat)}
-              className={`px-4 py-2 text-xs rounded-xl font-bold font-mono uppercase tracking-wide shrink-0 transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
-                categoryFilter === cat
-                  ? "bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg border border-indigo-500/30"
-                  : "bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none border border-gray-200 dark:border-white/5 text-gray-500 dark:text-slate-400 hover:border-gray-200 dark:border-white/10 hover:text-gray-900 dark:text-gray-100"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Grid List with inline Edit button for custom exercises */}
-      <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden divide-y divide-gray-100 dark:divide-white/5 shadow-2xl">
+      {/* Exercise list */}
+      <div className="m3-list">
         {filtered.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 dark:text-slate-400 text-xs font-semibold font-mono">
+          <div style={{ padding: "32px", textAlign: "center", color: "var(--m3-on-dim)", fontFamily: "var(--m3-mono-font)", fontSize: "12px" }}>
             No matching exercises in your library yet.
           </div>
         ) : (
@@ -400,56 +374,32 @@ export default function ExerciseLibrary({
             const subtitleModifier = nameMatch ? nameMatch[2].trim() : null;
 
             return (
-              <div
-                key={item.id}
-                onClick={() => openExerciseGuide(item)}
-                className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group w-full"
-                title="Click to view setup and guide demonstration"
-              >
-                <div className="flex flex-row items-center space-x-3.5 flex-1 min-w-0 pr-3">
-                  <div className="p-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm text-indigo-600 dark:text-indigo-400 rounded-xl border border-gray-200 dark:border-white/5 shrink-0 group-hover:bg-indigo-500/10 group-hover:text-indigo-600 dark:text-indigo-300 transition-colors">
-                    <Dumbbell className="w-4 h-4" />
+              <div key={item.id} onClick={() => openExerciseGuide(item)} className="m3-row">
+                <div className="ricon"><Dumbbell className="w-5 h-5" /></div>
+                <div className="rt">
+                  <div className="nm">
+                    {mainTitle}
+                    {item.isCustom && <span style={{ marginLeft: 7, fontSize: 9, fontFamily: "var(--m3-mono-font)", color: "var(--m3-accent)", letterSpacing: ".08em" }}>CUSTOM</span>}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm md:text-base flex flex-wrap items-center gap-1.5 group-hover:text-indigo-550 dark:group-hover:text-indigo-400 transition-colors leading-snug">
-                      <span className="whitespace-normal break-words flex-1 min-w-0">{mainTitle}</span>
-                      {item.isCustom && (
-                        <span className="text-[9px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 font-bold px-1.5 py-0.5 rounded-lg uppercase tracking-wider font-mono shrink-0">
-                          Custom
-                        </span>
-                      )}
-                    </h4>
-                    {subtitleModifier && (
-                      <div className="text-[13px] font-semibold text-indigo-500 dark:text-indigo-300 mt-0.5 leading-snug">
-                        {subtitleModifier}
-                      </div>
-                    )}
-                    <p className="text-[11px] sm:text-[12px] font-mono tracking-wide font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 flex items-center space-x-1">
-                      <span>{item.category}</span>
-                      <span className="text-gray-300 dark:text-gray-100/10">&bull;</span>
-                      <span>{item.equipment}</span>
-                    </p>
-                  </div>
+                  {subtitleModifier && (
+                    <div style={{ color: "var(--m3-accent)", fontWeight: 500, fontSize: "var(--m3-body-sm)", marginTop: 1 }}>{subtitleModifier}</div>
+                  )}
+                  <div className="meta">{item.category} · {item.equipment}</div>
                 </div>
-              
-              <div className="flex items-center space-x-2">
                 {item.isCustom && (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Avoid triggering open guide
-                      handleStartEdit(item);
-                    }}
-                    className="p-1.5 bg-indigo-600/10 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-300 hover:text-white dark:hover:text-white border border-indigo-500/20 hover:border-indigo-400 rounded-lg transition-all cursor-pointer flex items-center justify-center"
-                    title="Edit granular guide details"
+                    onClick={(e) => { e.stopPropagation(); handleStartEdit(item); }}
+                    title="Edit guide details"
+                    className="chev"
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 6 }}
                   >
-                    <Edit className="w-3.5 h-3.5" />
+                    <Edit className="w-4 h-4" />
                   </button>
                 )}
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="chev w-5 h-5" />
               </div>
-            </div>
-          );
-        })
+            );
+          })
         )}
       </div>
 
