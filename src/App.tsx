@@ -469,7 +469,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-hidden max-w-[100vw] bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans leading-normal antialiased relative flex flex-col">
+    <div className="min-h-screen w-full overflow-hidden max-w-[100vw] bg-white dark:bg-[#0b0910] text-gray-900 dark:text-gray-100 font-sans leading-normal antialiased relative flex flex-col">
       {/* Intro Splash Entry Screen */}
       {showIntro && (
         <IntroSplash
@@ -630,73 +630,40 @@ export default function App() {
       <div className="absolute bottom-[20%] right-[-10%] w-[50vw] h-[50vw] max-w-[500px] rounded-full gemini-bg-glow-2 pointer-events-none z-0 opacity-80" />
 
       {/* 1. TOP HEADER NAVIGATION BLOCK */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-black dark:border-white/10 shadow-sm text-gray-900 dark:text-gray-900 dark:text-gray-100 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-          {/* Logo Title */}
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl shadow-lg ring-1 ring-white/10">
-              <FlexingArm className="w-5 h-5 text-gray-900 dark:text-gray-100 animate-pulse" />
-            </div>
+      <header className="sticky top-0 z-40" style={{ background: "var(--m3-bg)" }}>
+        <div className="max-w-4xl mx-auto px-4 md:px-6 pt-3 pb-4 m3-appbar">
+          {/* Brand */}
+          <div className="m3-brand">
+            <div className="m3-logo"><FlexingArm className="w-5 h-5" /></div>
             <div>
-              <span className="font-extrabold tracking-tight uppercase text-gray-900 dark:text-gray-100 text-base md:text-lg flex items-center gap-1">
-                SW3AT <span className="gemini-text-spark">Workouts</span>
-              </span>
-              <span className="text-[10px] block font-mono text-indigo-600 dark:text-indigo-300 font-bold uppercase tracking-widest leading-none mt-0.5">
-                Neural Hypertrophy Engine
-              </span>
+              <div className="m3-wordmark">SW3AT <span>WORKOUTS</span></div>
+              <div className="m3-sub">Neural Hypertrophy Engine</div>
             </div>
           </div>
 
-          {/* Secure Backup Sync controls */}
-          <div className="flex items-center space-x-3">
+          {/* Sync controls */}
+          <div className="flex items-center gap-2">
             {isFirebaseReady && auth ? (
               state.user ? (
-                // Authenticated sync status badge
-                <div className="flex items-center space-x-2 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 px-2.5 py-1.5 rounded-xl">
-                  <div className="hidden md:flex flex-col text-right leading-none mr-1">
-                    <span className="text-xs font-bold font-mono text-gray-200">{state.user.displayName || "Athlete"}</span>
-                    <span className="text-[9px] text-indigo-400 font-bold flex items-center justify-end gap-1 font-mono">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" /> Cloud Active
-                    </span>
-                  </div>
+                <button onClick={handleGoogleLogout} title="Log out" className="m3-gsync">
                   {state.user.photoURL ? (
-                    <img
-                      src={state.user.photoURL}
-                      alt="avatar"
-                      referrerPolicy="no-referrer"
-                      className="w-7 h-7 rounded-full border border-gray-200 dark:border-white/10"
-                    />
+                    <img src={state.user.photoURL} alt="avatar" referrerPolicy="no-referrer" className="w-5 h-5 rounded-full" />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-900 dark:text-gray-100 text-xs font-bold border border-gray-200 dark:border-white/10">
-                      <User className="w-3.5 h-3.5" />
-                    </div>
+                    <User className="w-4 h-4" />
                   )}
-                  <button
-                    onClick={handleGoogleLogout}
-                    title="Log out"
-                    className="p-1 px-1.5 text-gray-400 hover:text-rose-400 rounded-lg transition-colors"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                  <span className="hidden sm:inline">{state.user.displayName?.split(" ")[0] || "Synced"}</span>
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               ) : (
-                // Google Authenticator triggering
-                <button
-                  onClick={handleGoogleLogin}
-                  className="bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 text-slate-100 text-xs font-bold px-3.5 py-2 rounded-xl border border-gray-200 dark:border-white/10 transition-all flex items-center space-x-1.5 shadow-md shrink-0"
-                >
-                  <LogIn className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Google Sync</span>
+                <button onClick={handleGoogleLogin} className="m3-gsync">
+                  <LogIn className="w-4 h-4" />
+                  Sync
                 </button>
               )
             ) : (
-              // Offline standalone sandbox badge
-              <div
-                className="bg-white dark:bg-black dark:border-white/10 shadow-sm text-gray-300 px-3 py-1.5 rounded-xl text-[10px] font-bold font-mono border border-gray-200 dark:border-white/10 flex items-center space-x-1.5 shadow-md"
-                title="Your browser keeps data safe via LocalStorage cache."
-              >
-                <CloudLightning className="w-3.5 h-3.5 text-purple-400 animate-bounce" />
-                <span>Local Core</span>
+              <div className="m3-gsync" title="Local-only cache">
+                <CloudLightning className="w-4 h-4" />
+                <span className="hidden sm:inline">Local</span>
               </div>
             )}
           </div>
@@ -840,7 +807,7 @@ export default function App() {
                       {/* Start a new session card */}
                       <div className="m3-card hi" style={{ textAlign: "center" }}>
                         <div className="m3-shape lg center">
-                          <svg className="sf" viewBox="0 0 100 100"><use href="#shape-flower" fill="var(--m3-primary-cont)" /></svg>
+                          <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-primary-cont)" /></svg>
                           <span className="si"><Dumbbell size={36} style={{ color: "var(--m3-primary)" }} /></span>
                         </div>
                         <h2 className="m3-h center">Start a new lifting session</h2>
@@ -945,202 +912,33 @@ export default function App() {
       </main>
 
       {/* UNIFIED PREMIUM FLOATING BOTTOM CONSOLE & NAVIGATION DOCK WITH BREATHING GLOW */}
-      <motion.div 
-        id="unified-floating-dock"
-        className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-md z-45 rounded-3xl border bg-white/95 dark:bg-black dark:border-white/10 flex-col ring-1 ring-white/10 overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-2xl flex"
-        animate={{
-          boxShadow: [
-            "0 12px 40px rgba(99, 102, 241, 0.25), 0 0 15px 1px rgba(168, 85, 247, 0.15)",
-            "0 12px 50px rgba(99, 102, 241, 0.50), 0 0 30px 4px rgba(168, 85, 247, 0.35)",
-            "0 12px 40px rgba(99, 102, 241, 0.25), 0 0 15px 1px rgba(168, 85, 247, 0.15)"
-          ],
-          borderColor: [
-            "rgba(99, 102, 241, 0.35)",
-            "rgba(168, 85, 247, 0.65)",
-            "rgba(99, 102, 241, 0.35)"
-          ]
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
+      {/* Floating bottom nav + active-workout banner */}
+      <div
+        className="fixed left-3 right-3 z-45 mx-auto"
+        style={{ bottom: "calc(14px + env(safe-area-inset-bottom))", maxWidth: "460px" }}
       >
         <AnimatePresence>
           <WorkoutBanner activeWorkout={state.activeWorkout} setActiveTab={setActiveTab} activeTab={activeTab} exercises={state.exercises} restTimerTarget={restTimerTarget} showSwipeUpInfo={showSwipeUpInfo} setShowSwipeUpInfo={setShowSwipeUpInfo} />
         </AnimatePresence>
-        {/* PREMIUM UNIVERSAL BOTTOM FLOATING NAVIGATION BAR (dock style inside) */}
-        <div className="px-3 py-2.5 flex items-center justify-around bg-white dark:bg-black dark:border-white/10 shadow-sm gap-2 md:gap-4 w-full h-[64px]">
-        <button
-          onClick={() => setActiveTab("workouts")}
-          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
-            activeTab === "workouts"
-              ? "text-purple-600 dark:text-purple-400 scale-105"
-              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
-          }`}
-        >
-          <motion.div
-            animate={{
-              scale: activeTab === "workouts" ? [1, 1.12, 1] : [1, 1.04, 1]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0
-            }}
-          >
-            <FlexingArm className={`w-5 h-5 ${activeTab === "workouts" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
-          </motion.div>
-          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "workouts" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>Workout</span>
-          {activeTab === "workouts" && (
-            <motion.div
-              layoutId="navGlow"
-              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
-            />
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab("history")}
-          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
-            activeTab === "history"
-              ? "text-purple-600 dark:text-purple-400 scale-105"
-              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
-          }`}
-        >
-          <motion.div
-            animate={{
-              scale: activeTab === "history" ? [1, 1.12, 1] : [1, 1.04, 1]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.6
-            }}
-            className="relative"
-          >
-            <History className={`w-5 h-5 ${activeTab === "history" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
-            {state.history.length > 0 && (
-              <span className="absolute -top-1 -right-2.5 bg-gradient-to-tr from-purple-600 to-fuchsia-600 text-[8px] font-extrabold text-white px-1 rounded-full border border-black min-w-3.5 h-3.5 flex items-center justify-center font-mono">
-                {state.history.length}
-              </span>
-            )}
-          </motion.div>
-          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "history" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>History</span>
-          {activeTab === "history" && (
-            <motion.div
-              layoutId="navGlow"
-              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
-            />
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab("templates")}
-          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
-            activeTab === "templates"
-              ? "text-purple-600 dark:text-purple-400 scale-105"
-              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
-          }`}
-        >
-          <motion.div
-            animate={{
-              scale: activeTab === "templates" ? [1, 1.12, 1] : [1, 1.04, 1]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1.2
-            }}
-          >
-            <Layers className={`w-5 h-5 ${activeTab === "templates" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
-          </motion.div>
-          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "templates" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>Routines</span>
-          {activeTab === "templates" && (
-            <motion.div
-              layoutId="navGlow"
-              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
-            />
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab("exercises")}
-          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
-            activeTab === "exercises"
-              ? "text-purple-600 dark:text-purple-400 scale-105"
-              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
-          }`}
-        >
-          <motion.div
-            animate={{
-              scale: activeTab === "exercises" ? [1, 1.12, 1] : [1, 1.04, 1]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1.8
-            }}
-          >
-            <Info className={`w-5 h-5 ${activeTab === "exercises" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
-          </motion.div>
-          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "exercises" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>Library</span>
-          {activeTab === "exercises" && (
-            <motion.div
-              layoutId="navGlow"
-              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
-            />
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab("account")}
-          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
-            activeTab === "account"
-              ? "text-purple-600 dark:text-purple-400 scale-105"
-              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
-          }`}
-        >
-          <motion.div
-            animate={{
-              scale: activeTab === "account" ? [1, 1.12, 1] : [1, 1.04, 1]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2.4
-            }}
-          >
-            {state.user ? (
-              state.user.photoURL ? (
-                <img
-                  src={state.user.photoURL}
-                  alt="Account"
-                  referrerPolicy="no-referrer"
-                  className={`w-5 h-5 rounded-full border ${activeTab === "account" ? "border-purple-400 ring-2 ring-purple-500/20" : "border-slate-500"}`}
-                />
-              ) : (
-                <User className={`w-5 h-5 ${activeTab === "account" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
-              )
-            ) : (
-              <User className={`w-5 h-5 ${activeTab === "account" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
-            )}
-          </motion.div>
-          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "account" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>{state.user ? "Account" : "Login"}</span>
-          {activeTab === "account" && (
-            <motion.div
-              layoutId="navGlow"
-              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
-            />
-          )}
-        </button>
-        </div>
-      </motion.div>
+        <nav className="m3-nav">
+          {[
+            { key: "workouts", label: "Workout", Icon: Dumbbell },
+            { key: "history", label: "History", Icon: History },
+            { key: "templates", label: "Routines", Icon: Layers },
+            { key: "exercises", label: "Library", Icon: Info },
+            { key: "account", label: state.user ? "Account" : "Login", Icon: User },
+          ].map(({ key, label, Icon }) => (
+            <a
+              key={key}
+              className={activeTab === key ? "on" : ""}
+              onClick={() => { if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10); setActiveTab(key); }}
+            >
+              <span className="pill"><Icon className="w-5 h-5" /></span>
+              <span className="lbl">{label}</span>
+            </a>
+          ))}
+        </nav>
+      </div>
 
       {/* DETAILED WORKOUT COMPLETED SPLASH CONGRATULATIONS SCENE */}
       {latestCompletedWorkout && (

@@ -256,6 +256,30 @@ html, body {
 .m3-btn.sm { padding: 12px 16px; font-size: var(--m3-label-md); }
 .m3-stack { display: flex; flex-direction: column; gap: 11px; }
 
+/* app bar (header) */
+.m3-appbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.m3-brand { display: flex; gap: 12px; align-items: center; }
+.m3-logo { width: 44px; height: 44px; border-radius: 14px; flex: none; display: grid; place-items: center; background: linear-gradient(150deg, var(--m3-primary-fill), #a06bff); color: #fff; }
+.m3-wordmark { font-family: var(--m3-display-font); font-weight: 700; font-size: var(--m3-title-lg); line-height: 1; letter-spacing: -.01em; color: var(--m3-on); }
+.m3-wordmark span { color: var(--m3-primary); }
+.m3-sub { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .1em; color: var(--m3-on-dim); margin-top: 4px; text-transform: uppercase; }
+.m3-gsync { display: inline-flex; align-items: center; gap: 7px; flex: none; border: 1.5px solid var(--m3-outline); color: var(--m3-on); background: transparent; padding: 9px 14px; border-radius: var(--m3-r-full); font-size: var(--m3-label-lg); font-weight: 500; cursor: pointer; }
+
+/* floating bottom nav (the wrapper handles fixed placement) */
+.m3-nav {
+  background: rgba(30, 25, 42, .94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--m3-outline-q); border-radius: 28px;
+  display: flex; justify-content: space-between; padding: 10px 12px 8px;
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,.6);
+}
+.native-android .m3-nav { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.m3-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--m3-on-dim); }
+.m3-nav .pill { width: 48px; height: 30px; border-radius: var(--m3-r-full); display: grid; place-items: center; transition: background .18s; }
+.m3-nav a.on .pill { background: var(--m3-primary-fill); }
+.m3-nav a.on { color: var(--m3-primary); }
+.m3-nav a.on .pill svg { color: #fff; }
+.m3-nav .lbl { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+
 /* The fluid-glow loop (scale/rotate/translate on big blurred gradients) is a
    constant GPU compositor cost. Keep the static gradient but drop the animation
    on the Android WebView and for anyone who prefers reduced motion. */
