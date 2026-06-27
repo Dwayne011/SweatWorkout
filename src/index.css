@@ -161,6 +161,101 @@ html, body {
   animation-delay: -5s;
 }
 
+/* ============================================================
+   M3 EXPRESSIVE design system (additive layer, ports v2 mockup)
+   Namespaced `m3-` so nothing collides with the existing Tailwind UI.
+   Rolling out screen by screen.
+   ============================================================ */
+:root {
+  /* tonal dark scheme, violet seed */
+  --m3-bg: #0b0910;
+  --m3-surface: #161220;
+  --m3-sc-low: #1d1828;
+  --m3-sc: #241e31;
+  --m3-sc-high: #2f273f;
+  --m3-sc-highest: #3a3149;
+  --m3-outline: #564d66;
+  --m3-outline-q: #372f47;
+  --m3-on: #ece5f6;
+  --m3-on-var: #b6abc8;
+  --m3-on-dim: #8a8099;
+
+  --m3-primary: #b69cff;
+  --m3-primary-fill: #7b53f6;
+  --m3-on-primary: #ffffff;
+  --m3-primary-cont: #3a2580;
+  --m3-on-primary-cont: #e8ddff;
+
+  --m3-accent: #caf24e;
+  --m3-on-accent: #222f00;
+
+  --m3-tertiary-cont: #7c2b4f;
+  --m3-on-tertiary-cont: #ffd9e3;
+
+  --m3-success: #27d488;
+  --m3-on-success: #00321d;
+  --m3-error: #ff6b80;
+  --m3-error-cont: #5e1626;
+  --m3-on-error-cont: #ffd9de;
+
+  --m3-r-s: 12px; --m3-r-m: 16px; --m3-r-l: 28px; --m3-r-xl: 32px; --m3-r-full: 999px;
+
+  --m3-display-font: "Roboto Flex", system-ui, sans-serif;
+  --m3-body-font: "Roboto Flex", system-ui, sans-serif;
+  --m3-mono-font: "Roboto Mono", ui-monospace, monospace;
+
+  --m3-headline-sm: 24px; --m3-headline-md: 28px;
+  --m3-title-lg: 22px; --m3-title-md: 16px;
+  --m3-body-md: 14px; --m3-body-sm: 12px;
+  --m3-label-lg: 14px; --m3-label-md: 12px; --m3-label-sm: 11px;
+}
+
+/* cards */
+.m3-card { background: var(--m3-sc-low); border-radius: var(--m3-r-l); padding: 22px; margin-bottom: 16px; }
+.m3-card.hi { background: var(--m3-sc); }
+
+/* eyebrow chips */
+.m3-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase; padding: 6px 12px; border-radius: var(--m3-r-full);
+}
+.m3-eyebrow.primary { background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); }
+.m3-eyebrow.accent { background: var(--m3-accent); color: var(--m3-on-accent); }
+
+/* headline + body */
+.m3-h { font-family: var(--m3-display-font); font-weight: 400; font-size: var(--m3-headline-sm); line-height: 1.2; margin: 12px 0 8px; color: var(--m3-on); }
+.m3-h.center { text-align: center; }
+.m3-body { color: var(--m3-on-var); font-size: var(--m3-body-md); font-weight: 400; line-height: 1.5; font-family: var(--m3-body-font); }
+.m3-body.center { text-align: center; }
+
+/* M3 shape backdrop (BlobIcon) */
+.m3-shape { position: relative; display: grid; place-items: center; flex: none; }
+.m3-shape.md { width: 64px; height: 64px; }
+.m3-shape.lg { width: 88px; height: 88px; }
+.m3-shape.center { margin: 0 auto; }
+.m3-shape svg.sf { position: absolute; width: 100%; height: 100%; }
+.m3-shape .si { position: relative; z-index: 1; display: grid; place-items: center; }
+.m3-shape .si svg { width: 28px; height: 28px; }
+.m3-shape.lg .si svg { width: 36px; height: 36px; }
+
+/* buttons (M3 Label Large 14/500, pill) */
+.m3-btn {
+  width: 100%; border: none; cursor: pointer; border-radius: var(--m3-r-full);
+  padding: 16px 22px; font-family: var(--m3-body-font); font-weight: 500; font-size: var(--m3-label-lg);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform .12s cubic-bezier(.2,.8,.2,1); letter-spacing: .01em;
+}
+.m3-btn svg { width: 20px; height: 20px; }
+.m3-btn:active { transform: scale(.96); }
+.m3-btn.fill { background: var(--m3-primary-fill); color: #fff; }
+.m3-btn.accent { background: var(--m3-accent); color: var(--m3-on-accent); }
+.m3-btn.tonal { background: var(--m3-sc-high); color: var(--m3-on); }
+.m3-btn.tonal-primary { background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); }
+.m3-btn.outline { background: transparent; border: 1.5px solid var(--m3-outline); color: var(--m3-on); }
+.m3-btn.sm { padding: 12px 16px; font-size: var(--m3-label-md); }
+.m3-stack { display: flex; flex-direction: column; gap: 11px; }
+
 /* The fluid-glow loop (scale/rotate/translate on big blurred gradients) is a
    constant GPU compositor cost. Keep the static gradient but drop the animation
    on the Android WebView and for anyone who prefers reduced motion. */
@@ -173,6 +268,15 @@ html, body {
   .gemini-bg-glow-2 {
     animation: none;
   }
+}
+
+/* 1D: backdrop-blur re-blurs everything behind an element every frame it
+   composites — the dominant GPU cost on the Android WebView with this much
+   glass. Drop it on native Android; panels keep their near-opaque backgrounds
+   so they read as solid cards. (Web/desktop keeps the frosted look.) */
+.native-android [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 /* Glassmorphism for panels and buttons */

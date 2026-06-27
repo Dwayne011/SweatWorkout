@@ -819,56 +819,46 @@ export default function App() {
                     </Suspense>
                   ) : activeTab === "workouts" ? (
                     // Launching screen if no session active yet
-                    <div className="space-y-6">
-                      {/* Google Cloud Backup Sync promo header */}
+                    <div className="space-y-4">
+                      {/* Cloud backup card */}
                       {!state.user && isFirebaseReady && auth && (
-                        <div className="bg-gradient-to-tr from-indigo-50 via-white to-purple-50 dark:from-indigo-950/20 dark:via-[#111119]/85 dark:to-purple-950/20 rounded-2xl border border-indigo-100/80 dark:border-white/5 p-4.5 shadow-2.5 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl" />
-                          <div className="text-left space-y-1.5 max-w-md">
-                            <span className="text-[9px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded px-1.5 py-0.5 leading-none uppercase font-extrabold tracking-widest font-mono">Cloud Backup</span>
-                            <h4 className="font-extrabold text-indigo-950 dark:text-gray-100 text-sm leading-snug">Sync Workout Metrics Across Devices</h4>
-                            <p className="text-[11px] text-indigo-900/60 dark:text-slate-400 leading-relaxed font-normal">
-                              Sync with your Google Account to automatically preserve your completed sets, strength analytics milestones, and bespoke templates on our secure cloud.
-                            </p>
-                          </div>
-                          <div className="flex flex-col md:flex-row items-center gap-4 w-full">
-                            <button
-                              onClick={handleGoogleLogin}
-                              className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl shadow-lg shrink-0 flex items-center justify-center space-x-1.5 transition-all hover:scale-[1.01] ring-1 ring-white/10"
-                            >
-                              <LogIn className="w-4 h-4 text-white" />
-                              <span>Log into your Google Account</span>
-                            </button>
-                            {window.self !== window.top && (
-                              <p className="text-[10px] text-amber-600 dark:text-[#f59e0b] leading-normal font-mono bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl text-left flex-1">
-                                ⚠️ <strong>Framed Preview:</strong> If auth popups fail, click <strong>"Open in a new tab"</strong> at the top right of this screen to sync safely.
-                              </p>
-                            )}
-                          </div>
+                        <div className="m3-card">
+                          <span className="m3-eyebrow primary">
+                            <LogIn className="w-3.5 h-3.5" />
+                            Cloud backup
+                          </span>
+                          <h2 className="m3-h">Sync your metrics across devices</h2>
+                          <p className="m3-body">Connect Google to preserve completed sets, strength milestones, and custom templates on secure cloud.</p>
+                          <div style={{ height: "16px" }} />
+                          <button onClick={handleGoogleLogin} className="m3-btn tonal-primary">
+                            <LogIn className="w-5 h-5" />
+                            Log in with Google
+                          </button>
                         </div>
                       )}
 
-                      <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/5 p-6 shadow-2xl text-center">
-                        <Dumbbell className="w-12 h-12 text-indigo-500/25 mx-auto mb-3 animate-bounce" />
-                        <h3 className="font-extrabold text-gray-900 dark:text-gray-100 text-lg md:text-xl mb-1.5 tracking-tight animate-pulse">Start New Lifting Session</h3>
-                        <p className="text-xs text-gray-500 dark:text-slate-400 max-w-sm mx-auto mb-6 leading-relaxed">
-                          Track weights, reps, and warm-up sets easily. Get in-depth exercise counts and historical records backed up automatically.
-                        </p>
-                        
-                        {/* Launch routines buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                      {/* Start a new session card */}
+                      <div className="m3-card hi" style={{ textAlign: "center" }}>
+                        <div className="m3-shape lg center">
+                          <svg className="sf" viewBox="0 0 100 100"><use href="#shape-flower" fill="var(--m3-primary-cont)" /></svg>
+                          <span className="si"><Dumbbell size={36} style={{ color: "var(--m3-primary)" }} /></span>
+                        </div>
+                        <h2 className="m3-h center">Start a new lifting session</h2>
+                        <p className="m3-body center">Track weights, reps and warm-ups. In-depth exercise counts and history, backed up automatically.</p>
+                        <div style={{ height: "16px" }} />
+                        <div className="m3-stack">
                           <button
                             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setRestTimerTarget(null); cancelServiceWorkerTimer(); state.startWorkout("Blank Routine"); }}
-                            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center space-x-1.5 ring-1 ring-white/10"
+                            className="m3-btn accent"
                           >
-                            <Sparkles className="w-4 h-4 text-yellow-300 animate-spin" style={{ animationDuration: '6s' }} />
-                            <span>Quick Empty Session</span>
+                            <Sparkles className="w-5 h-5" />
+                            Quick empty session
                           </button>
                           <button
                             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setActiveTab("templates"); }}
-                            className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5"
+                            className="m3-btn tonal"
                           >
-                            <span>Browse Routines</span>
+                            Browse routines
                           </button>
                         </div>
                       </div>
