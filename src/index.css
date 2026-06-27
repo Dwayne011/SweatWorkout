@@ -161,6 +161,20 @@ html, body {
   animation-delay: -5s;
 }
 
+/* The fluid-glow loop (scale/rotate/translate on big blurred gradients) is a
+   constant GPU compositor cost. Keep the static gradient but drop the animation
+   on the Android WebView and for anyone who prefers reduced motion. */
+.native-android .gemini-bg-glow-1,
+.native-android .gemini-bg-glow-2 {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gemini-bg-glow-1,
+  .gemini-bg-glow-2 {
+    animation: none;
+  }
+}
+
 /* Glassmorphism for panels and buttons */
 .gemini-glass {
   background: var(--glass-bg);

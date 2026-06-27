@@ -250,7 +250,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                     </div>
                   </div>
                   <motion.div
-                    layout
+                    layout="position"
                     drag="x"
                     dragDirectionLock
                     dragConstraints={{ left: -140, right: 0 }}

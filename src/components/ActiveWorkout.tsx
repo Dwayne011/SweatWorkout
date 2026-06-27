@@ -1466,7 +1466,7 @@ export default function ActiveWorkout({
                             )}
 
                             <motion.div
-                              layout
+                              layout="position"
                               drag="x"
                               dragDirectionLock
                               dragConstraints={{ left: -140, right: 0 }}
@@ -1999,7 +1999,7 @@ export default function ActiveWorkout({
                     )}
 
                     <motion.div
-                      layout
+                      layout="position"
                       drag="x"
                       dragDirectionLock
                       dragConstraints={{ left: -140, right: 0 }}
