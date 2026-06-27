@@ -576,9 +576,11 @@ export default function App() {
               <div className="inline-flex items-center justify-center p-4 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl hover:scale-105 transition-transform">
                 <Dumbbell className="w-8 h-8 text-gray-900 dark:text-gray-100 animate-pulse" />
               </div>
-              <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight leading-none uppercase">
-                SW3AT <span className="gemini-text-spark">WORKOUTS</span>
-              </h1>
+              <div className="text-gray-900 dark:text-gray-100 flex justify-center">
+                <div className="pb-logo hero" style={{ color: "currentColor" }}>
+                  <span>PROJECT</span><span className="dot" /><span className="pb">PB</span>
+                </div>
+              </div>
               <p className="text-[10px] font-mono text-indigo-600 dark:text-indigo-300 tracking-widest uppercase font-extrabold">
                 Your Personal Strength Companion
               </p>
@@ -636,8 +638,8 @@ export default function App() {
           <div className="m3-brand">
             <div className="m3-logo"><FlexingArm className="w-5 h-5" /></div>
             <div>
-              <div className="m3-wordmark">SW3AT <span>WORKOUTS</span></div>
-              <div className="m3-sub">Neural Hypertrophy<br />Engine</div>
+              <div className="pb-logo"><span>PROJECT</span><span className="dot" /><span className="pb">PB</span></div>
+              <div className="pb-sub">Neural Hypertrophy Engine</div>
             </div>
           </div>
 

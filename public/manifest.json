@@ -1,7 +1,7 @@
 {
   "id": "/?homescreen=1",
-  "name": "SW3AT Workouts",
-  "short_name": "SW3AT",
+  "name": "Project PB",
+  "short_name": "Project PB",
   "description": "Voice-enabled intelligent athletic logger and Gemini Coach.",
   "lang": "en-US",
   "dir": "ltr",
@@ -77,14 +77,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "SW3AT Workouts Performance Monitor on Desktop"
+      "label": "Project PB Performance Monitor on Desktop"
     },
     {
       "src": "/screenshot-mobile.png",
       "sizes": "720x1280",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "SW3AT Active Logger and Live Gemini Coach on Mobile"
+      "label": "Project PB Active Logger and Live Gemini Coach on Mobile"
     }
   ],
   "shortcuts": [

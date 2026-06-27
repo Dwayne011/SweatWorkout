@@ -31,32 +31,6 @@ export default function IntroSplash({ onComplete }: IntroSplashProps) {
     };
   }, [onComplete]);
 
-  // Letters of "SW3AT" for letter stagger animation
-  const word1 = ["S", "W", "3", "A", "T"];
-  const word2 = ["W", "O", "R", "K", "O", "U", "T", "S"];
-
-  const containerVariants = {
-    animate: {
-      transition: {
-        staggerChildren: 0.08,
-      },
-    },
-  };
-
-  const letterVariants = {
-    initial: { y: 25, opacity: 0, scale: 0.8 },
-    animate: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 200,
-        damping: 12,
-      },
-    },
-  };
-
   return (
     <AnimatePresence>
       {!startFadeOut && (
@@ -112,37 +86,15 @@ export default function IntroSplash({ onComplete }: IntroSplashProps) {
               <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 animate-bounce" />
             </motion.div>
 
-            {/* Staggered text assembly */}
+            {/* Wordmark */}
             <motion.div
-              variants={containerVariants}
-              initial="initial"
-              animate="animate"
-              className="flex flex-col items-center space-y-2"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.6, ease: "easeOut" }}
+              className="text-gray-900 dark:text-gray-100 flex justify-center"
             >
-              {/* SW3AT */}
-              <div className="flex items-center space-x-1">
-                {word1.map((letter, i) => (
-                  <motion.span
-                    key={`w1-${i}`}
-                    variants={letterVariants}
-                    className="text-4xl md:text-5xl font-black text-gray-900 dark:text-gray-100 tracking-widest font-sans selection:bg-indigo-500"
-                  >
-                    {letter}
-                  </motion.span>
-                ))}
-              </div>
-
-              {/* WORKOUTS with Sparkle Accent */}
-              <div className="flex items-center space-x-1 pl-1">
-                {word2.map((letter, i) => (
-                  <motion.span
-                    key={`w2-${i}`}
-                    variants={letterVariants}
-                    className="text-2xl md:text-3xl font-extrabold text-[#818cf8] tracking-widest uppercase font-mono brightness-110"
-                  >
-                    {letter}
-                  </motion.span>
-                ))}
+              <div className="pb-logo hero" style={{ color: "currentColor" }}>
+                <span>PROJECT</span><span className="dot" /><span className="pb">PB</span>
               </div>
             </motion.div>
 
