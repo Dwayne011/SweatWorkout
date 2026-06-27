@@ -344,23 +344,25 @@ export default function ExerciseLibrary({
             <span>Create Custom</span>
           </button>
 
-          <button
-            onClick={handleExport}
-            className="px-3.5 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl shadow flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
-            title="Download your custom exercises collections as JSON"
-          >
-            <Download className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-            <span>Export Collection</span>
-          </button>
+          <div className="bgroup">
+            <button
+              onClick={handleExport}
+              className="px-3.5 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold shadow flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+              title="Download your custom exercises collections as JSON"
+            >
+              <Download className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+              <span>Export Collection</span>
+            </button>
 
-          <button
-            onClick={() => setShowImportForm(true)}
-            className="px-3.5 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl shadow flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
-            title="Import custom exercise guides"
-          >
-            <Upload className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-            <span>Import</span>
-          </button>
+            <button
+              onClick={() => setShowImportForm(true)}
+              className="px-3.5 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold shadow flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+              title="Import custom exercise guides"
+            >
+              <Upload className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+              <span>Import</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -403,6 +405,7 @@ export default function ExerciseLibrary({
               <div
                 key={item.id}
                 onClick={() => openExerciseGuide(item)}
+                style={{ contentVisibility: 'auto', containIntrinsicSize: '0 80px' }}
                 className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group w-full"
                 title="Click to view setup and guide demonstration"
               >

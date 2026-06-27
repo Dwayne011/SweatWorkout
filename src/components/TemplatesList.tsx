@@ -127,70 +127,69 @@ export default function TemplatesList({
     <div className="space-y-6 pb-40">
       {/* Starting Block Launcher controls - Expanded to 3 Columns Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between">
+        {/* Card 1: Quick logging panel */}
+        <div className="card flex flex-col justify-between">
           <div>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500/10 to-purple-500/10 text-indigo-455 flex items-center justify-center mb-3 ring-1 ring-indigo-500/20">
-              <Play className="w-4 h-4 fill-indigo-400 text-indigo-400" />
+            <div className="blob" style={{ position: "relative", marginBottom: "6px" }}>
+              <svg className="shape" viewBox="0 0 100 100"><path fill="var(--primary-cont)" d="M 50.00 5.00 C 60.80 5.00, 51.08 8.88, 60.35 11.36 C 69.63 13.85, 63.15 5.63, 72.50 11.03 C 81.85 16.43, 71.50 14.93, 78.28 21.72 C 85.07 28.50, 83.57 18.15, 88.97 27.50 C 94.37 36.85, 86.15 30.37, 88.64 39.65 C 91.12 48.92, 95.00 39.20, 95.00 50.00 C 95.00 60.80, 91.12 51.08, 88.64 60.35 C 86.15 69.63, 94.37 63.15, 88.97 72.50 C 83.57 81.85, 85.07 71.50, 78.28 78.28 C 71.50 85.07, 81.85 83.57, 72.50 88.97 C 63.15 94.37, 69.63 86.15, 60.35 88.64 C 51.08 91.12, 60.80 95.00, 50.00 95.00 C 39.20 95.00, 48.92 91.12, 39.65 88.64 C 30.37 86.15, 36.85 94.37, 27.50 88.97 C 18.15 83.57, 28.50 85.07, 21.72 78.28 C 14.93 71.50, 16.43 81.85, 11.03 72.50 C 5.63 63.15, 13.85 69.63, 11.36 60.35 C 8.88 51.08, 5.00 60.80, 5.00 50.00 C 5.00 39.20, 8.88 48.92, 11.36 39.65 C 13.85 30.37, 5.63 36.85, 11.03 27.50 C 16.43 18.15, 14.93 28.50, 21.72 21.72 C 28.50 14.93, 18.15 16.43, 27.50 11.03 C 36.85 5.63, 30.37 13.85, 39.65 11.36 C 48.92 8.88, 39.20 5.00, 50.00 5.00 Z"/></svg>
+              <Play className="gi text-[var(--primary)] fill-current" />
             </div>
-            <h3 className="font-extrabold text-base md:text-lg text-gray-900 dark:text-gray-100 mb-1">Quick Logging Panel</h3>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mb-4 font-normal leading-relaxed">
-              Skip planning and initialize an active blank workout instantly to record whatever exercises you perform on the fly.
-            </p>
+            <h2 className="h">Quick logging panel</h2>
+            <p className="body">Skip planning and start a blank active workout instantly. Record whatever you perform, on the fly.</p>
           </div>
-          <button
-            onClick={onStartBlank}
-            className="w-full py-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl transition-all shadow-lg flex items-center justify-center space-x-1 ring-1 ring-white/10"
-          >
-            <Play className="w-4 h-4 fill-white" />
-            <span>Start Empty Workout</span>
+          <div style={{ height: "18px" }}></div>
+          <button onClick={onStartBlank} className="btn fill cursor-pointer hover:opacity-90">
+            <Play className="w-5 h-5 fill-current" />
+            <span>Start empty workout</span>
           </button>
         </div>
 
-        <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between">
+        {/* Card 2: Custom routine architect */}
+        <div className="card flex flex-col justify-between">
           <div>
-            <div className="w-8 h-8 rounded-lg bg-white dark:bg-black dark:border-white/10 shadow-sm text-slate-350 flex items-center justify-center mb-3 ring-1 ring-white/10">
-              <Plus className="w-4 h-4" />
+            <div className="blob" style={{ position: "relative", marginBottom: "6px" }}>
+              <svg className="shape" viewBox="0 0 100 100"><path fill="var(--sc-highest)" d="M 50.00 5.00 C 60.80 5.00, 51.08 8.88, 60.35 11.36 C 69.63 13.85, 63.15 5.63, 72.50 11.03 C 81.85 16.43, 71.50 14.93, 78.28 21.72 C 85.07 28.50, 83.57 18.15, 88.97 27.50 C 94.37 36.85, 86.15 30.37, 88.64 39.65 C 91.12 48.92, 95.00 39.20, 95.00 50.00 C 95.00 60.80, 91.12 51.08, 88.64 60.35 C 86.15 69.63, 94.37 63.15, 88.97 72.50 C 83.57 81.85, 85.07 71.50, 78.28 78.28 C 71.50 85.07, 81.85 83.57, 72.50 88.97 C 63.15 94.37, 69.63 86.15, 60.35 88.64 C 51.08 91.12, 60.80 95.00, 50.00 95.00 C 39.20 95.00, 48.92 91.12, 39.65 88.64 C 30.37 86.15, 36.85 94.37, 27.50 88.97 C 18.15 83.57, 28.50 85.07, 21.72 78.28 C 14.93 71.50, 16.43 81.85, 11.03 72.50 C 5.63 63.15, 13.85 69.63, 11.36 60.35 C 8.88 51.08, 5.00 60.80, 5.00 50.00 C 5.00 39.20, 8.88 48.92, 11.36 39.65 C 13.85 30.37, 5.63 36.85, 11.03 27.50 C 16.43 18.15, 14.93 28.50, 21.72 21.72 C 28.50 14.93, 18.15 16.43, 27.50 11.03 C 36.85 5.63, 30.37 13.85, 39.65 11.36 C 48.92 8.88, 39.20 5.00, 50.00 5.00 Z"/></svg>
+              <Plus className="gi text-[var(--on-var)]" />
             </div>
-            <h3 className="font-extrabold text-base md:text-lg text-gray-900 dark:text-gray-100 mb-1">Custom Routine Architect</h3>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mb-4 font-normal leading-relaxed">
-              Combine multiple barbell, dumbbell, or bodyweight exercises to pre-arrange sets and volume targets for automated start.
-            </p>
+            <h2 className="h">Custom routine architect</h2>
+            <p className="body">Combine barbell, dumbbell or bodyweight exercises to pre-arrange sets and volume targets for an automated start.</p>
           </div>
+          <div style={{ height: "18px" }}></div>
           <button
             onClick={() => {
               setShowAddTemplate(true);
               setShowAIGenerator(false);
             }}
-            className="w-full py-3 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/10 text-slate-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center space-x-1"
+            className="btn outline cursor-pointer hover:bg-[#ffffff]/5"
           >
-            <Plus className="w-4 h-4" />
-            <span>Create New Template</span>
+            <Plus className="w-5 h-5" />
+            <span>Create new template</span>
           </button>
         </div>
 
-        <div className="bg-gradient-to-tr from-indigo-50 via-white to-purple-50 dark:from-indigo-950/20 dark:via-[#111119]/90 dark:to-purple-950/20 rounded-2xl border border-indigo-100 dark:border-[#818cf8]/15 p-5 shadow-xl dark:shadow-2xl flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-2xl animate-pulse" />
+        {/* Card 3: Gemini AI composer */}
+        <div className="card flex flex-col justify-between" style={{ background: "var(--tertiary-cont)", position: "relative", overflow: "hidden" }}>
           <div>
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-yellow-300 flex items-center justify-center mb-3 ring-1 ring-indigo-500/20">
-              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-yellow-300 fill-indigo-600 dark:fill-yellow-300 animate-pulse" />
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+              <div className="blob" style={{ width: "50px", height: "50px", position: "relative" }}>
+                <svg className="shape" viewBox="0 0 100 100"><path fill="rgba(255,255,255,.18)" d="M 50.00 5.00 C 60.80 5.00, 51.08 8.88, 60.35 11.36 C 69.63 13.85, 63.15 5.63, 72.50 11.03 C 81.85 16.43, 71.50 14.93, 78.28 21.72 C 85.07 28.50, 83.57 18.15, 88.97 27.50 C 94.37 36.85, 86.15 30.37, 88.64 39.65 C 91.12 48.92, 95.00 39.20, 95.00 50.00 C 95.00 60.80, 91.12 51.08, 88.64 60.35 C 86.15 69.63, 94.37 63.15, 88.97 72.50 C 83.57 81.85, 85.07 71.50, 78.28 78.28 C 71.50 85.07, 81.85 83.57, 72.50 88.97 C 63.15 94.37, 69.63 86.15, 60.35 88.64 C 51.08 91.12, 60.80 95.00, 50.00 95.00 C 39.20 95.00, 48.92 91.12, 39.65 88.64 C 30.37 86.15, 36.85 94.37, 27.50 88.97 C 18.15 83.57, 28.50 85.07, 21.72 78.28 C 14.93 71.50, 16.43 81.85, 11.03 72.50 C 5.63 63.15, 13.85 69.63, 11.36 60.35 C 8.88 51.08, 5.00 60.80, 5.00 50.00 C 5.00 39.20, 8.88 48.92, 11.36 39.65 C 13.85 30.37, 5.63 36.85, 11.03 27.50 C 16.43 18.15, 14.93 28.50, 21.72 21.72 C 28.50 14.93, 18.15 16.43, 27.50 11.03 C 36.85 5.63, 30.37 13.85, 39.65 11.36 C 48.92 8.88, 39.20 5.00, 50.00 5.00 Z"/></svg>
+                <Sparkles className="gi text-white fill-current" style={{ width: "24px", height: "24px" }} />
+              </div>
+              <span className="eyebrow tert font-bold uppercase tracking-wider text-[10px]" style={{ background: "rgba(0,0,0,.25)", color: "#fff" }}>LAB</span>
             </div>
-            <h3 className="font-extrabold text-base md:text-lg text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-1.5">
-              <span>Gemini AI Composer</span>
-              <span className="text-[9px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded px-1 py-0.5 leading-none uppercase font-bold tracking-wider font-mono">LAB</span>
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 font-normal leading-relaxed">
-              Let Gemini S&C intelligence generate custom warmups, set progressions, and volume targets aligned to your goals.
-            </p>
+            <h2 className="h" style={{ color: "#fff" }}>Gemini AI composer</h2>
+            <p className="body" style={{ color: "var(--on-tertiary-cont)" }}>Let Gemini S&C intelligence generate custom warm-ups, accessory work and progression targets.</p>
           </div>
+          <div style={{ height: "18px" }}></div>
           <button
             onClick={() => {
               setShowAIGenerator(!showAIGenerator);
               setShowAddTemplate(false);
             }}
-            className="w-full py-3 font-extrabold text-xs rounded-xl transition-all flex items-center justify-center space-x-1 bg-gradient-to-tr from-indigo-650 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-555 text-white shadow-lg ring-1 ring-white/10"
+            className="btn grad cursor-pointer hover:opacity-90"
           >
-            <Sparkles className="w-4 h-4 text-yellow-350 fill-yellow-350" />
-            <span>{showAIGenerator ? "Hide AI Composer" : "Launch AI Composer"}</span>
+            <Sparkles className="w-5 h-5 fill-current" />
+            <span>{showAIGenerator ? "Hide AI composer" : "Launch AI composer"}</span>
           </button>
         </div>
       </div>
@@ -226,7 +225,7 @@ export default function TemplatesList({
             {allAvailableTemplates.map((tp) => (
               <div
                 key={tp.id}
-                className="bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between space-y-4"
+                className="card flex flex-col justify-between space-y-4"
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
@@ -263,9 +262,9 @@ export default function TemplatesList({
 
                 <button
                   onClick={() => onStartFromTemplate(tp.id)}
-                  className="w-full py-2.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl transition-all shadow-lg flex items-center justify-center space-x-1 ring-1 ring-white/10"
+                  className="btn fill sm cursor-pointer hover:opacity-90"
                 >
-                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <Play className="w-4 h-4 fill-current" />
                   <span>Launch Template</span>
                 </button>
               </div>
@@ -280,7 +279,7 @@ export default function TemplatesList({
             {STARTER_TEMPLATES.map((tp) => (
               <div
                 key={tp.id}
-                className="bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-4 shadow-2xl flex flex-col justify-between space-y-3.5"
+                className="card flex flex-col justify-between space-y-3.5"
               >
                 <div>
                   <h4 className="font-extrabold text-gray-900 dark:text-slate-100 text-sm md:text-base leading-none mb-1">
@@ -306,9 +305,9 @@ export default function TemplatesList({
                       if (res) onStartFromTemplate(res.id);
                     });
                   }}
-                  className="w-full py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 font-bold text-xs rounded-xl transition-all flex items-center justify-center space-x-1"
+                  className="btn tonal sm cursor-pointer hover:opacity-90"
                 >
-                  <Play className="w-3 h-3 fill-indigo-400 text-indigo-400" />
+                  <Play className="w-4 h-4 fill-current" />
                   <span>Start Routine</span>
                 </button>
               </div>

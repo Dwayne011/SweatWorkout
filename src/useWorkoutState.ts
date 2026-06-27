@@ -170,7 +170,41 @@ export function useWorkoutState() {
       return;
     }
 
+    const debounce = <T extends (...args: any[]) => void>(func: T, wait: number) => {
+      let timeout: any;
+      const debounced = (...args: Parameters<T>) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+      };
+      debounced.cancel = () => clearTimeout(timeout);
+      return debounced;
+    };
+
     setIsSyncing(true);
+
+    // Debounced state setters to group rapid Firestore snapshots
+    const debouncedSetExercises = debounce((data: Exercise[]) => {
+      setExercises(data);
+      setIsSyncing(false);
+    }, 150);
+
+    const debouncedSetTemplates = debounce((data: WorkoutSession[]) => {
+      setTemplates(data);
+    }, 150);
+
+    const debouncedSetHistory = debounce((data: WorkoutSession[]) => {
+      setHistory(data);
+    }, 150);
+
+    const debouncedSetNotes = debounce((data: Record<string, string>) => {
+      setExerciseNotes(data);
+      saveToLocal("workout_tracker_exercise_notes", data);
+    }, 150);
+
+    const debouncedSetSpreadsheetId = debounce((id: string) => {
+      setSpreadsheetId(id);
+      localStorage.setItem("sw3at_spreadsheet_id", id);
+    }, 150);
 
     // Sync Custom Exercises
     const qExercises = query(collection(db, "custom_exercises"), where("userId", "==", user.uid));
@@ -181,8 +215,7 @@ export function useWorkoutState() {
         snapshot.forEach((doc) => {
           customEx.push(doc.data() as Exercise);
         });
-        setExercises([...defaultExercises, ...specialRoutinesExercises, ...customEx]);
-        setIsSyncing(false);
+        debouncedSetExercises([...defaultExercises, ...specialRoutinesExercises, ...customEx]);
       },
       (error) => {
         console.error("Exercises sync error:", error);
@@ -208,7 +241,7 @@ export function useWorkoutState() {
             hasNew = true;
           }
         });
-        setTemplates(merged);
+        debouncedSetTemplates(merged);
         if (hasNew) {
           DEFAULT_ROUTINES.forEach(async (defR) => {
             if (!tps.some((t) => t.name.toLowerCase() === defR.name.toLowerCase() || t.id === defR.id)) {
@@ -243,7 +276,7 @@ export function useWorkoutState() {
         const sorted = hts.sort(
           (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
         );
-        setHistory(sorted);
+        debouncedSetHistory(sorted);
       },
       (error) => {
         console.error("History sync error:", error);
@@ -263,8 +296,7 @@ export function useWorkoutState() {
             notesMap[data.exerciseId] = data.notes;
           }
         });
-        setExerciseNotes(notesMap);
-        saveToLocal("workout_tracker_exercise_notes", notesMap);
+        debouncedSetNotes(notesMap);
       },
       (error) => {
         console.error("Exercise notes sync error:", error);
@@ -279,8 +311,7 @@ export function useWorkoutState() {
         if (docSnap.exists()) {
           const cloudSpreadsheetId = docSnap.data().spreadsheetId;
           if (cloudSpreadsheetId) {
-            setSpreadsheetId(cloudSpreadsheetId);
-            localStorage.setItem("sw3at_spreadsheet_id", cloudSpreadsheetId);
+            debouncedSetSpreadsheetId(cloudSpreadsheetId);
           }
         }
       },
@@ -296,6 +327,11 @@ export function useWorkoutState() {
       unsubHistory();
       unsubNotes();
       unsubSheets();
+      debouncedSetExercises.cancel();
+      debouncedSetTemplates.cancel();
+      debouncedSetHistory.cancel();
+      debouncedSetNotes.cancel();
+      debouncedSetSpreadsheetId.cancel();
     };
   }, [user]);
 

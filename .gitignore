@@ -8,3 +8,6 @@ android-build.log
 logcat-capture.txt
 .env*
 !.env.example
+
+# AI Studio one-off patch script (not app source)
+apply_fixes.py

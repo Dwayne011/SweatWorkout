@@ -723,10 +723,11 @@ export default function WorkoutSplashScene({
                       {/* Interactive percentage bar */}
                       <div className="w-full bg-white dark:bg-black dark:border-white/10 shadow-sm rounded-full h-1.5 overflow-hidden">
                         <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${imp.intensity}%` }}
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
                           transition={{ duration: 1, delay: 0.2 }}
                           className={`h-full bg-gradient-to-r ${imp.intensity > 70 ? "from-indigo-500 to-rose-500" : "from-indigo-500 to-purple-500"}`}
+                          style={{ width: `${imp.intensity}%`, transformOrigin: "left" }}
                         />
                       </div>
                       <p className="text-[10px] text-gray-500 dark:text-slate-400 leading-normal">{imp.description}</p>
@@ -816,10 +817,11 @@ export default function WorkoutSplashScene({
                               <span className="w-20 text-gray-500 dark:text-slate-400 text-left shrink-0">Previous Peak:</span>
                               <div className="flex-1 bg-white dark:bg-black dark:border-white/10 shadow-sm h-2.5 rounded-md overflow-hidden">
                                 <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${prevPercent}%` }}
+                                  initial={{ scaleX: 0 }}
+                                  animate={{ scaleX: 1 }}
                                   transition={{ duration: 0.8 }}
                                   className="h-full bg-slate-650/40 border-r-2 border-slate-450 rounded-md"
+                                  style={{ width: `${prevPercent}%`, transformOrigin: "left" }}
                                 />
                               </div>
                               <span className="w-24 text-right font-medium text-gray-500 dark:text-slate-400 shrink-0">
@@ -833,13 +835,13 @@ export default function WorkoutSplashScene({
                             <span className="w-20 text-indigo-600 dark:text-indigo-300 text-left shrink-0">This Session:</span>
                             <div className="flex-1 bg-white dark:bg-black h-3.5 rounded-md overflow-hidden ring-1 ring-indigo-500/15">
                               <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${currPercent}%` }}
+                                initial={{ scaleX: 0 }}
+                                animate={{ scaleX: 1 }}
                                 transition={{ duration: 1, delay: 0.1 }}
                                 className={`h-full bg-gradient-to-r ${
                                   isNew ? "from-indigo-600 to-emerald-500 border-emerald-400" : isIncrease ? "from-indigo-600 to-purple-600" : "from-gray-300 dark:from-[#222238] to-gray-400 dark:to-[#121219]"
                                 } border-r-2 rounded-md`}
-                                style={{ width: `${currPercent}%` }}
+                                style={{ width: `${currPercent}%`, transformOrigin: "left" }}
                               />
                             </div>
                             <span className={`w-24 text-right font-extrabold shrink-0 ${isIncrease ? "text-indigo-600 dark:text-indigo-300 text-xs" : isNew ? "text-emerald-500 dark:text-emerald-300" : "text-slate-700 dark:text-slate-300"}`}>
