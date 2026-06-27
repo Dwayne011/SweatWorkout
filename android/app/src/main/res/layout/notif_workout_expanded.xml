@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Expanded notification: small state label, big centered timer, colored
+     progress, centered detail text, and a segmented action row. Button
+     backgrounds + colors are set in code (filled = primary, outline = others). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingTop="2dp"
+    android:paddingBottom="6dp"
+    android:paddingEnd="48dp">
+
+    <TextView
+        android:id="@+id/notif_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/notif_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="38sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false"
+        android:gravity="center" />
+
+    <ProgressBar
+        android:id="@+id/notif_progress"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:progressDrawable="@drawable/notif_progress"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/notif_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:ellipsize="end" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:id="@+id/notif_btn1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:paddingTop="9dp"
+            android:paddingBottom="9dp"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/notif_btn2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:paddingTop="9dp"
+            android:paddingBottom="9dp"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/notif_btn3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:paddingTop="9dp"
+            android:paddingBottom="9dp"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:gravity="center" />
+    </LinearLayout>
+</LinearLayout>
