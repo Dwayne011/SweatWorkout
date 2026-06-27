@@ -356,9 +356,9 @@ export default function AccountSettings({
 
           <button
             onClick={handleGoogleLogin}
-            className="px-6 py-3 bg-[#caf24e] hover:bg-[#b8dd3f] text-[#222f00] font-black text-xs rounded-full shadow-lg inline-flex items-center space-x-2.5 transition-all cursor-pointer hover:scale-[1.03] active:scale-[0.96]"
+            className="px-6 py-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-black text-xs rounded-xl shadow-lg inline-flex items-center space-x-2.5 transition-all cursor-pointer hover:scale-[1.03] active:scale-[0.96] ring-1 ring-white/10"
           >
-            <LogIn className="w-4 h-4 text-[#222f00]" />
+            <LogIn className="w-4 h-4 text-white" />
             <span>Sync with Google Account</span>
           </button>
 
