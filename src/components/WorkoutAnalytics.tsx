@@ -400,7 +400,7 @@ export default function WorkoutAnalytics({ history, exercisesList, onAskGemini }
     if (metrics.coachingInsights.length === 0) {
       metrics.coachingInsights.push({
         title: "Dynamic Analytics Calibrating",
-        desc: "Complete more workout sessions and log your sets with weights. SW3AT will automatically populate deep cardiovascular trends, biomechanical ratios, and muscle-recovery pacing benchmarks.",
+        desc: "Complete more workout sessions and log your sets with weights. Project PB will automatically populate deep cardiovascular trends, biomechanical ratios, and muscle-recovery pacing benchmarks.",
         type: "info",
       });
     }
@@ -1043,7 +1043,7 @@ Advise me on:
 
           <div className="text-[11px] text-gray-500 dark:text-slate-400 leading-normal pt-4 mt-4 border-t border-gray-200 dark:border-white/5 font-semibold flex items-start space-x-2">
             <Clock className="w-4 h-4 text-emerald-400 block shrink-0 mt-0.5 animate-pulse" />
-            <span>SW3AT calculates your hypertrophy anchoring targets dynamically based on daily repetitions volume logs.</span>
+            <span>Project PB calculates your hypertrophy anchoring targets dynamically based on daily repetitions volume logs.</span>
           </div>
         </div>
 

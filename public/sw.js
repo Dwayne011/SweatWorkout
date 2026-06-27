@@ -1,4 +1,4 @@
-// Author: SW3AT Workouts
+// Author: Project PB
 // OS support: All (Web, Android, iOS)
 // Description: Service Worker for offline asset caching and the lock-screen
 //   workout notification. The notification engine is a *renderer*: it shows a
@@ -122,7 +122,7 @@ self.addEventListener('periodicsync', (event) => {
 self.addEventListener('push', (event) => {
   console.log('⚡ SW remote push payload received:', event);
   let payload = {
-    title: 'SW3AT Coach Peak Performance Alert',
+    title: 'Project PB Coach Peak Performance Alert',
     body: 'Gemini synthesized custom suggestions based on your metric progression. Let\'s check it out!',
     icon: '/icon-192.png',
     badge: '/icon-192.png'

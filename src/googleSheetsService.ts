@@ -7,7 +7,7 @@ import { WorkoutSession, Exercise } from "./types";
 import { robustFetch } from "./utils/network";
 
 /**
- * Creates a brand new Google Spreadsheet named "SW3AT Workout Logs" on the user's Drive.
+ * Creates a brand new Google Spreadsheet named "Project PB Workout Logs" on the user's Drive.
  * Generates two tabs: "Workout Summaries" and "Sets Log".
  */
 export async function createWorkoutSpreadsheet(accessToken: string): Promise<string> {
@@ -19,7 +19,7 @@ export async function createWorkoutSpreadsheet(accessToken: string): Promise<str
     },
     body: JSON.stringify({
       properties: {
-        title: "SW3AT Workout Logs",
+        title: "Project PB Workout Logs",
       },
       sheets: [
         {

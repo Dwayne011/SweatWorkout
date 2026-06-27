@@ -298,7 +298,7 @@ export default function AccountSettings({
                   ) : (
                     <div className="space-y-3 pt-1 border-t border-gray-200 dark:border-white/5">
                       <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-normal">
-                        No linked spreadsheet found. Click below to automatically provision or restore your SW3AT spreadsheet.
+                        No linked spreadsheet found. Click below to automatically provision or restore your Project PB spreadsheet.
                       </p>
                       <button
                         onClick={handleCreateSpreadsheet}
@@ -313,7 +313,7 @@ export default function AccountSettings({
                         ) : (
                           <>
                             <Plus className="w-3.5 h-3.5" />
-                            <span>Create SW3AT Workout Sheet</span>
+                            <span>Create Project PB Workout Sheet</span>
                           </>
                         )}
                       </button>

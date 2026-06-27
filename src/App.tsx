@@ -711,7 +711,7 @@ export default function App() {
                             if (perm === "granted") {
                               try {
                                 new Notification("Alerts Configured! ⚡", {
-                                  body: "SW3AT Workouts will deliver persistent timer counters and set summaries.",
+                                  body: "Project PB will deliver persistent timer counters and set summaries.",
                                   icon: "/logo.svg"
                                 });
                               } catch (e) {

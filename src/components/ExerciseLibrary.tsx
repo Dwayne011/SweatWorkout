@@ -243,7 +243,7 @@ export default function ExerciseLibrary({
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(customOnly, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "sw3at_custom_exercises.json");
+    downloadAnchor.setAttribute("download", "project_pb_custom_exercises.json");
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();

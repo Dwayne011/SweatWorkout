@@ -50,7 +50,7 @@ async function generateAssets() {
     <!-- Dumbbell icon inside logo -->
     <path d="M 16 32 L 48 32 M 16 22 L 16 42 M 22 24 L 22 40 M 48 22 L 48 42 M 42 24 L 42 40" stroke="#ffffff" stroke-width="4" stroke-linecap="round" fill="none" />
     
-    <text x="84" y="30" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="900" letter-spacing="-0.5">SW3AT WORKOUTS</text>
+    <text x="84" y="30" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="900" letter-spacing="-0.5">PROJECT PB</text>
     <text x="84" y="52" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" letter-spacing="1">INTELLIGENT ATHLETIC JOURNAL &amp; GEMINI ACTIVE COACH</text>
   </g>
 
@@ -165,7 +165,7 @@ async function generateAssets() {
       <!-- Dumbbell -->
       <path d="M 14 24 L 34 24 M 14 16 L 14 32 M 18 18 L 18 30 M 34 16 L 34 32 M 30 18 L 30 30" stroke="#ffffff" stroke-width="3" fill="none" />
       
-      <text x="64" y="24" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" letter-spacing="-0.5">SW3AT</text>
+      <text x="64" y="24" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" letter-spacing="-0.5">PROJECT PB</text>
       <text x="64" y="40" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700">ACTIVE LOGGER</text>
     </g>
 
