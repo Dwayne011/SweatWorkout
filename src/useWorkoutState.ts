@@ -2,7 +2,7 @@
 // OS support: All (Web, Android, iOS)
 // Description: Custom React hook managing complete workout logic, user weights, sheets syncing, and database state.
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Exercise,
   WorkoutSession,
@@ -49,6 +49,41 @@ function cleanUndefined<T>(obj: T): T {
     return cleaned as T;
   }
   return obj;
+}
+
+/**
+ * Trailing-edge debounce with cancel() (drop pending) and flush() (run pending
+ * now). Used both to group rapid Firestore snapshots and to throttle the
+ * active-workout localStorage write off the per-keystroke hot path.
+ */
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
+  let timeout: any = null;
+  let lastArgs: Parameters<T> | null = null;
+  const run = () => {
+    timeout = null;
+    if (lastArgs) {
+      const args = lastArgs;
+      lastArgs = null;
+      func(...args);
+    }
+  };
+  const debounced = (...args: Parameters<T>) => {
+    lastArgs = args;
+    clearTimeout(timeout);
+    timeout = setTimeout(run, wait);
+  };
+  debounced.cancel = () => {
+    clearTimeout(timeout);
+    timeout = null;
+    lastArgs = null;
+  };
+  debounced.flush = () => {
+    if (timeout) {
+      clearTimeout(timeout);
+      run();
+    }
+  };
+  return debounced;
 }
 
 export function useWorkoutState() {
@@ -169,16 +204,6 @@ export function useWorkoutState() {
       // If signed out, keep standard local storage. Refresh standard states.
       return;
     }
-
-    const debounce = <T extends (...args: any[]) => void>(func: T, wait: number) => {
-      let timeout: any;
-      const debounced = (...args: Parameters<T>) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func(...args), wait);
-      };
-      debounced.cancel = () => clearTimeout(timeout);
-      return debounced;
-    };
 
     setIsSyncing(true);
 
@@ -336,14 +361,47 @@ export function useWorkoutState() {
   }, [user]);
 
   // Synchronize Active Workout updates locally
+  // Persist the active workout off the per-keystroke hot path: the React state
+  // update stays synchronous (instant UI) while the JSON.stringify + setItem is
+  // debounced ~500ms, so editing a set's weight/reps no longer thrashes storage.
+  const debouncedWriteActive = useMemo(
+    () =>
+      debounce((session: WorkoutSession) => {
+        try {
+          localStorage.setItem("workout_tracker_active_workout", JSON.stringify(session));
+        } catch (e) {
+          console.error("Failed to persist active workout", e);
+        }
+      }, 500),
+    []
+  );
+
+  // Flush the pending write before the app is backgrounded/torn down, so a
+  // change made <500ms before a kill isn't lost.
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === "hidden") debouncedWriteActive.flush();
+    };
+    const onPageHide = () => debouncedWriteActive.flush();
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      debouncedWriteActive.flush();
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onPageHide);
+    };
+  }, [debouncedWriteActive]);
+
   const updateActiveSessionState = useCallback((session: WorkoutSession | null) => {
     setActiveWorkout(session);
     if (session) {
-      saveToLocal("workout_tracker_active_workout", session);
+      debouncedWriteActive(session);
     } else {
+      // Discard/finish: drop any pending write and clear immediately.
+      debouncedWriteActive.cancel();
       localStorage.removeItem("workout_tracker_active_workout");
     }
-  }, []);
+  }, [debouncedWriteActive]);
 
   // --- MUTATION OPERATIONS ---
 
@@ -1440,7 +1498,9 @@ export function useWorkoutState() {
     setHistory(localHistory);
     setTemplates(localTemplates);
 
-    // Save to local storage
+    // Save to local storage (this path writes authoritatively, so drop any
+    // pending debounced active-workout write first to avoid a stale overwrite).
+    debouncedWriteActive.cancel();
     if (localActiveWorkout) {
       saveToLocal("workout_tracker_active_workout", localActiveWorkout);
     } else {
@@ -1449,7 +1509,7 @@ export function useWorkoutState() {
     saveToLocal("workout_tracker_history", localHistory);
     saveToLocal("workout_tracker_templates", localTemplates);
 
-  }, [activeWorkout, history, templates, exercises, user]);
+  }, [activeWorkout, history, templates, exercises, user, debouncedWriteActive]);
 
   return {
     exercises,

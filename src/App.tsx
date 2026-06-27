@@ -2,17 +2,13 @@
 // OS support: All (Web, Android, iOS)
 // Description: Main React App component providing routing tabs, sheets/auth popups, and layout structures.
 
-import React, { useState, useRef, useEffect, lazy, Suspense } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useWorkoutState } from "./useWorkoutState";
 import AIAssistant from "./components/AIAssistant";
-import TabSkeleton from "./components/TabSkeleton";
-// Code-split the main tab views: each becomes its own chunk, loaded on first
-// visit. ActiveWorkout (the largest) only downloads once a workout starts.
-const ActiveWorkout = lazy(() => import("./components/ActiveWorkout"));
-const TemplatesList = lazy(() => import("./components/TemplatesList"));
-const HistoryLogs = lazy(() => import("./components/HistoryLogs"));
-const ExerciseLibrary = lazy(() => import("./components/ExerciseLibrary"));
-const AccountSettings = lazy(() => import("./components/AccountSettings"));
+import ActiveWorkout from "./components/ActiveWorkout";
+import TemplatesList from "./components/TemplatesList";
+import HistoryLogs from "./components/HistoryLogs";
+import ExerciseLibrary from "./components/ExerciseLibrary";
 import WorkoutSplashScene from "./components/WorkoutSplashScene";
 import IntroSplash from "./components/IntroSplash";
 import OnboardingProfile from "./components/OnboardingProfile";
@@ -21,7 +17,6 @@ import { getNotificationService } from "./services/notifications";
 import { isFirebaseReady, auth } from "./firebase";
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import {
-  Play,
   Dumbbell,
   History,
   Calendar,
@@ -600,9 +595,9 @@ export default function App() {
             <div className="flex flex-col gap-3.5 pt-2">
               <button
                 onClick={handleGoogleLogin}
-                className="w-full py-4 bg-[#caf24e] hover:bg-[#b8dd3f] text-[#222f00] font-black text-sm rounded-full shadow-xl transition-all hover:scale-[1.01] flex items-center justify-center space-x-2 shrink-0 cursor-pointer"
+                className="w-full py-4 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 font-bold text-sm rounded-2xl shadow-xl transition-all hover:scale-[1.01] flex items-center justify-center space-x-2 shrink-0 cursor-pointer text-white"
               >
-                <LogIn className="w-5 h-5 text-[#222f00]" />
+                <LogIn className="w-5 h-5 text-gray-900 dark:text-gray-100" />
                 <span>Sync with Google Account</span>
               </button>
 
@@ -653,7 +648,7 @@ export default function App() {
             {isFirebaseReady && auth ? (
               state.user ? (
                 // Authenticated sync status badge
-                <div className="flex items-center space-x-2 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 px-2.5 py-1.5 rounded-full">
+                <div className="flex items-center space-x-2 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 px-2.5 py-1.5 rounded-xl">
                   <div className="hidden md:flex flex-col text-right leading-none mr-1">
                     <span className="text-xs font-bold font-mono text-gray-200">{state.user.displayName || "Athlete"}</span>
                     <span className="text-[9px] text-indigo-400 font-bold flex items-center justify-end gap-1 font-mono">
@@ -684,7 +679,7 @@ export default function App() {
                 // Google Authenticator triggering
                 <button
                   onClick={handleGoogleLogin}
-                  className="bg-transparent border border-gray-200 dark:border-white/10 text-gray-800 dark:text-slate-205 text-xs font-bold px-3.5 py-2 rounded-full transition-all flex items-center space-x-1.5 hover:bg-gray-50 dark:hover:bg-white/5 shadow-sm shrink-0 cursor-pointer"
+                  className="bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 text-slate-100 text-xs font-bold px-3.5 py-2 rounded-xl border border-gray-200 dark:border-white/10 transition-all flex items-center space-x-1.5 shadow-md shrink-0"
                 >
                   <LogIn className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Google Sync</span>
@@ -787,7 +782,6 @@ export default function App() {
                 {/* Always render ActiveWorkout so background timers and service worker listeners continue */}
                 <WorkoutTabSegment activeTab={activeTab}>
                   {state.activeWorkout ? (
-                    <Suspense fallback={<TabSkeleton />}>
                     <ActiveWorkout
                       session={state.activeWorkout}
                       exercisesList={state.exercises}
@@ -817,55 +811,58 @@ export default function App() {
                       setRestTimerTarget={setRestTimerTarget}
                       activeTab={activeTab}
                     />
-                    </Suspense>
                   ) : activeTab === "workouts" ? (
                     // Launching screen if no session active yet
                     <div className="space-y-6">
                       {/* Google Cloud Backup Sync promo header */}
                       {!state.user && isFirebaseReady && auth && (
-                        <div className="card">
-                          <span className="eyebrow primary">
-                            <LogIn className="w-3.5 h-3.5" />
-                            <span>Cloud backup</span>
-                          </span>
-                          <h2 className="h">Sync your metrics across devices</h2>
-                          <p className="body">Connect Google to preserve completed sets, strength milestones, and custom templates on secure cloud.</p>
-                          <div style={{ height: "18px" }}></div>
-                          <button onClick={handleGoogleLogin} className="btn tonal-primary cursor-pointer hover:opacity-90">
-                            <LogIn className="w-5 h-5" />
-                            <span>Log in with Google</span>
-                          </button>
-                          {window.self !== window.top && (
-                            <p className="text-[10px] text-amber-600 dark:text-[#f59e0b] leading-normal font-mono bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl text-left mt-3">
-                              ⚠️ <strong>Framed Preview:</strong> If auth popups fail, click <strong>"Open in a new tab"</strong> at the top right of this screen to sync safely.
+                        <div className="bg-gradient-to-tr from-indigo-50 via-white to-purple-50 dark:from-indigo-950/20 dark:via-[#111119]/85 dark:to-purple-950/20 rounded-2xl border border-indigo-100/80 dark:border-white/5 p-4.5 shadow-2.5 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl" />
+                          <div className="text-left space-y-1.5 max-w-md">
+                            <span className="text-[9px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded px-1.5 py-0.5 leading-none uppercase font-extrabold tracking-widest font-mono">Cloud Backup</span>
+                            <h4 className="font-extrabold text-indigo-950 dark:text-gray-100 text-sm leading-snug">Sync Workout Metrics Across Devices</h4>
+                            <p className="text-[11px] text-indigo-900/60 dark:text-slate-400 leading-relaxed font-normal">
+                              Sync with your Google Account to automatically preserve your completed sets, strength analytics milestones, and bespoke templates on our secure cloud.
                             </p>
-                          )}
+                          </div>
+                          <div className="flex flex-col md:flex-row items-center gap-4 w-full">
+                            <button
+                              onClick={handleGoogleLogin}
+                              className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl shadow-lg shrink-0 flex items-center justify-center space-x-1.5 transition-all hover:scale-[1.01] ring-1 ring-white/10"
+                            >
+                              <LogIn className="w-4 h-4 text-white" />
+                              <span>Log into your Google Account</span>
+                            </button>
+                            {window.self !== window.top && (
+                              <p className="text-[10px] text-amber-600 dark:text-[#f59e0b] leading-normal font-mono bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl text-left flex-1">
+                                ⚠️ <strong>Framed Preview:</strong> If auth popups fail, click <strong>"Open in a new tab"</strong> at the top right of this screen to sync safely.
+                              </p>
+                            )}
+                          </div>
                         </div>
                       )}
 
-                      <div className="card hi" style={{ textAlign: "center" }}>
-                        <div className="blob lg center" style={{ position: "relative", marginBottom: "6px" }}>
-                          <svg className="shape" viewBox="0 0 100 100">
-                            <path fill="var(--primary-cont)" d="M 50.00 5.00 C 60.80 5.00, 51.08 8.88, 60.35 11.36 C 69.63 13.85, 63.15 5.63, 72.50 11.03 C 81.85 16.43, 71.50 14.93, 78.28 21.72 C 85.07 28.50, 83.57 18.15, 88.97 27.50 C 94.37 36.85, 86.15 30.37, 88.64 39.65 C 91.12 48.92, 95.00 39.20, 95.00 50.00 C 95.00 60.80, 91.12 51.08, 88.64 60.35 C 86.15 69.63, 94.37 63.15, 88.97 72.50 C 83.57 81.85, 85.07 71.50, 78.28 78.28 C 71.50 85.07, 81.85 83.57, 72.50 88.97 C 63.15 94.37, 69.63 86.15, 60.35 88.64 C 51.08 91.12, 60.80 95.00, 50.00 95.00 C 39.20 95.00, 48.92 91.12, 39.65 88.64 C 30.37 86.15, 36.85 94.37, 27.50 88.97 C 18.15 83.57, 28.50 85.07, 21.72 78.28 C 14.93 71.50, 16.43 81.85, 11.03 72.50 C 5.63 63.15, 13.85 69.63, 11.36 60.35 C 8.88 51.08, 5.00 60.80, 5.00 50.00 C 5.00 39.20, 8.88 48.92, 11.36 39.65 C 13.85 30.37, 5.63 36.85, 11.03 27.50 C 16.43 18.15, 14.93 28.50, 21.72 21.72 C 28.50 14.93, 18.15 16.43, 27.50 11.03 C 36.85 5.63, 30.37 13.85, 39.65 11.36 C 48.92 8.88, 39.20 5.00, 50.00 5.00 Z"/>
-                          </svg>
-                          <Dumbbell className="gi text-[var(--primary)]" />
-                        </div>
-                        <h2 className="h center">Start a new lifting session</h2>
-                        <p className="body center">Track weights, reps and warm-ups easily. In-depth exercise counts and history, backed up automatically.</p>
-                        <div style={{ height: "18px" }}></div>
-                        <div className="stack">
+                      <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/5 p-6 shadow-2xl text-center">
+                        <Dumbbell className="w-12 h-12 text-indigo-500/25 mx-auto mb-3 animate-bounce" />
+                        <h3 className="font-extrabold text-gray-900 dark:text-gray-100 text-lg md:text-xl mb-1.5 tracking-tight animate-pulse">Start New Lifting Session</h3>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 max-w-sm mx-auto mb-6 leading-relaxed">
+                          Track weights, reps, and warm-up sets easily. Get in-depth exercise counts and historical records backed up automatically.
+                        </p>
+                        
+                        {/* Launch routines buttons */}
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                           <button
                             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setRestTimerTarget(null); cancelServiceWorkerTimer(); state.startWorkout("Blank Routine"); }}
-                            className="btn accent cursor-pointer hover:opacity-90"
+                            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center space-x-1.5 ring-1 ring-white/10"
                           >
-                            <Play className="w-5 h-5 fill-current" />
-                            <span>Quick empty session</span>
+                            <Sparkles className="w-4 h-4 text-yellow-300 animate-spin" style={{ animationDuration: '6s' }} />
+                            <span>Quick Empty Session</span>
                           </button>
                           <button
                             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setActiveTab("templates"); }}
-                            className="btn tonal cursor-pointer hover:opacity-90"
+                            className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5"
                           >
-                            <span>Browse routines</span>
+                            <span>Browse Routines</span>
                           </button>
                         </div>
                       </div>
@@ -874,19 +871,16 @@ export default function App() {
                 </WorkoutTabSegment>
 
                 {activeTab === "history" && (
-                  <Suspense fallback={<TabSkeleton />}>
-                    <HistoryLogs
-                      history={state.history}
-                      exercisesList={state.exercises}
-                      onDeleteLog={state.deleteHistoryLog}
-                      onAskGemini={handlePropagatePromptToGemini}
-                      onViewAnalysis={(session) => setLatestCompletedWorkout(session)}
-                    />
-                  </Suspense>
+                  <HistoryLogs
+                    history={state.history}
+                    exercisesList={state.exercises}
+                    onDeleteLog={state.deleteHistoryLog}
+                    onAskGemini={handlePropagatePromptToGemini}
+                    onViewAnalysis={(session) => setLatestCompletedWorkout(session)}
+                  />
                 )}
 
                 {activeTab === "templates" && (
-                  <Suspense fallback={<TabSkeleton />}>
                   <TemplatesList
                     templates={state.templates}
                     exercisesList={state.exercises}
@@ -907,44 +901,18 @@ export default function App() {
                     onCreateTemplate={state.createTemplate}
                     onDeleteTemplate={state.deleteTemplate}
                   />
-                  </Suspense>
                 )}
 
                 {activeTab === "exercises" && (
-                  <Suspense fallback={<TabSkeleton />}>
-                    <ExerciseLibrary
-                      exercises={state.exercises}
-                      onAddCustomExercise={state.addCustomExercise}
-                      onUpdateCustomExercise={state.updateCustomExercise}
-                      onImportCustomExercises={state.importCustomExercises}
-                    />
-                  </Suspense>
+                  <ExerciseLibrary
+                    exercises={state.exercises}
+                    onAddCustomExercise={state.addCustomExercise}
+                    onUpdateCustomExercise={state.updateCustomExercise}
+                    onImportCustomExercises={state.importCustomExercises}
+                  />
                 )}
 
                 {activeTab === "account" && (
-                  <Suspense fallback={<TabSkeleton />}>
-                    <AccountSettings
-                      state={state}
-                      theme={theme}
-                      setTheme={setTheme}
-                      isFirebaseReady={isFirebaseReady}
-                      auth={auth}
-                      handleGoogleLogin={handleGoogleLogin}
-                      handleGoogleLogout={handleGoogleLogout}
-                      handleCreateSpreadsheet={handleCreateSpreadsheet}
-                      handleSyncAllHistory={handleSyncAllHistory}
-                      isSyncingAllHistory={isSyncingAllHistory}
-                      isCreatingSheet={isCreatingSheet}
-                      sheetsSyncMessage={sheetsSyncMessage}
-                      setSheetsSyncMessage={setSheetsSyncMessage}
-                      isEditingProfile={isEditingProfile}
-                      setIsEditingProfile={setIsEditingProfile}
-                    />
-                  </Suspense>
-                )}
-
-                {/* OLD INLINE ACCOUNT BLOCK - REMOVED IN FAVOR OF LAZY-LOADED ACCOUNTSETTINGS ABOVE */}
-                {false && (
                   <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/5 p-6 shadow-2xl space-y-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between border-b border-gray-200 dark:border-white/5 pb-5 gap-4">
                       <div>
@@ -1264,9 +1232,9 @@ export default function App() {
                         
                         <button
                           onClick={handleGoogleLogin}
-                          className="px-6 py-3 bg-[#caf24e] hover:bg-[#b8dd3f] text-[#222f00] font-black text-xs rounded-full shadow-lg inline-flex items-center space-x-2.5 transition-all cursor-pointer hover:scale-[1.03] active:scale-[0.96]"
+                          className="px-6 py-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl shadow-lg inline-flex items-center space-x-2.5 transition-all ring-1 ring-white/10 cursor-pointer"
                         >
-                          <LogIn className="w-4 h-4 text-[#222f00]" />
+                          <LogIn className="w-4 h-4 text-gray-900 dark:text-gray-100" />
                           <span>Sync with Google Account</span>
                         </button>
 
@@ -1278,7 +1246,7 @@ export default function App() {
                       </div>
                     )}
                   </div>
-                  )}
+                )}
               </motion.div>
             </AnimatePresence>
           </section>
@@ -1313,71 +1281,176 @@ export default function App() {
         <AnimatePresence>
           <WorkoutBanner activeWorkout={state.activeWorkout} setActiveTab={setActiveTab} activeTab={activeTab} exercises={state.exercises} restTimerTarget={restTimerTarget} showSwipeUpInfo={showSwipeUpInfo} setShowSwipeUpInfo={setShowSwipeUpInfo} />
         </AnimatePresence>
-        {/* REDESIGNED NAVIGATION BAR (matching mockup frame_1.html class nav) */}
-        <div className="nav">
-          <button
-            onClick={() => setActiveTab("workouts")}
-            className={`${activeTab === "workouts" ? "on" : ""} cursor-pointer`}
+        {/* PREMIUM UNIVERSAL BOTTOM FLOATING NAVIGATION BAR (dock style inside) */}
+        <div className="px-3 py-2.5 flex items-center justify-around bg-white dark:bg-black dark:border-white/10 shadow-sm gap-2 md:gap-4 w-full h-[64px]">
+        <button
+          onClick={() => setActiveTab("workouts")}
+          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
+            activeTab === "workouts"
+              ? "text-purple-600 dark:text-purple-400 scale-105"
+              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
+          }`}
+        >
+          <motion.div
+            animate={{
+              scale: activeTab === "workouts" ? [1, 1.12, 1] : [1, 1.04, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0
+            }}
           >
-            <span className="pill">
-              <FlexingArm className="w-5.5 h-5.5" />
-            </span>
-            <span className="lbl">Workout</span>
-          </button>
+            <FlexingArm className={`w-5 h-5 ${activeTab === "workouts" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
+          </motion.div>
+          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "workouts" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>Workout</span>
+          {activeTab === "workouts" && (
+            <motion.div
+              layoutId="navGlow"
+              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
+            />
+          )}
+        </button>
 
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`${activeTab === "history" ? "on" : ""} cursor-pointer relative`}
+        <button
+          onClick={() => setActiveTab("history")}
+          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
+            activeTab === "history"
+              ? "text-purple-600 dark:text-purple-400 scale-105"
+              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
+          }`}
+        >
+          <motion.div
+            animate={{
+              scale: activeTab === "history" ? [1, 1.12, 1] : [1, 1.04, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.6
+            }}
+            className="relative"
           >
-            <span className="pill">
-              <History className="w-5.5 h-5.5" />
-              {state.history.length > 0 && (
-                <span className="absolute top-1 right-2 bg-rose-500 text-[8px] font-extrabold text-white px-1.5 py-0.5 rounded-full border border-black min-w-3.5 h-3.5 flex items-center justify-center font-mono">
-                  {state.history.length}
-                </span>
-              )}
-            </span>
-            <span className="lbl">History</span>
-          </button>
+            <History className={`w-5 h-5 ${activeTab === "history" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
+            {state.history.length > 0 && (
+              <span className="absolute -top-1 -right-2.5 bg-gradient-to-tr from-purple-600 to-fuchsia-600 text-[8px] font-extrabold text-white px-1 rounded-full border border-black min-w-3.5 h-3.5 flex items-center justify-center font-mono">
+                {state.history.length}
+              </span>
+            )}
+          </motion.div>
+          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "history" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>History</span>
+          {activeTab === "history" && (
+            <motion.div
+              layoutId="navGlow"
+              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
+            />
+          )}
+        </button>
 
-          <button
-            onClick={() => setActiveTab("templates")}
-            className={`${activeTab === "templates" ? "on" : ""} cursor-pointer`}
+        <button
+          onClick={() => setActiveTab("templates")}
+          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
+            activeTab === "templates"
+              ? "text-purple-600 dark:text-purple-400 scale-105"
+              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
+          }`}
+        >
+          <motion.div
+            animate={{
+              scale: activeTab === "templates" ? [1, 1.12, 1] : [1, 1.04, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1.2
+            }}
           >
-            <span className="pill">
-              <Layers className="w-5.5 h-5.5" />
-            </span>
-            <span className="lbl">Routines</span>
-          </button>
+            <Layers className={`w-5 h-5 ${activeTab === "templates" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
+          </motion.div>
+          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "templates" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>Routines</span>
+          {activeTab === "templates" && (
+            <motion.div
+              layoutId="navGlow"
+              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
+            />
+          )}
+        </button>
 
-          <button
-            onClick={() => setActiveTab("exercises")}
-            className={`${activeTab === "exercises" ? "on" : ""} cursor-pointer`}
+        <button
+          onClick={() => setActiveTab("exercises")}
+          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
+            activeTab === "exercises"
+              ? "text-purple-600 dark:text-purple-400 scale-105"
+              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
+          }`}
+        >
+          <motion.div
+            animate={{
+              scale: activeTab === "exercises" ? [1, 1.12, 1] : [1, 1.04, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1.8
+            }}
           >
-            <span className="pill">
-              <Info className="w-5.5 h-5.5" />
-            </span>
-            <span className="lbl">Library</span>
-          </button>
+            <Info className={`w-5 h-5 ${activeTab === "exercises" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
+          </motion.div>
+          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "exercises" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>Library</span>
+          {activeTab === "exercises" && (
+            <motion.div
+              layoutId="navGlow"
+              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
+            />
+          )}
+        </button>
 
-          <button
-            onClick={() => setActiveTab("account")}
-            className={`${activeTab === "account" ? "on" : ""} cursor-pointer`}
+        <button
+          onClick={() => setActiveTab("account")}
+          className={`flex flex-col items-center justify-center py-2 flex-1 rounded-xl transition-all relative min-h-[44px] ${
+            activeTab === "account"
+              ? "text-purple-600 dark:text-purple-400 scale-105"
+              : "text-gray-500 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-300"
+          }`}
+        >
+          <motion.div
+            animate={{
+              scale: activeTab === "account" ? [1, 1.12, 1] : [1, 1.04, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2.4
+            }}
           >
-            <span className="pill">
-              {state.user && state.user.photoURL ? (
+            {state.user ? (
+              state.user.photoURL ? (
                 <img
                   src={state.user.photoURL}
                   alt="Account"
                   referrerPolicy="no-referrer"
-                  className="w-5.5 h-5.5 rounded-full"
+                  className={`w-5 h-5 rounded-full border ${activeTab === "account" ? "border-purple-400 ring-2 ring-purple-500/20" : "border-slate-500"}`}
                 />
               ) : (
-                <User className="w-5.5 h-5.5" />
-              )}
-            </span>
-            <span className="lbl">{state.user ? "Account" : "Login"}</span>
-          </button>
+                <User className={`w-5 h-5 ${activeTab === "account" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
+              )
+            ) : (
+              <User className={`w-5 h-5 ${activeTab === "account" ? "text-purple-500 dark:text-purple-400" : "text-gray-500 dark:text-slate-400"}`} />
+            )}
+          </motion.div>
+          <span className={`mt-0.5 font-extrabold font-mono uppercase transition-all duration-300 block text-center ${activeTab === "account" ? "text-[10px] opacity-100 scale-105 origin-top" : "text-[8px] opacity-40 origin-top scale-75"}`}>{state.user ? "Account" : "Login"}</span>
+          {activeTab === "account" && (
+            <motion.div
+              layoutId="navGlow"
+              className="absolute -bottom-1 w-12 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-amber-500 dark:from-purple-500 dark:to-fuchsia-500 rounded-full shadow-[0_2px_10px_rgba(168,85,247,0.5)] dark:shadow-[0_0_12px_rgba(168,85,247,0.9)]"
+            />
+          )}
+        </button>
         </div>
       </motion.div>
 

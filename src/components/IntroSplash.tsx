@@ -158,10 +158,9 @@ export default function IntroSplash({ onComplete }: IntroSplashProps) {
 
             {/* Loading Indicator */}
             <motion.div
-              initial={{ scaleX: 0, opacity: 0 }}
-              animate={{ scaleX: 1, opacity: 0.8 }}
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "120px", opacity: 0.8 }}
               transition={{ delay: 1.3, duration: 0.8 }}
-              style={{ width: "120px", transformOrigin: "center" }}
               className="h-0.5 bg-gradient-to-r from-indigo-500 via-[#818cf8] to-purple-500 rounded-full shadow-[0_0_10px_rgba(129,140,248,0.7)] mt-4"
             />
           </div>

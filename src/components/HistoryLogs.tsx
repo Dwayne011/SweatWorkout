@@ -228,28 +228,12 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
               onAskGemini={onAskGemini}
             />
           ) : history.length === 0 ? (
-            <div className="text-center py-12 px-6 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl shadow-2xl flex flex-col items-center">
-              <div className="blob lg center mb-4">
-                <svg className="shape" viewBox="0 0 100 100">
-                  <path fill="var(--m3-primary-cont)" d="M 50.00 5.00 C 60.80 5.00, 51.08 8.88, 60.35 11.36 C 69.63 13.85, 63.15 5.63, 72.50 11.03 C 81.85 16.43, 71.50 14.93, 78.28 21.72 C 85.07 28.50, 83.57 18.15, 88.97 27.50 C 94.37 36.85, 86.15 30.37, 88.64 39.65 C 91.12 48.92, 95.00 39.20, 95.00 50.00 C 95.00 60.80, 91.12 51.08, 88.64 60.35 C 86.15 69.63, 94.37 63.15, 88.97 72.50 C 83.57 81.85, 85.07 71.50, 78.28 78.28 C 71.50 85.07, 81.85 83.57, 72.50 88.97 C 63.15 94.37, 69.63 86.15, 60.35 88.64 C 51.08 91.12, 60.80 95.00, 50.00 95.00 C 39.20 95.00, 48.92 91.12, 39.65 88.64 C 30.37 86.15, 36.85 94.37, 27.50 88.97 C 18.15 83.57, 28.50 85.07, 21.72 78.28 C 14.93 71.50, 16.43 81.85, 11.03 72.50 C 5.63 63.15, 13.85 69.63, 11.36 60.35 C 8.88 51.08, 5.00 60.80, 5.00 50.00 C 5.00 39.20, 8.88 48.92, 11.36 39.65 C 13.85 30.37, 5.63 36.85, 11.03 27.50 C 16.43 18.15, 14.93 28.50, 21.72 21.72 C 28.50 14.93, 18.15 16.43, 27.50 11.03 C 36.85 5.63, 30.37 13.85, 39.65 11.36 C 48.92 8.88, 39.20 5.00, 50.00 5.00 Z"/>
-                </svg>
-                <Calendar className="gi text-[var(--m3-primary)]" />
-              </div>
+            <div className="text-center py-12 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl shadow-2xl">
+              <HistoryIcon className="w-10 h-10 text-indigo-500/20 mx-auto mb-2 animate-pulse" />
               <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">No workout logs found</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400 max-w-xs mx-auto mt-1 leading-relaxed">
-                Start a session from the templates tab or log your history with our AI Coach.
+              <p className="text-xs text-indigo-600 dark:text-indigo-300/40 max-w-xs mx-auto mt-1 leading-relaxed">
+                Complete an active session or ask Gemini: <br />"Log a squat workout from yesterday"
               </p>
-              <button
-                onClick={() => {
-                  onAskGemini("Log a past workout: ");
-                  const openDrawerEvent = new CustomEvent("open-gemini-drawer");
-                  window.dispatchEvent(openDrawerEvent);
-                }}
-                className="mt-4 px-6 py-3 bg-[#caf24e] hover:bg-[#b8dd3f] text-[#222f00] font-black rounded-full shadow-lg flex items-center justify-center space-x-2 transition-all cursor-pointer hover:scale-[1.03] active:scale-[0.96]"
-              >
-                <Sparkles className="w-4 h-4 text-[#222f00] fill-current" />
-                <span>Log a past workout</span>
-              </button>
             </div>
           ) : (
             history.map((log) => {
@@ -258,7 +242,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
               const duration = calculateDurationMinutes(log.startTime, log.endTime);
 
               return (
-                <div key={log.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '0 120px' }} className="relative rounded-2xl overflow-hidden shrink-0">
+                <div key={log.id} className="relative rounded-2xl overflow-hidden shrink-0">
                   {/* Clean text action underlay */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent to-rose-500/20 dark:to-rose-600/30 flex items-center justify-end px-6 rounded-2xl pointer-events-none">
                     <div className="flex items-center justify-center bg-white dark:bg-black rounded-lg border border-rose-500/20 px-2.5 py-1 shadow-sm">
@@ -266,6 +250,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                     </div>
                   </div>
                   <motion.div
+                    layout
                     drag="x"
                     dragDirectionLock
                     dragConstraints={{ left: -140, right: 0 }}
@@ -376,10 +361,9 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                   <AnimatePresence initial={false}>
                     {isExpanded && (
                       <motion.div
-                        initial={{ scaleY: 0, opacity: 0 }}
-                        animate={{ scaleY: 1, opacity: 1 }}
-                        exit={{ scaleY: 0, opacity: 0 }}
-                        style={{ transformOrigin: "top" }}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
                         className="border-t border-gray-200 dark:border-white/5 bg-white dark:bg-black"
                       >
                         <div className="p-4 md:p-5 space-y-4">
