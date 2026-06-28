@@ -346,6 +346,26 @@ html.light {
 .m3-seg2 button { flex: 1; border: none; cursor: pointer; padding: 13px 10px; border-radius: 16px; font-family: var(--m3-body-font); font-weight: 500; font-size: var(--m3-label-lg); background: transparent; color: var(--m3-on-var); display: flex; align-items: center; justify-content: center; gap: 7px; }
 .m3-seg2 button.sel { background: var(--m3-primary-fill); color: #fff; }
 
+/* ===== Athlete profile controls (dropdown, sliders, goal chips) ===== */
+.m3-seclabel .l svg { width: 15px; height: 15px; color: var(--m3-primary); vertical-align: -2px; }
+.m3-field { position: relative; margin-bottom: 14px; }
+.m3-dropdown { width: 100%; padding: 14px 44px 14px 16px; background: var(--m3-sc); border: none; border-radius: 14px; color: var(--m3-on); font-size: 16px; font-family: var(--m3-body-font); font-weight: 500; cursor: pointer; appearance: none; -webkit-appearance: none; outline: none; }
+.m3-field .chev { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--m3-on-dim); pointer-events: none; }
+.m3-slider-row { margin-bottom: 18px; }
+.m3-slider-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; }
+.m3-slider-top .l { font-weight: 500; font-size: var(--m3-title-md); color: var(--m3-on); display: flex; align-items: center; gap: 7px; }
+.m3-slider-top .l svg { width: 16px; height: 16px; color: var(--m3-primary); }
+.m3-numpill { min-width: 48px; padding: 6px 12px; text-align: center; font-family: var(--m3-mono-font); font-weight: 500; font-size: var(--m3-body-md); color: var(--m3-primary); background: var(--m3-primary-cont); border: none; border-radius: var(--m3-r-full); outline: none; }
+.m3-unit { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; color: var(--m3-on-var); text-transform: uppercase; }
+.m3-slider-wrap { position: relative; height: 20px; display: flex; align-items: center; }
+.m3-slider-track { position: relative; width: 100%; height: 8px; background: var(--m3-sc-high); border-radius: 4px; }
+.m3-slider-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--m3-primary-fill); border-radius: 4px; }
+.m3-slider-thumb { position: absolute; top: 50%; width: 20px; height: 20px; border-radius: 50%; background: var(--m3-primary-fill); transform: translate(-50%, -50%); box-shadow: 0 2px 7px rgba(123,83,246,.45); pointer-events: none; }
+.m3-slider-wrap input[type=range] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; margin: 0; }
+.m3-goals { display: flex; flex-wrap: wrap; gap: 8px; }
+.m3-goal { padding: 10px 16px; border-radius: var(--m3-r-full); border: 1.5px solid var(--m3-outline-q); color: var(--m3-on-var); font-size: var(--m3-label-lg); font-weight: 500; background: transparent; cursor: pointer; font-family: var(--m3-body-font); }
+.m3-goal.sel { border-color: var(--m3-primary-fill); background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); }
+
 /* app bar (header) */
 .m3-appbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .m3-brand { display: flex; gap: 12px; align-items: center; }
