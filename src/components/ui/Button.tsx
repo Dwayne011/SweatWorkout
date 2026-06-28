@@ -55,7 +55,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <motion.button
       ref={ref}
       className={className}
-      style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent", ...(sh.rest ? { boxShadow: sh.rest } : null), ...style }}
+      style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent", userSelect: "none", WebkitUserSelect: "none", ...(sh.rest ? { boxShadow: sh.rest } : null), ...style }}
       whileTap={
         reduce
           ? { filter: "brightness(0.92)" }
