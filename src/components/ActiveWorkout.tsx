@@ -2271,23 +2271,12 @@ export default function ActiveWorkout({
           })()
         )}
 
-        {/* Bottom action buttons — exact port (.addex lime + .botbtns) */}
+        {/* Bottom — tonal "Add exercise" (master main active workout; Discard/Finish live in the session card) */}
         {session.exercises.length > 0 && (
-          <div className="pt-4">
-            <button onClick={() => setShowAddModal(true)} className="pbw-addex">
-              <Plus /> Add Exercise
+          <div style={{ padding: "10px 0 4px" }}>
+            <button onClick={() => setShowAddModal(true)} className="pbw-addex-tonal">
+              <Plus /> Add exercise
             </button>
-            <div className="pbw-botbtns">
-              <button
-                onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setShowDiscardConfirm(true); }}
-                className="pbw-botbtn discard"
-              >
-                <Trash2 /> Discard
-              </button>
-              <button onClick={handleFinishClick} className="pbw-botbtn finish">
-                <CheckCircle /> Finish Workout
-              </button>
-            </div>
           </div>
         )}
       </div>

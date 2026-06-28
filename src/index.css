@@ -520,18 +520,20 @@ html.light { background-color: #fcfaff; }
 .pbw-restpill input::-webkit-outer-spin-button, .pbw-restpill input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .pbw-swipehint { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; color: var(--m3-on-dim); margin-left: auto; white-space: nowrap; }
 /* set grid */
-.pbw-setgrid { display: grid; grid-template-columns: 28px 68px 1fr 44px 32px; gap: 4px 6px; align-items: center; margin-top: 6px; }
-.pbw-gh { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-dim); padding-bottom: 4px; }
+.pbw-setgrid { display: grid; grid-template-columns: 26px 64px 1fr 46px 34px; gap: 9px 8px; align-items: center; margin-top: 8px; }
+.pbw-gh { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-dim); padding-bottom: 2px; text-align: center; }
 .pbw-snum { font-family: var(--m3-mono-font); font-weight: 500; font-size: 14px; color: var(--m3-primary); text-align: center; }
-.pbw-typsel { background: var(--m3-sc); border: 1px solid var(--m3-outline-q); color: var(--m3-on); padding: 7px 6px; border-radius: 999px; font-size: 12px; font-weight: 500; font-family: var(--m3-display-font); width: 100%; appearance: none; -webkit-appearance: none; text-align: center; cursor: pointer; }
-.pbw-winput { background: var(--m3-sc); border: 1px solid var(--m3-outline-q); color: var(--m3-on); padding: 7px 8px; border-radius: 999px; font-family: var(--m3-mono-font); font-size: 14px; font-weight: 500; text-align: center; width: 100%; min-width: 0; outline: none; -moz-appearance: textfield; }
+.pbw-typsel { background: var(--m3-sc); border: 1px solid var(--m3-outline-q); color: var(--m3-on); padding: 8px 6px; border-radius: 999px; font-size: 12px; font-weight: 500; font-family: var(--m3-display-font); width: 100%; appearance: none; -webkit-appearance: none; text-align: center; text-align-last: center; cursor: pointer; }
+.pbw-winput { background: var(--m3-sc); border: 1px solid var(--m3-outline-q); color: var(--m3-on); padding: 8px 8px; border-radius: 999px; font-family: var(--m3-mono-font); font-size: 14px; font-weight: 500; text-align: center; width: 100%; min-width: 0; outline: none; -moz-appearance: textfield; }
 .pbw-winput::placeholder { color: var(--m3-on-dim); }
 .pbw-winput::-webkit-outer-spin-button, .pbw-winput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.pbw-wcell { display: flex; align-items: center; gap: 2px; min-width: 0; }
+/* weight cell — kg lives INSIDE the pill to save a column */
+.pbw-wcell { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; background: var(--m3-sc); border: 1px solid var(--m3-outline-q); border-radius: 999px; padding: 8px 10px; }
+.pbw-wcell .pbw-winput { border: none; background: transparent; padding: 0; width: 100%; min-width: 0; flex: 1; text-align: center; }
 .pbw-wunit { font-family: var(--m3-mono-font); font-size: 11px; color: var(--m3-on-dim); flex: none; }
 /* grid items must be allowed to shrink (default min-width:auto overflows + clips the done box) */
 .pbw-setgrid > *, .pbw-setrow-inner > * { min-width: 0; }
-.pbw-donebox { width: 26px; height: 26px; border: 2px solid var(--m3-success); border-radius: 8px; display: grid; place-items: center; cursor: pointer; background: transparent; justify-self: center; padding: 0; }
+.pbw-donebox { box-sizing: border-box; width: 28px; height: 28px; aspect-ratio: 1 / 1; border: 2px solid var(--m3-success); border-radius: 8px; display: grid; place-items: center; cursor: pointer; background: transparent; justify-self: center; align-self: center; padding: 0; }
 .pbw-donebox svg { width: 14px; height: 14px; color: var(--m3-success); opacity: 0; }
 .pbw-donebox.on { background: var(--m3-success); }
 .pbw-donebox.on svg { color: var(--m3-on-success); opacity: 1; }
@@ -541,6 +543,9 @@ html.light { background-color: #fcfaff; }
 /* bottom buttons */
 .pbw-addex { width: 100%; border: none; background: var(--m3-accent); color: var(--m3-on-accent); border-radius: 999px; padding: 16px; font-weight: 500; font-size: 15px; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--m3-display-font); }
 .pbw-addex svg { width: 18px; height: 18px; }
+/* master main active workout: tonal Add exercise (.btn.tonal) */
+.pbw-addex-tonal { width: 100%; border: none; cursor: pointer; border-radius: 999px; padding: 14px 20px; font-family: var(--m3-display-font); font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: var(--m3-sc-high); color: var(--m3-on); }
+.pbw-addex-tonal svg { width: 18px; height: 18px; }
 .pbw-botbtns { display: flex; gap: 10px; padding-bottom: 8px; }
 .pbw-botbtn { flex: 1; border: none; border-radius: 999px; padding: 16px; font-weight: 500; font-size: 15px; font-family: var(--m3-display-font); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .pbw-botbtn svg { width: 18px; height: 18px; flex: none; }
@@ -584,7 +589,7 @@ html.light { background-color: #fcfaff; }
 .pbw-setswipe .pbw-delpane { border-radius: 14px; padding: 0 18px; }
 .pbw-setswipe .pbw-delpane svg { width: 18px; height: 18px; }
 .pbw-setswipe .pbw-delpane .rl { font-size: 11px; }
-.pbw-setrow-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 28px 68px 1fr 44px 32px; gap: 4px 6px; align-items: center; background: var(--m3-sc-low); padding: 4px 0; }
+.pbw-setrow-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 26px 64px 1fr 46px 34px; gap: 9px 8px; align-items: center; background: var(--m3-sc-low); padding: 6px 0; }
 .pbw-setrow-inner.done .pbw-snum, .pbw-setrow-inner.done .pbw-typesel, .pbw-setrow-inner.done .pbw-winput, .pbw-setrow-inner.done .pbw-rinput { opacity: .5; }
 /* exercise-level swipe reveal */
 .pbw-exswipe { position: relative; border-radius: 26px; overflow: hidden; }
