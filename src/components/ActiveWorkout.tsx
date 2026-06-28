@@ -1231,9 +1231,14 @@ export default function ActiveWorkout({
             activeTab={activeTab}
           />
         ) : (
-          <div className="m3-stat" style={{ marginBottom: "12px" }}>
-            <span>Active session tracked</span> · <b><ActiveWorkoutDuration startTime={session.startTime} /></b>
-          </div>
+          <>
+            <div className="m3-stat" style={{ marginBottom: "10px" }}>
+              <span>Active session</span> · <b><ActiveWorkoutDuration startTime={session.startTime} /></b>
+            </div>
+            <svg className="m3-wave" viewBox="0 0 320 16" preserveAspectRatio="none" style={{ marginBottom: "12px" }}>
+              <path d="M0 8 Q10 1 20 8 T40 8 T60 8 T80 8 T100 8 T120 8 T140 8 T160 8 T180 8 T200 8 T220 8 T240 8 T260 8 T280 8 T300 8 T320 8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </>
         )}
         <div className="pbw-sessbtns">
           <button
@@ -1243,7 +1248,7 @@ export default function ActiveWorkout({
             <Trash2 /> Discard
           </button>
           <button onClick={handleFinishClick} className="pbw-sbtn finish">
-            <CheckCircle /> Finish workout
+            <CheckCircle /> Finish
           </button>
         </div>
       </div>
@@ -1251,9 +1256,9 @@ export default function ActiveWorkout({
       {/* Workout notes */}
       <div>
         <div className="m3-seclabel">
-          <span className="l">Workout notes {session.notes ? "✓" : ""}</span>
+          <span className="l">Exercises</span>
           <button onClick={() => setIsNotesExpanded(!isNotesExpanded)} className="m3-txtbtn">
-            {isNotesExpanded ? "Collapse" : "Expand / add"}
+            {session.notes ? "Notes ✓" : "Notes"}
           </button>
         </div>
         {isNotesExpanded && (

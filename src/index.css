@@ -497,10 +497,11 @@ html.light { background-color: #fcfaff; }
 .pbw-rt .ctlbtn { flex: 1; background: rgba(11,9,16,.72); color: #fff; border: none; font-family: var(--m3-mono-font); font-weight: 500; border-radius: 999px; padding: 11px; font-size: 14px; cursor: pointer; }
 .pbw-rt .skip { flex: 1; background: #ece5f6; color: #1d1828; border: none; font-weight: 500; border-radius: 999px; padding: 11px; font-size: 14px; cursor: pointer; font-family: var(--m3-display-font); }
 .pbw-sessbtns { display: flex; gap: 10px; }
-.pbw-sbtn { flex: 1; border: none; border-radius: 999px; padding: 15px; font-weight: 500; font-size: 15px; font-family: var(--m3-display-font); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.pbw-sbtn { flex: 1; border: none; border-radius: 999px; padding: 11px 14px; font-weight: 500; font-size: 14px; font-family: var(--m3-display-font); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.pbw-sbtn svg { width: 17px; height: 17px; flex: none; }
 .pbw-sbtn svg { width: 18px; height: 18px; flex: none; }
 .pbw-sbtn.discard { background: var(--m3-error-cont); color: var(--m3-on-error-cont); }
-.pbw-sbtn.finish { background: var(--m3-success); color: var(--m3-on-success); }
+.pbw-sbtn.finish { background: var(--m3-success); color: var(--m3-on-success); flex: 1.3; }
 /* exercise card */
 .pbw-excard { background: var(--m3-sc-low); border-radius: 22px; padding: 14px; margin-bottom: 10px; position: relative; }
 .pbw-exhd { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
@@ -526,8 +527,10 @@ html.light { background-color: #fcfaff; }
 .pbw-winput { background: var(--m3-sc); border: 1px solid var(--m3-outline-q); color: var(--m3-on); padding: 7px 8px; border-radius: 999px; font-family: var(--m3-mono-font); font-size: 14px; font-weight: 500; text-align: center; width: 100%; min-width: 0; outline: none; -moz-appearance: textfield; }
 .pbw-winput::placeholder { color: var(--m3-on-dim); }
 .pbw-winput::-webkit-outer-spin-button, .pbw-winput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.pbw-wcell { display: flex; align-items: center; gap: 2px; }
+.pbw-wcell { display: flex; align-items: center; gap: 2px; min-width: 0; }
 .pbw-wunit { font-family: var(--m3-mono-font); font-size: 11px; color: var(--m3-on-dim); flex: none; }
+/* grid items must be allowed to shrink (default min-width:auto overflows + clips the done box) */
+.pbw-setgrid > *, .pbw-setrow-inner > * { min-width: 0; }
 .pbw-donebox { width: 26px; height: 26px; border: 2px solid var(--m3-success); border-radius: 8px; display: grid; place-items: center; cursor: pointer; background: transparent; justify-self: center; padding: 0; }
 .pbw-donebox svg { width: 14px; height: 14px; color: var(--m3-success); opacity: 0; }
 .pbw-donebox.on { background: var(--m3-success); }
