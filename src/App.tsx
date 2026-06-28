@@ -137,72 +137,39 @@ function WorkoutBanner({ activeWorkout, setActiveTab, activeTab, exercises, rest
             setShowSwipeUpInfo(true);
           }
         }}
-        onTap={() => {
-          if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-          setActiveTab("workouts");
-        }}
-        style={{ background: "var(--m3-err-solid)" }}
-        className={`${isTimerRunning ? "pbw-breathe " : ""}p-3 pt-4 flex items-center justify-between cursor-pointer relative overflow-hidden shrink-0 touch-none`}
+        onTap={() => { setActiveTab("workouts"); }}
+        className="cursor-pointer touch-none shrink-0"
       >
-        {/* Visual pull drag-up indicator bar */}
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-20">
-          <div className="w-[46px] h-[4px] bg-white/50 rounded-full" />
-        </div>
-
-        {/* Thin progress line at the seam with the nav — drains as rest counts down */}
-        {isTimerRunning && (
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black/25 z-20">
-            <motion.div
-              className="h-full origin-left"
-              style={{ background: "rgba(255,255,255,.9)", transformOrigin: "left" }}
-              animate={{ scaleX: Math.max(0, Math.min(1, (restSecondsLeft || 0) / (restTimerTarget?.total || 90))) }}
-              transition={{ duration: 1, ease: "linear" }}
-            />
+        {isTimerRunning ? (
+          /* Rest-timer dock (.timer-bar) — breathing + draining line */
+          <div className="pbw-tbar">
+            <div className="grip" />
+            <div className="timer-icon"><Clock /></div>
+            <div className="timer-info">
+              <div className="tl">Rest timer active</div>
+              <div className="tex">{exerciseName || "Recovery"}</div>
+            </div>
+            <div className="timer-count">{restSecondsLeft}s</div>
+            <div className="tprog" style={{ width: `${Math.max(0, Math.min(100, ((restSecondsLeft || 0) / (restTimerTarget?.total || 90)) * 100))}%`, transition: "width 1s linear" }} />
+          </div>
+        ) : (
+          /* Workout-in-Progress bar (.wip) — static */
+          <div className="pbw-wip">
+            <div className="grip" />
+            <div className="wicon"><Clock /></div>
+            <div className="wtext">
+              <div className="wtop">
+                <span className="wtitle">Workout in Progress</span>
+                <span className="wtime">{timeStr}</span>
+              </div>
+              <div className="wsub">
+                <span className="wex">{exerciseName || "Tap to return"}</span>
+                <span className="wswipe">Swipe up</span>
+              </div>
+            </div>
+            <button className="wgo" onClick={(e) => { e.stopPropagation(); setActiveTab("workouts"); }}><Dumbbell /></button>
           </div>
         )}
-
-        <div className="flex items-center justify-between gap-3 relative z-10 w-full min-w-0 pr-2">
-          <div className="flex items-center gap-3 w-full min-w-0">
-            <div className="w-10 h-10 rounded-full bg-black/20 dark:bg-white/20 flex items-center justify-center border border-black/15 dark:border-white/20 shrink-0 shadow-inner ring-1 ring-black/5">
-              <Clock className="w-5 h-5 text-white animate-pulse filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]" />
-            </div>
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <div className="flex items-baseline gap-2">
-                <h5 
-                  className="font-extrabold text-white text-sm leading-tight whitespace-nowrap"
-                  style={textOutlineStyle}
-                >
-                  {isTimerRunning ? "Rest Timer Active" : "Workout in Progress"}
-                </h5>
-                <span className="text-xs font-mono font-bold text-red-100 bg-black/40 px-1.5 py-0.5 rounded shadow-inner ring-1 ring-black/10">
-                  {isTimerRunning ? `${restSecondsLeft}s Left` : timeStr}
-                </span>
-              </div>
-              
-              {exerciseName ? (
-                <div className="flex items-center gap-2 mt-0.5 min-w-0">
-                  <p 
-                    className="text-[10px] font-bold text-white/95 truncate uppercase tracking-wide pb-0.5"
-                    style={textOutlineStyle}
-                  >
-                    {exerciseName} {currentDetail && `• ${currentDetail}`}
-                  </p>
-                  <span className="text-[8px] font-extrabold text-white bg-black/40 border border-black/25 dark:bg-white/15 dark:border-white/10 px-1 rounded whitespace-nowrap uppercase tracking-wider font-mono">Swipe Up</span>
-                </div>
-              ) : (
-                <p 
-                  className="text-[10px] font-bold text-white/95 uppercase tracking-widest font-mono mt-0.5"
-                  style={textOutlineStyle}
-                >
-                  Tap to return • Swipe up to view
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="bg-black/20 dark:bg-white/20 p-2 rounded-xl shrink-0 shadow-md ring-1 ring-black/15 dark:ring-white/20">
-            <Dumbbell className="w-4 h-4 text-white filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.55)]" />
-          </div>
-        </div>
       </motion.div>
     </div>
   );

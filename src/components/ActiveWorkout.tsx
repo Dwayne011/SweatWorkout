@@ -1928,7 +1928,7 @@ export default function ActiveWorkout({
                         x: isPendingDelete ? -120 : 0
                       }}
                       transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      style={{ background: "var(--m3-sc-low)", borderRadius: "26px", padding: "18px" }}
+                      style={{ background: "var(--m3-sc-low)", borderRadius: "22px", padding: "14px" }}
                       className="relative z-10 w-full h-full"
                     >
                       <div className="flex flex-col">
@@ -1942,9 +1942,7 @@ export default function ActiveWorkout({
                               {mainTitle}
                             </h4>
                             {subtitleModifier && (
-                              <div className="text-[13px] font-medium text-[var(--m3-primary)] mt-1 leading-snug">
-                                {subtitleModifier}
-                              </div>
+                              <div className="pbw-eqtype">{subtitleModifier}</div>
                             )}
                             <div className="pbw-exmeta">
                               {exerciseDetails?.category} · {exerciseDetails?.equipment}
@@ -1958,79 +1956,57 @@ export default function ActiveWorkout({
                           </button>
                         </div>
 
-                        <div className="flex flex-col w-full mt-1 gap-2">
-                          <div className="pbw-extools">
-                            <button
-                              type="button"
-                              onClick={() => { if (exerciseDetails) { handleOpenExerciseNotes(exerciseDetails.id); } }}
-                              className="pbw-notebtn"
-                            >
-                              <Sparkles /> {exerciseNotes?.[workoutEx.exerciseId] ? "Notes" : "+ Note"}
-                            </button>
-
-                            <span className="pbw-infopill">
-                              <Timer /> Rest:
+                        <div className="pbw-extools">
+                          <button
+                            type="button"
+                            onClick={() => { if (exerciseDetails) { handleOpenExerciseNotes(exerciseDetails.id); } }}
+                            className="pbw-notebtn"
+                          >
+                            <Sparkles /> {exerciseNotes?.[workoutEx.exerciseId] ? "Notes" : "+ Note"}
+                          </button>
+                          <span className="pbw-restpill">
+                            <Timer /> Rest:&nbsp;
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              min="0"
+                              max="600"
+                              value={workoutEx.restTime !== undefined ? workoutEx.restTime : 90}
+                              onChange={(e) => {
+                                const parsedVal = parseInt(e.target.value);
+                                const newRest = isNaN(parsedVal) ? 90 : parsedVal;
+                                const updatedExercises = session.exercises.map((item) => item.id === workoutEx.id ? { ...item, restTime: newRest } : item);
+                                onUpdateWorkout({ ...session, exercises: updatedExercises });
+                              }}
+                              title="Custom rest time in seconds"
+                            />
+                            <b>s</b>
+                          </span>
+                          {exerciseDetails?.equipment === 'Barbell' && (
+                            <span className="pbw-restpill">
+                              <Dumbbell /> Bar:&nbsp;
                               <input
                                 type="number"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
                                 min="0"
-                                max="600"
-                                value={workoutEx.restTime !== undefined ? workoutEx.restTime : 90}
-                                onChange={(e) => {
-                                  const parsedVal = parseInt(e.target.value);
-                                  const newRest = isNaN(parsedVal) ? 90 : parsedVal;
-                                  const updatedExercises = session.exercises.map((item) => {
-                                    if (item.id === workoutEx.id) {
-                                      return { ...item, restTime: newRest };
-                                    }
-                                    return item;
-                                  });
-                                  onUpdateWorkout({
-                                    ...session,
-                                    exercises: updatedExercises,
-                                  });
-                                }}
-                                title="Custom rest time in seconds"
+                                max="120"
+                                value={workoutEx.barWeight ?? 0}
+                                onChange={(e) => { const val = parseFloat(e.target.value) || 0; onUpdateExerciseBarWeight?.(workoutEx.exerciseId, val); }}
+                                title="Weight of the bar separately from the KG plates"
                               />
-                              <b>s</b>
+                              <b>kg</b>
                             </span>
-
-                            {exerciseDetails?.equipment === 'Barbell' && (
-                              <span className="pbw-infopill">
-                                <Dumbbell /> Bar:
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="120"
-                                  value={workoutEx.barWeight ?? 0}
-                                  onChange={(e) => {
-                                    const val = parseFloat(e.target.value) || 0;
-                                    onUpdateExerciseBarWeight?.(workoutEx.exerciseId, val);
-                                  }}
-                                  title="Weight of the bar separately from the KG plates"
-                                />
-                                <b>kg</b>
-                              </span>
-                            )}
-
-                            <span className="pbw-infopill">
-                              <History /> Last: <b>{memory ? memory.setsStr : "—"}</b>
-                            </span>
-                          </div>
-
-                          <div className="pbw-swipehint" style={{ marginBottom: 0 }}>
-                            Swipe to delete &rarr;
-                          </div>
+                          )}
+                          <span className="pbw-swipehint">Swipe to delete &rarr;</span>
                         </div>
                       </div>
 
                       {/* Set grid — exact port of project-pb-workout-page.html .setgrid */}
                       <div className="pbw-setgrid">
-                        <div className="pbw-gh" style={{ textAlign: "center" }}>Set</div>
+                        <div className="pbw-gh">Set</div>
                         <div className="pbw-gh">Type</div>
-                        <div className="pbw-gh" style={{ textAlign: "center" }}>{isCardio ? "Duration" : "Weight"}</div>
-                        <div className="pbw-gh" style={{ textAlign: "center" }}>{isCardio ? "RPE" : "Reps"}</div>
+                        <div className="pbw-gh">{isCardio ? "Duration" : "Weight"}</div>
+                        <div className="pbw-gh">{isCardio ? "RPE" : "Reps"}</div>
                         <div className="pbw-gh" style={{ textAlign: "center" }}>Done</div>
 
                         {workoutEx.sets.map((set, idx) => {
@@ -2063,41 +2039,43 @@ export default function ActiveWorkout({
                               }}
                               className={`pbw-setrow-inner ${set.isCompleted ? "done" : ""}`}
                             >
-                              <div className="pbw-snum">{idx + 1}</div>
-                              <div className="pbw-typesel">
-                                {typeLabel} <ChevronDown />
-                                <select
-                                  disabled={set.isCompleted}
-                                  value={set.type}
-                                  onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { type: e.target.value as SetType })}
-                                >
-                                  <option value="normal">Normal</option>
-                                  <option value="warmup">Warmup</option>
-                                  <option value="drop">Drop</option>
-                                  <option value="failure">Failure</option>
-                                </select>
-                              </div>
+                              <span className="pbw-snum">{idx + 1}</span>
+                              <select
+                                className="pbw-typsel"
+                                disabled={set.isCompleted}
+                                value={set.type}
+                                onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { type: e.target.value as SetType })}
+                              >
+                                <option value="normal">Normal</option>
+                                <option value="warmup">Warmup</option>
+                                <option value="drop">Drop</option>
+                                <option value="failure">Failure</option>
+                              </select>
                               {isCardio ? (
                                 <>
-                                  <div className="pbw-winput">
-                                    <button
-                                      type="button"
-                                      disabled={set.isCompleted}
-                                      onClick={() => openDurationPicker(workoutEx.exerciseId, idx, set.duration || 0)}
-                                      style={{ background: "transparent", border: "none", color: "var(--m3-on)", fontFamily: "var(--m3-mono-font)", fontSize: "13px", fontWeight: 500, cursor: "pointer", width: "100%" }}
-                                      title="Set duration"
-                                    >
-                                      {formatHumanFriendlyDuration(set.duration || 0)}
-                                    </button>
-                                  </div>
-                                  <div className="pbw-rinput">
-                                    <input disabled={set.isCompleted} type="number" value={set.rpe || 5} onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { rpe: parseInt(e.target.value) || 5 })} />
-                                  </div>
+                                  <button
+                                    type="button"
+                                    disabled={set.isCompleted}
+                                    onClick={() => openDurationPicker(workoutEx.exerciseId, idx, set.duration || 0)}
+                                    className="pbw-winput"
+                                    style={{ cursor: "pointer" }}
+                                    title="Set duration"
+                                  >
+                                    {formatHumanFriendlyDuration(set.duration || 0)}
+                                  </button>
+                                  <input
+                                    className="pbw-winput"
+                                    disabled={set.isCompleted}
+                                    type="number"
+                                    value={set.rpe || 5}
+                                    onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { rpe: parseInt(e.target.value) || 5 })}
+                                  />
                                 </>
                               ) : (
                                 <>
-                                  <div className="pbw-winput">
+                                  <div className="pbw-wcell">
                                     <input
+                                      className="pbw-winput"
                                       disabled={set.isCompleted}
                                       type="number"
                                       placeholder="Wgt"
@@ -2113,17 +2091,16 @@ export default function ActiveWorkout({
                                       }}
                                       title="Weight"
                                     />
-                                    <span className="u">kg</span>
+                                    <span className="pbw-wunit">kg</span>
                                   </div>
-                                  <div className="pbw-rinput">
-                                    <input
-                                      disabled={set.isCompleted}
-                                      type="number"
-                                      placeholder="–"
-                                      value={set.reps === 0 ? "" : set.reps}
-                                      onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { reps: e.target.value === "" ? 0 : parseInt(e.target.value) || 0 })}
-                                    />
-                                  </div>
+                                  <input
+                                    className="pbw-winput"
+                                    disabled={set.isCompleted}
+                                    type="number"
+                                    placeholder="–"
+                                    value={set.reps === 0 ? "" : set.reps}
+                                    onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { reps: e.target.value === "" ? 0 : parseInt(e.target.value) || 0 })}
+                                  />
                                 </>
                               )}
                               <button
