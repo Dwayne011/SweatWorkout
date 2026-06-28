@@ -8,6 +8,7 @@ import { Trash2, Dumbbell, Calendar, Clock, Trophy, ChevronDown, ChevronUp, Spar
 import { WorkoutSession, Exercise } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import WorkoutAnalytics from "./WorkoutAnalytics";
+import { Button } from "./ui/Button";
 
 interface HistoryLogsProps {
   history: WorkoutSession[];
@@ -184,12 +185,12 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
       {/* History header + segmented tabs */}
       <div><span className="m3-eyebrow primary">Workout history</span></div>
       <div className="m3-seg2">
-        <button onClick={() => setViewMode("logs")} className={viewMode === "logs" ? "sel" : ""}>
+        <Button variant="none" onClick={() => setViewMode("logs")} className={viewMode === "logs" ? "sel" : ""}>
           <ListCollapse className="w-4 h-4" /> Journals timeline
-        </button>
-        <button onClick={() => setViewMode("analytics")} className={viewMode === "analytics" ? "sel" : ""}>
+        </Button>
+        <Button variant="none" onClick={() => setViewMode("analytics")} className={viewMode === "analytics" ? "sel" : ""}>
           <BarChart3 className="w-4 h-4" /> Insights &amp; trends
-        </button>
+        </Button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -273,9 +274,9 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                       {deletingLogId === log.id ? (
                         <span className="text-[10px] text-rose-500 font-mono italic px-2">Deleting…</span>
                       ) : (
-                        <button className="viewins" onClick={(e) => { e.stopPropagation(); onViewAnalysis(log); }}>
+                        <Button variant="none" className="viewins" onClick={(e) => { e.stopPropagation(); onViewAnalysis(log); }}>
                           <Sparkles /> {log.analysis ? "View insights" : "Analyze workout"}
-                        </button>
+                        </Button>
                       )}
                       <span className="jhint">&larr; Swipe to delete</span>
                       <span className="jchev">{isExpanded ? <ChevronUp /> : <ChevronDown />}</span>
@@ -305,11 +306,12 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                             </div>
 
                             {/* Ask Gemini shortcut button */}
-                            <button
+                            <Button
+                              variant="none"
                               onClick={() => {
                                 const queryPrompt = `Explain performance details for my workout log "${log.name}" checked on ${formatDate(log.startTime)}, featuring ${totalVolume}kg total weight. Suggest recommendations for improvement.`;
                                 onAskGemini(queryPrompt);
-                                
+
                                 // Automatically open the Gemini Coach drawer
                                 const openDrawerEvent = new CustomEvent("open-gemini-drawer");
                                 window.dispatchEvent(openDrawerEvent);
@@ -318,7 +320,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                             >
                               <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
                               <span>Analyse with Gemini Coach</span>
-                            </button>
+                            </Button>
                           </div>
 
                           {/* Log notes if present */}

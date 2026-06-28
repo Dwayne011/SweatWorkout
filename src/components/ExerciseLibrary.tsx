@@ -26,6 +26,7 @@ import {
 import { Exercise } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { openExerciseGuide } from "./ExerciseGuideModal";
+import { Button } from "./ui/Button";
 
 interface ExerciseLibraryProps {
   exercises: Exercise[];
@@ -333,17 +334,17 @@ export default function ExerciseLibrary({
 
       {/* Create + Export/Import */}
       <div className="m3-stack" style={{ marginBottom: "16px" }}>
-        <button onClick={() => setShowAddForm(true)} className="m3-btn fill">
+        <Button variant="primary" onClick={() => setShowAddForm(true)} className="m3-btn fill">
           <Plus className="w-5 h-5" />
           Create custom
-        </button>
+        </Button>
         <div className="m3-bgroup">
-          <button onClick={handleExport} className="seg" title="Export collection as JSON">
+          <Button variant="none" onClick={handleExport} className="seg" title="Export collection as JSON">
             <Download className="w-4 h-4" /> Export
-          </button>
-          <button onClick={() => setShowImportForm(true)} className="seg" title="Import custom exercises">
+          </Button>
+          <Button variant="none" onClick={() => setShowImportForm(true)} className="seg" title="Import custom exercises">
             <Upload className="w-4 h-4" /> Import
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -387,14 +388,15 @@ export default function ExerciseLibrary({
                   <div className="meta">{item.category} · {item.equipment}</div>
                 </div>
                 {item.isCustom && (
-                  <button
+                  <Button
+                    variant="icon"
                     onClick={(e) => { e.stopPropagation(); handleStartEdit(item); }}
                     title="Edit guide details"
                     className="chev"
                     style={{ background: "none", border: "none", cursor: "pointer", padding: 6 }}
                   >
                     <Edit className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
                 <ChevronRight className="chev w-5 h-5" />
               </div>
@@ -417,12 +419,13 @@ export default function ExerciseLibrary({
                   <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
                   <span>Create Custom Exercise</span>
                 </h3>
-                <button
+                <Button
+                  variant="icon"
                   onClick={() => setShowAddForm(false)}
                   className="p-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm transition-colors"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
 
               <form onSubmit={handleSaveCustom} className="p-5 space-y-4">
@@ -480,20 +483,22 @@ export default function ExerciseLibrary({
                 </div>
 
                 <div className="pt-2 flex justify-end space-x-2">
-                  <button
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={() => setShowAddForm(false)}
                     className="px-4 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="primary"
                     type="submit"
                     disabled={isSaving || !newName.trim()}
                     className="px-4 py-2 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border border-gray-200 dark:border-white/10 text-white text-xs font-bold rounded-lg flex items-center space-x-1 shadow-md transition-all disabled:opacity-55 cursor-pointer"
                   >
                     <span>{isSaving ? "Saving..." : "Create"}</span>
-                  </button>
+                  </Button>
                 </div>
               </form>
             </motion.div>
@@ -516,7 +521,8 @@ export default function ExerciseLibrary({
                   <Edit className="w-5 h-5 text-indigo-400" />
                   <span>Configure Custom Exercise Guide</span>
                 </h3>
-                <button
+                <Button
+                  variant="icon"
                   onClick={() => {
                     setShowEditForm(false);
                     setEditingEx(null);
@@ -524,7 +530,7 @@ export default function ExerciseLibrary({
                   className="p-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm transition-colors"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
 
               <form onSubmit={handleSaveGranularEdit} className="p-5 overflow-y-auto flex-1 space-y-4">
@@ -652,7 +658,8 @@ export default function ExerciseLibrary({
                               {selectedFileForAnalysis.fileName}
                             </span>
                           </div>
-                          <button
+                          <Button
+                            variant="none"
                             type="button"
                             onClick={() => {
                               setSelectedFileForAnalysis(null);
@@ -662,14 +669,15 @@ export default function ExerciseLibrary({
                             className="text-[9px] text-rose-500 font-bold uppercase tracking-widest hover:underline cursor-pointer"
                           >
                             Remove File
-                          </button>
+                          </Button>
                         </div>
 
-                        <button
+                        <Button
+                          variant="primary"
                           type="button"
                           disabled={isAnalyzingMedia}
                           onClick={handleRunAiAnalysis}
-                          className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-xl text-xs font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-950/10"
+                          className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:pointer-events-none rounded-xl text-xs font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-950/10"
                         >
                           {isAnalyzingMedia ? (
                             <>
@@ -682,7 +690,7 @@ export default function ExerciseLibrary({
                               <span>✨ AI Analyze & Autofill Movement Guide</span>
                             </>
                           )}
-                        </button>
+                        </Button>
 
                         {analysisError && (
                           <p className="text-[10px] text-rose-400 font-semibold font-mono leading-relaxed mt-1">
@@ -705,7 +713,8 @@ export default function ExerciseLibrary({
                             Cloud-synced visual demo active
                           </span>
                         </div>
-                        <button
+                        <Button
+                          variant="none"
                           type="button"
                           onClick={() => {
                             setEditMediaUrl("");
@@ -714,7 +723,7 @@ export default function ExerciseLibrary({
                           className="text-[9px] text-rose-500 font-bold uppercase tracking-widest hover:underline cursor-pointer"
                         >
                           Clear Attachment
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -796,7 +805,8 @@ export default function ExerciseLibrary({
 
                 {/* Footer buttons Inside scroll */}
                 <div className="pt-3.5 flex justify-end space-x-2 border-t border-gray-200 dark:border-white/5 sticky bottom-0 bg-white dark:bg-black py-2">
-                  <button
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={() => {
                       setShowEditForm(false);
@@ -805,14 +815,15 @@ export default function ExerciseLibrary({
                     className="px-4 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="primary"
                     type="submit"
                     disabled={isSaving || !editName.trim()}
                     className="px-4 py-2 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border border-gray-200 dark:border-white/10 text-white text-xs font-bold rounded-lg flex items-center space-x-1 shadow-md transition-all disabled:opacity-55 cursor-pointer"
                   >
                     <span>{isSaving ? "Saving..." : "Save Config to Account"}</span>
-                  </button>
+                  </Button>
                 </div>
               </form>
             </motion.div>
@@ -835,12 +846,13 @@ export default function ExerciseLibrary({
                   <FileCode className="w-5 h-5 text-indigo-400" />
                   <span>Import Custom Exercises</span>
                 </h3>
-                <button
+                <Button
+                  variant="icon"
                   onClick={() => setShowImportForm(false)}
                   className="p-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm transition-colors"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
 
               <div className="p-5 space-y-4">
@@ -892,21 +904,23 @@ export default function ExerciseLibrary({
                   )}
 
                   <div className="pt-2 flex justify-end space-x-2">
-                    <button
+                    <Button
+                      variant="outline"
                       type="button"
                       onClick={() => setShowImportForm(false)}
                       className="px-4 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="primary"
                       type="submit"
                       disabled={!rawImportText.trim()}
                       className="px-4 py-2 bg-gradient-to-tr from-indigo-640 via-violet-640 to-purple-640 hover:from-indigo-550 hover:to-purple-550 border border-gray-200 dark:border-white/10 text-white text-xs font-bold rounded-lg flex items-center space-x-1.5 shadow-md transition-all disabled:opacity-55 cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Parse and Load</span>
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>

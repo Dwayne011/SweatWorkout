@@ -22,6 +22,7 @@ import {
   Zap,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { Button } from "./ui/Button";
 
 interface WorkoutAnalyticsProps {
   history: WorkoutSession[];
@@ -556,7 +557,8 @@ export default function WorkoutAnalytics({ history, exercisesList, onAskGemini }
             </p>
           </div>
           
-          <button
+          <Button
+            variant="primary"
             onClick={() => {
               const summaries = history.map((h, idx) => {
                 const totalVol = h.exercises.reduce((vSum, ex) => vSum + ex.sets.reduce((sSum, s) => sSum + (s.isCompleted ? s.weight * s.reps : 0), 0), 0);
@@ -575,12 +577,12 @@ Advise me on:
               const openDrawerEvent = new CustomEvent("open-gemini-drawer");
               window.dispatchEvent(openDrawerEvent);
             }}
-            className="group flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-all text-center leading-none ring-1 ring-white/10"
+            className="group flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all text-center leading-none ring-1 ring-white/10"
           >
             <Sparkles className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
             <span>Consult Gemini Medical Trainer</span>
             <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-          </button>
+          </Button>
         </div>
 
         {/* GOOGLE HEALTH BENTO STATS BLOCK */}
@@ -717,14 +719,15 @@ Advise me on:
               Personalized tips about your training consistency, fatigue, and muscle splits.
             </p>
           </div>
-          <button
+          <Button
+            variant="primary"
             onClick={fetchDiagnosticInsights}
             disabled={diagnosticLoading}
-            className="flex items-center space-x-1 px-3 py-1.5 text-[10px] uppercase font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 disabled:opacity-50 rounded-lg transition-all self-start cursor-pointer select-none"
+            className="flex items-center space-x-1 px-3 py-1.5 text-[10px] uppercase font-bold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-lg transition-all self-start cursor-pointer select-none"
           >
             <Zap className={`w-3 h-3 ${diagnosticLoading ? "animate-spin" : ""}`} />
             <span>{diagnosticLoading ? "Running Diagnostics..." : "Refresh Engine"}</span>
-          </button>
+          </Button>
         </div>
 
         {diagnosticLoading ? (
@@ -856,22 +859,24 @@ Advise me on:
 
               {/* TOGGLERS */}
               <div className="flex items-center bg-white dark:bg-black dark:border-white/10 shadow-sm p-1 rounded-xl border border-gray-200 dark:border-white/5">
-                <button
+                <Button
+                  variant="none"
                   onClick={() => setActiveMetricTab("strength")}
                   className={`px-3 py-1 text-[10px] font-extrabold uppercase rounded-lg transition-all cursor-pointer ${
                     activeMetricTab === "strength" ? "bg-indigo-600 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-500 dark:text-slate-400 font-semibold"
                   }`}
                 >
                   Strength (1RM)
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="none"
                   onClick={() => setActiveMetricTab("volume")}
                   className={`px-3 py-1 text-[10px] font-extrabold uppercase rounded-lg transition-all cursor-pointer ${
                     activeMetricTab === "volume" ? "bg-indigo-600 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-500 dark:text-slate-400 font-semibold"
                   }`}
                 >
                   Set Volume
-                </button>
+                </Button>
               </div>
             </div>
 

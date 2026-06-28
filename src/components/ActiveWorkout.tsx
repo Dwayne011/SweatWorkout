@@ -1705,14 +1705,15 @@ export default function ActiveWorkout({
                                   </div>
 
                                   <div className="flex items-center gap-2 shrink-0">
-                                    <button
+                                    <Button
+                                      variant="none"
                                       onClick={() => handleRemoveFromSuperset(workoutEx.id)}
                                       title="Unlink from Superset"
                                       className="px-2 h-8 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-650 dark:text-indigo-300 rounded-lg text-[10px] font-bold font-mono border border-indigo-500/15 flex items-center space-x-1 transition-all"
                                     >
                                       <X className="w-2.5 h-2.5" />
                                       <span className="hidden sm:inline">Unlink</span>
-                                    </button>
+                                    </Button>
                                     <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono italic whitespace-nowrap select-none">
                                       Swipe to delete &rarr;
                                     </span>
@@ -1803,17 +1804,18 @@ export default function ActiveWorkout({
 
                                           {isCardio ? (
                                             <div className="flex-1 px-1 flex justify-center">
-                                              <button
+                                              <Button
+                                                 variant="none"
                                                  disabled={set.isCompleted}
                                                  type="button"
                                                  onClick={() => openDurationPicker(workoutEx.exerciseId, idx, set.duration || 0)}
-                                                 className="w-full text-center max-w-[95px] border border-indigo-500/20 dark:border-indigo-500/10 rounded-xl py-1 bg-indigo-500/5 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/10 dark:hover:bg-indigo-500/20 shadow-sm active:scale-95 transition-all disabled:opacity-40 overflow-hidden flex items-center justify-center"
+                                                 className="w-full text-center max-w-[95px] border border-indigo-500/20 dark:border-indigo-500/10 rounded-xl py-1 bg-indigo-500/5 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/10 dark:hover:bg-indigo-500/20 shadow-sm transition-all disabled:opacity-40 overflow-hidden flex items-center justify-center"
                                                  title="Set duration utilising wheel drums"
                                                >
                                                  <span style={{ fontSize: '12px', transform: 'scale(0.8)', transformOrigin: 'center', display: 'inline-block' }} className="font-mono font-bold whitespace-nowrap">
                                                    {formatHumanFriendlyDuration(set.duration || 0)}
                                                  </span>
-                                               </button>
+                                               </Button>
                                             </div>
                                           ) : (
                                             <>
@@ -2012,13 +2014,14 @@ export default function ActiveWorkout({
 
                               {/* Adding Sets Footer */}
                               <div className="p-3 bg-white/3 flex justify-end">
-                                <button
+                                <Button
+                                  variant="none"
                                   onClick={() => onAddSet(workoutEx.exerciseId)}
                                   className="px-3 py-1 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-lg border border-gray-200 dark:border-white/5 flex items-center space-x-1 transition-colors"
                                 >
                                   <Plus className="w-3 h-3 text-indigo-400" />
                                   <span>Add Set</span>
-                                </button>
+                                </Button>
                               </div>
                             </motion.div>
 
@@ -2040,7 +2043,8 @@ export default function ActiveWorkout({
                                   </p>
                                   
                                   <div className="flex items-center space-x-2.5 font-mono">
-                                    <button
+                                    <Button
+                                      variant="tonal"
                                       onClick={() => {
                                         onRemoveExercise(workoutEx.exerciseId);
                                         setPendingDeleteExerciseId(null);
@@ -2048,15 +2052,16 @@ export default function ActiveWorkout({
                                       className="px-4 py-1.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-extrabold text-[10px] md:text-xs uppercase tracking-wider rounded-lg shadow-lg cursor-pointer"
                                     >
                                       Delete
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
+                                      variant="outline"
                                       onClick={() => {
                                         setPendingDeleteExerciseId(null);
                                       }}
                                       className="px-4 py-1.5 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-800 dark:text-slate-200 font-extrabold text-[10px] md:text-xs uppercase tracking-wider rounded-lg cursor-pointer"
                                     >
                                       Keep
-                                    </button>
+                                    </Button>
                                   </div>
                                 </motion.div>
                               )}
@@ -2146,12 +2151,13 @@ export default function ActiveWorkout({
                               {exerciseDetails?.category} · {exerciseDetails?.equipment}
                             </div>
                           </div>
-                          <button
+                          <Button
+                            variant="icon"
                             className="pbw-drag"
                             title="Drag and drop this onto another exercise to group as a Superset"
                           >
                             <ListFilter />
-                          </button>
+                          </Button>
                         </div>
 
                         <div className="pbw-extools">
@@ -2246,7 +2252,8 @@ export default function ActiveWorkout({
                               />
                               {isCardio ? (
                                 <>
-                                  <button
+                                  <Button
+                                    variant="none"
                                     type="button"
                                     disabled={set.isCompleted}
                                     onClick={() => openDurationPicker(workoutEx.exerciseId, idx, set.duration || 0)}
@@ -2255,7 +2262,7 @@ export default function ActiveWorkout({
                                     title="Set duration"
                                   >
                                     {formatHumanFriendlyDuration(set.duration || 0)}
-                                  </button>
+                                  </Button>
                                   <input
                                     className="pbw-winput"
                                     disabled={set.isCompleted}
@@ -2432,7 +2439,8 @@ export default function ActiveWorkout({
                           </p>
                           
                           <div className="flex items-center space-x-2.5 font-mono">
-                            <button
+                            <Button
+                              variant="tonal"
                               onClick={() => {
                                 onRemoveExercise(workoutEx.exerciseId);
                                 setPendingDeleteExerciseId(null);
@@ -2440,15 +2448,16 @@ export default function ActiveWorkout({
                               className="px-4 py-1.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-extrabold text-[10px] md:text-xs uppercase tracking-wider rounded-lg shadow-lg cursor-pointer"
                             >
                               Delete
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="outline"
                               onClick={() => {
                                 setPendingDeleteExerciseId(null);
                               }}
                               className="px-4 py-1.5 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 text-gray-800 dark:text-slate-200 font-extrabold text-[10px] md:text-xs uppercase tracking-wider rounded-lg cursor-pointer"
                             >
                               Keep
-                            </button>
+                            </Button>
                           </div>
                         </motion.div>
                       )}
@@ -2577,13 +2586,14 @@ export default function ActiveWorkout({
                 }}
               />
               
-              <button
+              <Button
+                variant="outline"
                 type="button"
                 onClick={() => setShowNoCompletedSetsModal(false)}
                 className="w-full mt-3 py-2 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/10 font-bold rounded-xl text-xs transition-all cursor-pointer"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </motion.div>
         </div>,
@@ -3031,22 +3041,24 @@ export default function ActiveWorkout({
                 {/* Action Buttons Section */}
                 <div className="p-5 bg-white dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-900 flex flex-col gap-2.5">
                   {/* Full-width elegant blue done button */}
-                  <button
+                  <Button
+                    variant="primary"
                     type="button"
                     onClick={handleDoneClick}
-                    className="w-full py-3.5 px-4 bg-gradient-to-tr from-indigo-600 via-indigo-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 active:from-indigo-650 active:scale-98 text-white text-sm font-black whitespace-nowrap uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/15 transition-all text-center flex items-center justify-center gap-2 cursor-pointer border border-white/5"
+                    className="w-full py-3.5 px-4 bg-gradient-to-tr from-indigo-600 via-indigo-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white text-sm font-black whitespace-nowrap uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/15 transition-all text-center flex items-center justify-center gap-2 cursor-pointer border border-white/5"
                   >
                     <Check className="w-4 h-4 text-white" />
                     <span>Done</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
+                    variant="text"
                     type="button"
                     onClick={() => setDurationPickerState(null)}
                     className="w-full py-2.5 text-center text-xs text-gray-400 hover:text-gray-900 dark:text-zinc-500 dark:hover:text-zinc-100 font-bold tracking-wider uppercase transition-colors"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </motion.div>
             </div>

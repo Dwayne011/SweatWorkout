@@ -9,6 +9,7 @@ import { WorkoutSession, Exercise, UserProfile } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import AIGeneratorLab from "./AIGeneratorLab";
 import { openExerciseGuide } from "./ExerciseGuideModal";
+import { Button } from "./ui/Button";
 
 interface TemplatesListProps {
   templates: WorkoutSession[];
@@ -134,7 +135,7 @@ export default function TemplatesList({
         <h2 className="m3-h">Quick logging panel</h2>
         <p className="m3-body">Skip planning and start a blank active workout instantly. Record whatever you perform, on the fly.</p>
         <div style={{ height: "16px" }} />
-        <button onClick={onStartBlank} className="m3-btn fill"><Play className="w-5 h-5" /> Start empty workout</button>
+        <Button variant="primary" onClick={onStartBlank} className="m3-btn fill"><Play className="w-5 h-5" /> Start empty workout</Button>
       </div>
 
       <div className="m3-card">
@@ -145,7 +146,7 @@ export default function TemplatesList({
         <h2 className="m3-h">Custom routine architect</h2>
         <p className="m3-body">Combine barbell, dumbbell or bodyweight exercises to pre-arrange sets and volume targets.</p>
         <div style={{ height: "16px" }} />
-        <button onClick={() => { setShowAddTemplate(true); setShowAIGenerator(false); }} className="m3-btn outline"><Plus className="w-5 h-5" /> Create new template</button>
+        <Button variant="outline" onClick={() => { setShowAddTemplate(true); setShowAIGenerator(false); }} className="m3-btn outline"><Plus className="w-5 h-5" /> Create new template</Button>
       </div>
 
       <div className="m3-card" style={{ background: "var(--m3-tertiary-cont)" }}>
@@ -159,9 +160,9 @@ export default function TemplatesList({
         <h2 className="m3-h" style={{ color: "#fff" }}>Gemini AI composer</h2>
         <p className="m3-body" style={{ color: "var(--m3-on-tertiary-cont)" }}>Let Gemini S&C intelligence generate custom warm-ups, accessory work and progression targets.</p>
         <div style={{ height: "16px" }} />
-        <button onClick={() => { setShowAIGenerator(!showAIGenerator); setShowAddTemplate(false); }} className="m3-btn" style={{ background: "linear-gradient(95deg, var(--m3-primary-fill), #d566c8 90%)", color: "#fff" }}>
+        <Button variant="primary" onClick={() => { setShowAIGenerator(!showAIGenerator); setShowAddTemplate(false); }} className="m3-btn" style={{ background: "linear-gradient(95deg, var(--m3-primary-fill), #d566c8 90%)", color: "#fff" }}>
           <Sparkles className="w-5 h-5" /> {showAIGenerator ? "Hide AI composer" : "Launch AI composer"}
-        </button>
+        </Button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -200,9 +201,9 @@ export default function TemplatesList({
                     <span>{tp.name.split(/\s+/).filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase()}</span>
                   </div>
                   <div className="rtitle"><div className="rname">{tp.name}</div></div>
-                  <button className="rmenu" onClick={() => onDeleteTemplate(tp.id)} title="Delete saved routine">
+                  <Button variant="icon" className="rmenu" onClick={() => onDeleteTemplate(tp.id)} title="Delete saved routine">
                     <Trash2 />
-                  </button>
+                  </Button>
                 </div>
                 <div className="rmeta">
                   <b>{tp.exercises.length} exercise{tp.exercises.length === 1 ? "" : "s"}</b> &middot; {tp.exercises.reduce((a, ex) => a + ex.sets.length, 0)} sets
@@ -215,9 +216,9 @@ export default function TemplatesList({
                     <span className="rc more">+{tp.exercises.length - 3} more</span>
                   )}
                 </div>
-                <button className="rstart" onClick={() => onStartFromTemplate(tp.id)}>
+                <Button variant="tonal" className="rstart" onClick={() => onStartFromTemplate(tp.id)}>
                   <Play /> Start routine
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -249,7 +250,8 @@ export default function TemplatesList({
                   </div>
                 </div>
 
-                <button
+                <Button
+                  variant="none"
                   onClick={() => {
                     // Create and start!
                     onCreateTemplate(tp.name, tp.exercises, tp.notes).then((res) => {
@@ -260,7 +262,7 @@ export default function TemplatesList({
                 >
                   <Play className="w-3 h-3 fill-indigo-400 text-indigo-400" />
                   <span>Start Routine</span>
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -281,12 +283,13 @@ export default function TemplatesList({
                   <Dumbbell className="w-5 h-5 text-indigo-400 animate-pulse" />
                   <span>Build New Muscle Routine</span>
                 </h3>
-                <button
+                <Button
+                  variant="icon"
                   onClick={() => setShowAddTemplate(false)}
                   className="p-1 text-gray-400 hover:text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-50 dark:bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm transition-colors"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
 
               <form onSubmit={handleCreateTemplateSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
@@ -336,7 +339,8 @@ export default function TemplatesList({
                             <span className="text-[10px] text-indigo-600 dark:text-indigo-300/50 block font-normal mt-0.5">{ex.category} • {ex.equipment}</span>
                           </div>
                           <div className="flex items-center space-x-2 shrink-0">
-                            <button
+                            <Button
+                              variant="icon"
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -346,7 +350,7 @@ export default function TemplatesList({
                               title="View setup & body form demonstration guide"
                             >
                               <Info className="w-4 h-4 shrink-0" />
-                            </button>
+                            </Button>
                             {isSelected && <Check className="w-4 h-4 text-indigo-400 shrink-0" />}
                           </div>
                         </div>
@@ -356,20 +360,22 @@ export default function TemplatesList({
                 </div>
 
                 <div className="pt-2 flex justify-end space-x-2">
-                  <button
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={() => setShowAddTemplate(false)}
                     className="px-4 py-2 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-white/10 transition-colors"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="primary"
                     type="submit"
                     disabled={selectedExercises.length === 0 || !templateName.trim()}
                     className="px-4 py-2 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-555 hover:to-purple-555 text-white text-xs font-bold rounded-lg flex items-center space-x-1 shadow-lg disabled:opacity-30 transition-colors"
                   >
                     <span>Create Template</span>
-                  </button>
+                  </Button>
                 </div>
               </form>
             </motion.div>

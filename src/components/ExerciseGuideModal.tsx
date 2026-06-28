@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { X, CheckCircle, Info, Dumbbell, ShieldAlert, Award } from "lucide-react";
 import { Exercise } from "../types";
 import { motion, AnimatePresence } from "motion/react";
+import { Button } from "./ui/Button";
 
 // Register helper for dispatching global events
 export function openExerciseGuide(exercise: Exercise) {
@@ -835,12 +836,13 @@ export default function ExerciseGuideModal() {
               );
             })()}
           </div>
-          <button
+          <Button
+            variant="icon"
             onClick={() => setOpen(false)}
             className="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:bg-black dark:border-white/10 shadow-sm rounded-xl transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Dynamic form / scrollable contents */}
@@ -936,12 +938,13 @@ export default function ExerciseGuideModal() {
 
         {/* Footer controls */}
         <div className="p-4 bg-white dark:bg-black border-t border-gray-200 dark:border-white/5 flex justify-end shrink-0">
-          <button
+          <Button
+            variant="primary"
             onClick={() => setOpen(false)}
             className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer"
           >
             Got It, Thanks
-          </button>
+          </Button>
         </div>
       </motion.div>
     </div>

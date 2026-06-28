@@ -1,5 +1,6 @@
 import React from "react";
 import { User, LogOut, LogIn, ExternalLink, Loader2, RefreshCw, Plus, CloudLightning, Pencil } from "lucide-react";
+import { Button } from "./ui/Button";
 
 interface AccountSettingsProps {
   state: any;
@@ -44,10 +45,10 @@ export default function AccountSettings({
           <p className="m3-body">Configure cloud sync and save custom routines safely.</p>
         </div>
         {state.user ? (
-          <button onClick={handleGoogleLogout} className="m3-btn error sm" style={{ width: "auto", flex: "none" }}>
+          <Button variant="tonal" onClick={handleGoogleLogout} className="m3-btn error sm" style={{ width: "auto", flex: "none" }}>
             <LogOut className="w-[16px] h-[16px]" />
             <span>Disconnect</span>
-          </button>
+          </Button>
         ) : null}
       </div>
 
@@ -61,10 +62,10 @@ export default function AccountSettings({
           <p className="m3-body center" style={{ maxWidth: 330, margin: "0 auto 18px" }}>
             Log in with your Google account to secure your custom work logs, track exercises, and load metrics instantly across devices.
           </p>
-          <button onClick={handleGoogleLogin} className="m3-btn accent">
+          <Button variant="accent" onClick={handleGoogleLogin} className="m3-btn accent">
             <LogIn className="w-[18px] h-[18px]" />
             <span>Sync with Google account</span>
-          </button>
+          </Button>
           {typeof window !== 'undefined' && window.self !== window.top && (
             <p style={{ fontFamily: "var(--m3-mono-font)", fontSize: 11, lineHeight: 1.5, color: "#d9920a", background: "rgba(245,158,11,.06)", border: "1px solid rgba(245,158,11,.18)", padding: 12, borderRadius: 14, maxWidth: 330, margin: "16px auto 0", textAlign: "left" }}>
               ⚠️ <strong>Framed sandbox notice:</strong> this framed preview blocks Google login popups. Click <strong>"Open in a new tab"</strong> at the top-right to authorize safely.
@@ -91,9 +92,9 @@ export default function AccountSettings({
           </div>
         </div>
         <div style={{ height: 14 }} />
-        <button onClick={() => setIsEditingProfile(true)} className="m3-btn tonal-primary sm" style={{ width: "auto" }}>
+        <Button variant="tonal" onClick={() => setIsEditingProfile(true)} className="m3-btn tonal-primary sm" style={{ width: "auto" }}>
           <Pencil className="w-[16px] h-[16px]" /> Edit profile
-        </button>
+        </Button>
       </div>
 
       {/* Application theme */}
@@ -102,14 +103,16 @@ export default function AccountSettings({
         <p className="m3-body">Toggle between Light and Neural Expressive Dark.</p>
         <div style={{ height: 12 }} />
         <div className="m3-bgroup">
-          <button
+          <Button
+            variant="none"
             className={`seg${theme === 'light' ? ' sel' : ''}`}
             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setTheme("light"); }}
-          >Light</button>
-          <button
+          >Light</Button>
+          <Button
+            variant="none"
             className={`seg${theme === 'dark' ? ' sel' : ''}`}
             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setTheme("dark"); }}
-          >Dark</button>
+          >Dark</Button>
         </div>
       </div>
 
@@ -181,13 +184,14 @@ export default function AccountSettings({
                 <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-normal">
                   To obtain write permissions for spreadsheets, click below to authorize and securely link your Sheets access for this browser session.
                 </p>
-                <button
+                <Button
+                  variant="tonal"
                   onClick={handleGoogleLogin}
-                  className="w-full sm:w-auto px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer hover:scale-[1.02]"
+                  className="w-full sm:w-auto px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Authorize Google Sheets API</span>
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -240,7 +244,8 @@ export default function AccountSettings({
 
                       {/* Sync Actions Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                        <button
+                        <Button
+                          variant="primary"
                           onClick={handleSyncAllHistory}
                           disabled={isSyncingAllHistory}
                           className="px-4 py-2 bg-indigo-600 hover:bg-indigo-505 disabled:bg-indigo-600/35 text-gray-900 dark:text-gray-100 text-xs font-bold rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
@@ -256,9 +261,10 @@ export default function AccountSettings({
                               <span>Refresh Full Sync</span>
                             </>
                           )}
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                          variant="none"
                           onClick={() => {
                             if (confirm("Disconnect currently linked Google Sheet? This stops cloud sheets sync.")) {
                               state.setSpreadsheetId(null);
@@ -279,7 +285,7 @@ export default function AccountSettings({
                           className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-gray-600 dark:text-slate-300 text-xs font-bold rounded-lg transition-all border border-gray-200 dark:border-white/5 cursor-pointer"
                         >
                           Unlink Sheet
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -287,7 +293,8 @@ export default function AccountSettings({
                       <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-normal">
                         No linked spreadsheet found. Click below to automatically provision or restore your Project PB spreadsheet.
                       </p>
-                      <button
+                      <Button
+                        variant="tonal"
                         onClick={handleCreateSpreadsheet}
                         disabled={isCreatingSheet}
                         className="w-full sm:w-auto px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/35 text-slate-950 text-xs font-black rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
@@ -303,7 +310,7 @@ export default function AccountSettings({
                             <span>Create Project PB Workout Sheet</span>
                           </>
                         )}
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

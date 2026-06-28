@@ -8,6 +8,7 @@ import { Send, Sparkles, Bot, Trash2, Dumbbell, History, BookOpen, AlertCircle, 
 import { ChatMessage, AIResponse } from "../types";
 import { robustFetch } from "../utils/network";
 import { motion, AnimatePresence } from "motion/react";
+import { Button } from "./ui/Button";
 
 interface AIAssistantProps {
   workoutState: any;
@@ -300,14 +301,15 @@ export default function AIAssistant({ workoutState, initialPrompt, evaluationOnl
         <div className="px-3.5 py-2 border-t border-gray-200 dark:border-white/5 bg-white dark:bg-black shrink-0">
           <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-1">
             {PRESET_CHIPS.map((chip, i) => (
-              <button
+              <Button
+                variant="none"
                 key={i}
                 onClick={() => handleSendMessage(chip.prompt)}
                 className="whitespace-nowrap flex-none text-[10px] md:text-xs bg-white dark:bg-black hover:bg-gray-100 dark:hover:bg-white dark:bg-black text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/10 transition-all flex items-center space-x-1.5 hover:border-indigo-500/30 shadow-sm"
               >
                 <Sparkles className="w-3 h-3 text-indigo-400 shrink-0" />
                 <span>{chip.label}</span>
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -353,27 +355,29 @@ export default function AIAssistant({ workoutState, initialPrompt, evaluationOnl
         <div className="p-2.5 bg-white dark:bg-black border-t border-gray-200 dark:border-white/10 flex items-center space-x-2 shrink-0 shadow-2xl">
           {/* Compact Clean Inline Trash button to clear chat records */}
           {messages.length > 1 && (
-            <button
+            <Button
+              variant="icon"
               onClick={clearChat}
               title="Clear Chat History"
               className="p-2.5 text-gray-500 dark:text-slate-400 hover:text-rose-400 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-rose-500/10 rounded-full border border-gray-200 dark:border-white/5 transition-all shrink-0"
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </Button>
           )}
 
           {/* Voice Trigger Clicker with Google design ripples */}
-          <button
+          <Button
+            variant="icon"
             onClick={handleVoiceListenToggle}
             title={isListening ? "Stop listening" : "Say workout command"}
             className={`p-2.5 rounded-full transition-all shrink-0 ${
-              isListening 
-                ? "bg-rose-500 shadow-lg shadow-rose-500/30 text-gray-900 dark:text-gray-100 animate-pulse" 
+              isListening
+                ? "bg-rose-500 shadow-lg shadow-rose-500/30 text-gray-900 dark:text-gray-100 animate-pulse"
                 : "bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 text-indigo-400 border border-gray-200 dark:border-white/5"
             }`}
           >
             {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-          </button>
+          </Button>
 
           <input
             type="text"
@@ -385,13 +389,14 @@ export default function AIAssistant({ workoutState, initialPrompt, evaluationOnl
             className="flex-1 text-sm bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-full py-2.5 px-4 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 font-normal shadow-inner"
           />
 
-          <button
+          <Button
+            variant="primary"
             onClick={() => handleSendMessage(inputValue)}
             disabled={!inputValue.trim() || isLoading}
             className="p-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-full transition-all disabled:opacity-30 shrink-0 ring-1 ring-white/10 shadow-lg"
           >
             <Send className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -44,6 +44,7 @@ import {
   Moon,
 } from "lucide-react";
 import { motion, AnimatePresence, useIsPresent } from "motion/react";
+import { Button } from "./components/ui/Button";
 
 import FlexingArm from "./components/FlexingArm";
 import ExerciseGuideModal from "./components/ExerciseGuideModal";
@@ -167,7 +168,7 @@ function WorkoutBanner({ activeWorkout, setActiveTab, activeTab, exercises, rest
                 <span className="wswipe">Swipe up</span>
               </div>
             </div>
-            <button className="wgo" onClick={(e) => { e.stopPropagation(); setActiveTab("workouts"); }}><Dumbbell /></button>
+            <Button variant="none" className="wgo" onClick={(e) => { e.stopPropagation(); setActiveTab("workouts"); }}><Dumbbell /></Button>
           </div>
         )}
       </motion.div>
@@ -477,12 +478,13 @@ export default function App() {
       {isEditingProfile && (
         <div className="fixed inset-0 z-[60000] bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 56px)", paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}>
           <div className="relative w-full max-w-md overflow-hidden" style={{ background: "var(--m3-surface)", borderRadius: "28px", border: "1px solid var(--m3-outline-q)" }}>
-            <button 
+            <Button
+              variant="none"
               onClick={() => setIsEditingProfile(false)}
               className="absolute -top-12 right-0 text-white hover:text-indigo-400 font-bold p-2"
             >
               Close
-            </button>
+            </Button>
             <OnboardingProfile
               initialProfile={state.userProfile}
               onComplete={(profile: UserProfile) => {
@@ -574,10 +576,10 @@ export default function App() {
 
             {/* Triggers */}
             <div className="m3-stack" style={{ paddingTop: 2 }}>
-              <button onClick={handleGoogleLogin} className="m3-btn fill">
+              <Button variant="primary" onClick={handleGoogleLogin} className="m3-btn fill">
                 <LogIn className="w-[18px] h-[18px]" />
                 <span>Sync with Google Account</span>
-              </button>
+              </Button>
 
               {window.self !== window.top && (
                 <p style={{ fontFamily: "var(--m3-mono-font)", fontSize: 11, lineHeight: 1.5, color: "#d9920a", background: "rgba(245,158,11,.06)", border: "1px solid rgba(245,158,11,.18)", padding: 12, borderRadius: 14, maxWidth: 360, margin: "0 auto", textAlign: "left" }}>
@@ -585,7 +587,8 @@ export default function App() {
                 </p>
               )}
 
-              <button
+              <Button
+                variant="text"
                 onClick={() => {
                   sessionStorage.setItem("projectpb_dismissed_gate", "true");
                   setHasDismissedGate(true);
@@ -593,7 +596,7 @@ export default function App() {
                 className="pb-skip"
               >
                 Continue offline sandbox
-              </button>
+              </Button>
             </div>
           </motion.div>
         </div>
@@ -619,7 +622,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             {isFirebaseReady && auth ? (
               state.user ? (
-                <button onClick={handleGoogleLogout} title="Log out" className="m3-gsync">
+                <Button variant="none" onClick={handleGoogleLogout} title="Log out" className="m3-gsync">
                   {state.user.photoURL ? (
                     <img src={state.user.photoURL} alt="avatar" referrerPolicy="no-referrer" className="w-5 h-5 rounded-full" />
                   ) : (
@@ -627,12 +630,12 @@ export default function App() {
                   )}
                   <span className="hidden sm:inline">{state.user.displayName?.split(" ")[0] || "Synced"}</span>
                   <LogOut className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               ) : (
-                <button onClick={handleGoogleLogin} className="m3-gsync">
+                <Button variant="none" onClick={handleGoogleLogin} className="m3-gsync">
                   <LogIn className="w-4 h-4" />
                   Sync
-                </button>
+                </Button>
               )
             ) : (
               <div className="m3-gsync" title="Local-only cache">
@@ -675,7 +678,8 @@ export default function App() {
                   </div>
                   
                   <div className="flex flex-row sm:flex-col lg:flex-row items-center sm:items-stretch lg:items-center gap-2 w-full sm:w-auto shrink-0">
-                    <button
+                    <Button
+                      variant="primary"
                       onClick={() => {
                         if (typeof window !== "undefined" && "Notification" in window) {
                           Notification.requestPermission().then((perm) => {
@@ -693,19 +697,20 @@ export default function App() {
                           });
                         }
                       }}
-                      className="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-extrabold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer text-center"
+                      className="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-extrabold rounded-xl transition-all shadow-md cursor-pointer text-center"
                     >
                       Enable Alerts
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
                       onClick={() => {
                         sessionStorage.setItem("projectpb_dismissed_noti_banner", "true");
                         setDismissedNotificationBanner(true);
                       }}
-                      className="flex-1 sm:flex-initial px-3 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 hover:text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-slate-400 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer text-center"
+                      className="flex-1 sm:flex-initial px-3 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 hover:text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-slate-400 text-xs font-bold rounded-xl transition-all cursor-pointer text-center"
                     >
                       Dismiss
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </motion.div>
@@ -777,10 +782,10 @@ export default function App() {
                           <h2 className="m3-h">Sync your metrics across devices</h2>
                           <p className="m3-body">Connect Google to preserve completed sets, strength milestones, and custom templates on secure cloud.</p>
                           <div style={{ height: "16px" }} />
-                          <button onClick={handleGoogleLogin} className="m3-btn tonal-primary">
+                          <Button variant="tonal" onClick={handleGoogleLogin} className="m3-btn tonal-primary">
                             <LogIn className="w-5 h-5" />
                             Log in with Google
-                          </button>
+                          </Button>
                         </div>
                       )}
 
@@ -794,19 +799,21 @@ export default function App() {
                         <p className="m3-body center">Track weights, reps and warm-ups. In-depth exercise counts and history, backed up automatically.</p>
                         <div style={{ height: "16px" }} />
                         <div className="m3-stack">
-                          <button
+                          <Button
+                            variant="accent"
                             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setRestTimerTarget(null); cancelServiceWorkerTimer(); state.startWorkout("Blank Routine"); }}
                             className="m3-btn accent"
                           >
                             <Sparkles className="w-5 h-5" />
                             Quick empty session
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="tonal"
                             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setActiveTab("templates"); }}
                             className="m3-btn tonal"
                           >
                             Browse routines
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -905,14 +912,17 @@ export default function App() {
             { key: "exercises", label: "Library", Icon: Info },
             { key: "account", label: state.user ? "Account" : "Login", Icon: User },
           ].map(({ key, label, Icon }) => (
-            <a
+            <motion.a
               key={key}
               className={activeTab === key ? "on" : ""}
               onClick={() => goToTab(key as typeof activeTab)}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 500, damping: 19, mass: 0.7 }}
+              style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
             >
               <span className="pill"><Icon className="w-5 h-5" /></span>
               <span className="lbl">{label}</span>
-            </a>
+            </motion.a>
           ))}
         </nav>
       </div>
@@ -1139,7 +1149,8 @@ export default function App() {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <button
+                  <Button
+                    variant="none"
                     onClick={() => {
                       setShowAiOverlay(false);
                       setActiveAIPrompt(null);
@@ -1147,7 +1158,7 @@ export default function App() {
                     className="p-1 px-3 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-gray-100 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 rounded-xl transition-all font-bold text-xs uppercase"
                   >
                     Close
-                  </button>
+                  </Button>
                 </div>
               </div>
 

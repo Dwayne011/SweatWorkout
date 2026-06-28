@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import FlexingArm from "./FlexingArm";
+import { Button } from "./ui/Button";
 
 interface AIGeneratorLabProps {
   exercisesList: Exercise[];
@@ -239,7 +240,8 @@ export default function AIGeneratorLab({
                   { name: "Kettlebells Only", label: "Kettlebells" },
                   { name: "Bodyweight Only", label: "Bodyweight" },
                 ].map((item) => (
-                  <button
+                  <Button
+                    variant="none"
                     key={item.name}
                     type="button"
                     onClick={() => setEquipment(item.name)}
@@ -250,7 +252,7 @@ export default function AIGeneratorLab({
                     }`}
                   >
                     {item.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -326,13 +328,14 @@ export default function AIGeneratorLab({
             )}
 
             {/* ACTION DISPATCH BUTTON */}
-            <button
+            <Button
+              variant="primary"
               onClick={handleGenerate}
-              className="w-full py-3.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl transition-all shadow-lg active:scale-99 flex items-center justify-center space-x-1.5 uppercase tracking-wide group"
+              className="w-full py-3.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl transition-all shadow-lg flex items-center justify-center space-x-1.5 uppercase tracking-wide group"
             >
               <Sparkles className="w-4 h-4 text-yellow-300 fill-yellow-300 group-hover:animate-bounce" />
               <span>Compose Personalised Workout Plan</span>
-            </button>
+            </Button>
           </motion.div>
         ) : isLoading ? (
           // MODERN GLOWING NEURAL LOADER
@@ -411,30 +414,33 @@ export default function AIGeneratorLab({
 
             {/* OPTION FORMS DISPATCH PANEL */}
             <div className="grid grid-cols-2 gap-3 pt-3">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setGeneratedWorkout(null)}
                 className="w-full py-3 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-600 dark:text-slate-300 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Reset Panel</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant="none"
                 onClick={handleSaveToTemplates}
                 className="w-full py-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-305 border border-indigo-500/25 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1 shadow-2xs"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>Save Routine</span>
-              </button>
+              </Button>
             </div>
 
-            <button
+            <Button
+              variant="primary"
               onClick={handleStartWorkoutNow}
               className="w-full py-3.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center space-x-1.5 uppercase tracking-wider ring-1 ring-white/10"
             >
               <Play className="w-4 h-4 fill-white" />
               <span>Start Tracking This Session Now</span>
-            </button>
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { Button } from "./ui/Button";
 import { robustFetch } from "../utils/network";
 import {
   Sparkles,
@@ -618,12 +619,13 @@ export default function WorkoutSplashScene({
         {error && !analysis && (
           <div className="p-4 bg-orange-500/10 rounded-xl border border-orange-500/20 text-center space-y-2">
             <p className="text-xs font-bold text-orange-400">{error}</p>
-            <button
+            <Button
+              variant="outline"
               onClick={runLocalFallbackAnalysis}
               className="px-4 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
             >
               Analyse Locally Instead
-            </button>
+            </Button>
           </div>
         )}
 
@@ -925,19 +927,21 @@ export default function WorkoutSplashScene({
         {/* Buttons Controls inside Overlay */}
         <div className="pt-4 border-t border-gray-200 dark:border-white/5 flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full items-stretch">
           {loading || !analysis ? (
-            <button
+            <Button
+              variant="tonal"
               onClick={onClose}
-              className="w-full py-3 px-6 bg-gray-50 dark:bg-slate-900/80 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-300 font-extrabold text-xs uppercase tracking-wider font-mono rounded-xl shadow-md hover:scale-[1.01] transition-all cursor-pointer text-center"
+              className="w-full py-3 px-6 bg-gray-50 dark:bg-slate-900/80 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-300 font-extrabold text-xs uppercase tracking-wider font-mono rounded-xl shadow-md transition-all cursor-pointer text-center"
             >
               Skip Analysis & Save Workout
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
+              variant="primary"
               onClick={onClose}
-              className="w-full py-3 px-6 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-extrabold text-xs uppercase tracking-wider font-mono rounded-xl shadow-lg hover:scale-[1.01] transition-all cursor-pointer text-center ring-1 ring-white/10"
+              className="w-full py-3 px-6 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-extrabold text-xs uppercase tracking-wider font-mono rounded-xl shadow-lg transition-all cursor-pointer text-center ring-1 ring-white/10"
             >
               Acknowledge Coach Analytics & Save
-            </button>
+            </Button>
           )}
         </div>
       </motion.div>

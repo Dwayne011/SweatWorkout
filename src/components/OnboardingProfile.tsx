@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { UserProfile } from "../types";
 import { motion } from "motion/react";
 import { Check, Ruler, Scale, User, Target, ChevronDown } from "lucide-react";
+import { Button } from "./ui/Button";
 
 interface OnboardingProfileProps {
   onComplete: (profile: UserProfile) => void;
@@ -120,12 +121,12 @@ export default function OnboardingProfile({ onComplete, initialProfile }: Onboar
 
       {/* Units */}
       <div className="m3-bgroup" style={{ marginBottom: "22px" }}>
-        <button className={`seg${preferredUnits === "Metric" ? " sel" : ""}`} onClick={() => setPreferredUnits("Metric")}>
+        <Button variant="none" className={`seg${preferredUnits === "Metric" ? " sel" : ""}`} onClick={() => setPreferredUnits("Metric")}>
           Metric (kg/cm)
-        </button>
-        <button className={`seg${preferredUnits === "Imperial" ? " sel" : ""}`} onClick={() => setPreferredUnits("Imperial")}>
+        </Button>
+        <Button variant="none" className={`seg${preferredUnits === "Imperial" ? " sel" : ""}`} onClick={() => setPreferredUnits("Imperial")}>
           Imperial (lbs/ft)
-        </button>
+        </Button>
       </div>
 
       {/* Biological sex */}
@@ -327,19 +328,20 @@ export default function OnboardingProfile({ onComplete, initialProfile }: Onboar
       <div className="m3-seclabel"><span className="l"><Target /> Primary goal</span></div>
       <div className="m3-goals">
         {goals.map((goal) => (
-          <button
+          <Button
+            variant="none"
             key={goal}
             onClick={() => setPrimaryGoal(goal)}
             className={`m3-goal${primaryGoal === goal ? " sel" : ""}`}
           >
             {goal === "Cardiovascular Endurance" ? "Cardio endurance" : goal}
-          </button>
+          </Button>
         ))}
       </div>
 
-      <button onClick={handleSubmit} className="m3-btn accent" style={{ marginTop: "26px" }}>
+      <Button variant="accent" onClick={handleSubmit} className="m3-btn accent" style={{ marginTop: "26px" }}>
         <Check className="w-[18px] h-[18px]" /> Save profile
-      </button>
+      </Button>
     </motion.div>
   );
 }
