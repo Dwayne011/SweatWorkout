@@ -208,6 +208,42 @@ html, body {
   --m3-title-lg: 22px; --m3-title-md: 16px;
   --m3-body-md: 14px; --m3-body-sm: 12px;
   --m3-label-lg: 14px; --m3-label-md: 12px; --m3-label-sm: 11px;
+
+  /* success container (used by set tracking) */
+  --m3-success-cont: #0f5436;
+  --m3-on-success-cont: #a6ffce;
+}
+
+/* Light scheme — overrides the dark :root tokens when <html> has .light.
+   AA-contrast palette validated in the v4 mockup review. */
+html.light {
+  --m3-bg: #fbf8fe;
+  --m3-surface: #f5eff9;
+  --m3-sc-low: #f1ecf8;
+  --m3-sc: #e7e0f1;
+  --m3-sc-high: #ded5ec;
+  --m3-sc-highest: #cabfdd;
+  --m3-outline: #67616f;
+  --m3-outline-q: #c5bdd2;
+  --m3-on: #1b1922;
+  --m3-on-var: #3c3847;
+  --m3-on-dim: #585263;
+  --m3-primary: #5b3fa0;
+  --m3-primary-fill: #6a4bc0;
+  --m3-on-primary: #ffffff;
+  --m3-primary-cont: #dccaff;
+  --m3-on-primary-cont: #23005c;
+  --m3-accent: #3c5500;
+  --m3-on-accent: #ffffff;
+  --m3-tertiary-cont: #984061;
+  --m3-on-tertiary-cont: #ffd9e3;
+  --m3-success: #006c3a;
+  --m3-on-success: #ffffff;
+  --m3-success-cont: #a6f0c4;
+  --m3-on-success-cont: #00210f;
+  --m3-error: #b3261e;
+  --m3-error-cont: #f9dedc;
+  --m3-on-error-cont: #410e0b;
 }
 
 /* cards */
