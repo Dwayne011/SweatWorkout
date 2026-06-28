@@ -195,7 +195,7 @@ export default function TemplatesList({
             {allAvailableTemplates.map((tp) => (
               <div
                 key={tp.id}
-                className="bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between space-y-4"
+                className="bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between space-y-4"
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
@@ -204,7 +204,7 @@ export default function TemplatesList({
                     </h4>
                     <button
                       onClick={() => onDeleteTemplate(tp.id)}
-                      className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm rounded-lg transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-gray-50 dark:bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm rounded-lg transition-colors"
                       title="Delete saved template"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -217,13 +217,13 @@ export default function TemplatesList({
                     {tp.exercises.slice(0, 3).map((ex, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center text-xs bg-white dark:bg-black dark:border-white/10 shadow-sm text-slate-350 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/5 font-normal"
+                        className="inline-flex items-center text-xs bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm text-slate-350 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/5 font-normal"
                       >
                         {ex.sets.length}x {getExerciseName(ex.exerciseId)}
                       </span>
                     ))}
                     {tp.exercises.length > 3 && (
-                      <span className="text-[10px] text-indigo-600 dark:text-indigo-300/60 font-semibold bg-white dark:bg-black dark:border-white/10 shadow-sm px-2 rounded-lg border border-gray-200 dark:border-white/5 leading-6">
+                      <span className="text-[10px] text-indigo-600 dark:text-indigo-300/60 font-semibold bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm px-2 rounded-lg border border-gray-200 dark:border-white/5 leading-6">
                         +{tp.exercises.length - 3} more
                       </span>
                     )}
@@ -249,7 +249,7 @@ export default function TemplatesList({
             {STARTER_TEMPLATES.map((tp) => (
               <div
                 key={tp.id}
-                className="bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-4 shadow-2xl flex flex-col justify-between space-y-3.5"
+                className="bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-4 shadow-2xl flex flex-col justify-between space-y-3.5"
               >
                 <div>
                   <h4 className="font-extrabold text-gray-900 dark:text-slate-100 text-sm md:text-base leading-none mb-1">
@@ -293,16 +293,16 @@ export default function TemplatesList({
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white dark:bg-black dark:border-white/10 shadow-sm rounded-2xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col max-h-[calc(100vh-32px)] md:max-h-[85vh] relative"
+              className="bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm rounded-2xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col max-h-[calc(100vh-32px)] md:max-h-[85vh] relative"
             >
-              <div className="p-4 bg-white dark:bg-black dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 flex items-center justify-between">
+              <div className="p-4 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 flex items-center justify-between">
                 <h3 className="font-extrabold text-gray-900 dark:text-gray-100 text-sm md:text-base flex items-center space-x-2">
                   <Dumbbell className="w-5 h-5 text-indigo-400 animate-pulse" />
                   <span>Build New Muscle Routine</span>
                 </h3>
                 <button
                   onClick={() => setShowAddTemplate(false)}
-                  className="p-1 text-gray-400 hover:text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm transition-colors"
+                  className="p-1 text-gray-400 hover:text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-50 dark:bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -319,7 +319,7 @@ export default function TemplatesList({
                     placeholder="e.g. Heavy Legs A, Upper Hypertrophy"
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
-                    className="w-full text-xs font-bold border border-gray-200 dark:border-white/10 rounded-xl p-3 bg-white dark:bg-black dark:border-white/10 shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 placeholder-gray-500"
+                    className="w-full text-xs font-bold border border-gray-200 dark:border-white/10 rounded-xl p-3 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 placeholder-gray-500"
                   />
                 </div>
 
@@ -334,10 +334,10 @@ export default function TemplatesList({
                     placeholder="Search exercise library..."
                     value={exerciseSearch}
                     onChange={(e) => setExerciseSearch(e.target.value)}
-                    className="w-full text-xs font-bold border border-gray-200 dark:border-white/10 bg-white dark:bg-black dark:border-white/10 shadow-sm text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2.5 mb-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400"
+                    className="w-full text-xs font-bold border border-gray-200 dark:border-white/10 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2.5 mb-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400"
                   />
 
-                  <div className="border border-gray-200 dark:border-white/5 rounded-xl p-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm max-h-60 overflow-y-auto space-y-1">
+                  <div className="border border-gray-200 dark:border-white/5 rounded-xl p-2.5 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm max-h-60 overflow-y-auto space-y-1">
                     {filteredExercises.map((ex) => {
                       const isSelected = selectedExercises.includes(ex.id);
                       return (
@@ -347,7 +347,7 @@ export default function TemplatesList({
                           className={`w-full text-left px-3 py-2.5 text-xs rounded-lg flex items-center justify-between border transition-all cursor-pointer ${
                             isSelected
                               ? "bg-indigo-500/15 border-indigo-505/30 text-indigo-500 dark:text-indigo-200 font-bold"
-                              : "bg-white dark:bg-black dark:border-white/10 shadow-sm border-transparent hover:bg-white/10 text-slate-330"
+                              : "bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border-transparent hover:bg-white/10 text-slate-330"
                           }`}
                         >
                           <div className="flex-1 min-w-0 pr-2">
@@ -378,7 +378,7 @@ export default function TemplatesList({
                   <button
                     type="button"
                     onClick={() => setShowAddTemplate(false)}
-                    className="px-4 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-white/10 transition-colors"
+                    className="px-4 py-2 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-white/10 transition-colors"
                   >
                     Cancel
                   </button>

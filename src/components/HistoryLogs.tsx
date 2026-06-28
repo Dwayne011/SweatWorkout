@@ -226,7 +226,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                 <div key={log.id} className="relative rounded-2xl overflow-hidden shrink-0">
                   {/* Clean text action underlay */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent to-rose-500/20 dark:to-rose-600/30 flex items-center justify-end px-6 rounded-2xl pointer-events-none">
-                    <div className="flex items-center justify-center bg-white dark:bg-black rounded-lg border border-rose-500/20 px-2.5 py-1 shadow-sm">
+                    <div className="flex items-center justify-center bg-[var(--m3-sc-low)] rounded-lg border border-rose-500/20 px-2.5 py-1 shadow-sm">
                       <span className="text-rose-500 text-[10px] font-bold uppercase tracking-wider font-mono">Delete Log</span>
                     </div>
                   </div>
@@ -246,14 +246,14 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                         setTimeout(() => onDeleteLog(log.id), 300);
                       }
                     }}
-                    className={`bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden relative z-10 w-full h-full ${
+                    className={`bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm shadow-inner backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden relative z-10 w-full h-full ${
                       deletingLogId === log.id ? 'translate-x-[-100vw] opacity-0 transition-all duration-300' : ''
                     }`}
                   >
                   {/* Collapsed top bar summary card */}
                   <div
                     onClick={() => toggleExpand(log.id)}
-                    className="p-4 md:p-5 flex flex-wrap items-center justify-between cursor-pointer gap-4 bg-transparent hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm select-none transition-all"
+                    className="p-4 md:p-5 flex flex-wrap items-center justify-between cursor-pointer gap-4 bg-transparent hover:bg-gray-50 dark:bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm select-none transition-all"
                   >
                     <div className="flex items-center space-x-3.5">
                       <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl ring-1 ring-indigo-500/20">
@@ -301,7 +301,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                                 e.stopPropagation();
                                 onViewAnalysis(log);
                               }}
-                              className="px-3 py-1.5 bg-white dark:bg-black hover:bg-indigo-950/80 border border-indigo-500/20 hover:border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:text-gray-900 dark:text-gray-100 rounded-xl flex items-center space-x-1.5 text-[10px] font-extrabold uppercase tracking-wider font-mono transition-all cursor-pointer shrink-0 border border-gray-200 dark:border-white/5 hover:scale-[1.02]"
+                              className="px-3 py-1.5 bg-[var(--m3-sc-low)] hover:bg-indigo-950/80 border border-indigo-500/20 hover:border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:text-gray-900 dark:text-gray-100 rounded-xl flex items-center space-x-1.5 text-[10px] font-extrabold uppercase tracking-wider font-mono transition-all cursor-pointer shrink-0 border border-gray-200 dark:border-white/5 hover:scale-[1.02]"
                               style={{ boxShadow: "0 0 12px rgba(99, 102, 241, 0.35), 0 0 8px rgba(168, 85, 247, 0.25)" }}
                               title="View completed coaching insights"
                             >
@@ -345,11 +345,11 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-gray-200 dark:border-white/5 bg-white dark:bg-black"
+                        className="border-t border-gray-200 dark:border-white/5 bg-[var(--m3-sc-low)]"
                       >
                         <div className="p-4 md:p-5 space-y-4">
                           {/* Interactive summary panel */}
-                          <div className="bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-xl p-3.5 flex flex-wrap gap-4 items-center justify-between">
+                          <div className="bg-[var(--m3-sc-low)] border border-gray-200 dark:border-white/10 rounded-xl p-3.5 flex flex-wrap gap-4 items-center justify-between">
                             <div className="flex items-center space-x-3">
                               <div className="p-2 bg-yellow-500/10 text-yellow-500 rounded-lg ring-1 ring-yellow-500/20">
                                 <Trophy className="w-4 h-4 text-yellow-405" />
@@ -390,9 +390,9 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                             {log.exercises.map((workoutEx) => (
                               <div
                                 key={workoutEx.id}
-                                className="bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-2xs"
+                                className="bg-[var(--m3-sc-low)] rounded-xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-2xs"
                               >
-                                <div className="px-4 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 flex justify-between items-center">
+                                <div className="px-4 py-2.5 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 flex justify-between items-center">
                                   <div>
                                     <h5 className="font-extrabold text-[#818cf8] text-[#818cf8] text-xs md:text-sm">
                                       {getExerciseName(workoutEx.exerciseId)}

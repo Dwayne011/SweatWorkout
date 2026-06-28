@@ -25,6 +25,7 @@ import {
   CheckCircle,
   Bell,
   ChevronRight,
+  Search,
   ChevronLeft,
   ChevronUp,
   ChevronDown,
@@ -261,79 +262,29 @@ function RestTimerOverlay({
     };
   }, [target, onReachedZero]);
 
-  const isTabActive = !activeTab || activeTab === "workouts";
+  void activeTab;
+  const pctRemaining = Math.max(0, Math.min(100, (secondsLeft / (target.total || 90)) * 100));
 
-  return createPortal(
-    <motion.div
-       key="rest-timer-overlay"
-       initial={{ opacity: 0, y: 40, scale: 0.95 }}
-       animate={{ 
-         opacity: isTabActive ? 1 : 0, 
-         y: isTabActive ? 0 : -12, 
-         scale: isTabActive ? 1 : 0.975 
-       }}
-       exit={{ opacity: 0, y: 40, scale: 0.95 }}
-       transition={{ 
-         duration: isTabActive ? 0.28 : 0.15, 
-         ease: [0.16, 1, 0.3, 1]
-       }}
-       className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[400px] z-[99999] bg-white dark:bg-black border border-indigo-500/30 shadow-[0_10px_50px_rgba(99,102,241,0.35)] dark:shadow-[0_10px_55px_rgba(0,0,0,0.7)] rounded-2xl overflow-hidden mt-4 ${
-         isTabActive ? "" : "pointer-events-none"
-       }`}
-    >
-      {/* Retracting large background section (scaleX is GPU-composited — no per-frame layout) */}
-      <motion.div
-        initial={{ scaleX: 1 }}
-        animate={{ scaleX: Math.max(0, Math.min(1, secondsLeft / target.total)) }}
-        transition={{ duration: 1, ease: "linear" }}
-        style={{ transformOrigin: "left" }}
-        className="absolute inset-y-0 left-0 w-full origin-left bg-indigo-50 dark:bg-indigo-950/40 border-r border-indigo-200 dark:border-indigo-500/20"
-      />
-
-      <div className="relative z-10 p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center space-x-4">
-          <div className="text-2xl font-mono font-black text-indigo-700 dark:text-indigo-400 shrink-0 tracking-tight bg-white dark:bg-black/40 px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-white/10 shadow-sm">
-            {formatTimerTime(secondsLeft)}
-          </div>
-          <div>
-            <h4 className="text-sm font-extrabold text-gray-950 dark:text-white">Resting: {target.exerciseName || 'Recovery'}</h4>
-            <p className="text-[10px] text-gray-600 dark:text-indigo-300/80 flex items-center space-x-1 font-mono">
-              <Bell className="w-3 h-3 animate-pulse text-indigo-500 dark:text-indigo-400" />
-              <span>Timer is running in background</span>
-            </p>
+  // Active-timer bar — layout B (exact port of project-pb-workout-page.html .rt).
+  // Sits inside the session card while resting.
+  return (
+    <div className="pbw-rt">
+      <div className="fill" style={{ width: `${pctRemaining}%`, transition: "width 1s linear" }} />
+      <div className="inner">
+        <div className="toprow">
+          <span className="cd">{formatTimerTime(secondsLeft)}</span>
+          <div className="lab">
+            <div className="t">Rest</div>
+            <div className="s">Running in background</div>
           </div>
         </div>
-        
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); onAddSeconds(30); }}
-            className="px-2 py-1 text-[10px] font-mono font-bold border border-gray-300 dark:border-white/20 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-white rounded-lg transition-all cursor-pointer"
-          >
-            +30s
-          </button>
-          <button
-            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); onSubtractSeconds(30); }}
-            className="px-2 py-1 text-[10px] font-mono font-bold border border-gray-300 dark:border-white/20 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-white rounded-lg transition-all cursor-pointer"
-          >
-            -30s
-          </button>
-          <button
-            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); handleManualCancel(); }}
-            className="px-2.5 py-1 text-[10px] font-mono font-extrabold border border-indigo-200 dark:border-indigo-400/30 text-indigo-700 dark:text-white bg-indigo-100 dark:bg-indigo-500/20 hover:bg-indigo-200 dark:hover:bg-indigo-500/30 rounded-lg transition-all cursor-pointer"
-          >
-            Skip Rest
-          </button>
-          <button
-            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); handleManualCancel(); }}
-            className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 border border-transparent rounded-lg text-gray-500 dark:text-indigo-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer ml-1"
-            title="Dismiss"
-          >
-            <X className="w-4 h-4" strokeWidth={2.5} />
-          </button>
+        <div className="ctls">
+          <button className="ctlbtn" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); onAddSeconds(30); }}>+30s</button>
+          <button className="ctlbtn" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); onSubtractSeconds(30); }}>&minus;30s</button>
+          <button className="skip" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); handleManualCancel(); }}>Skip</button>
         </div>
       </div>
-    </motion.div>,
-    document.body
+    </div>
   );
 }
 
@@ -1256,67 +1207,44 @@ export default function ActiveWorkout({
 
   return (
     <div className="relative z-10 w-full max-w-full space-y-4">
-      {/* M3 active-session header */}
-      <div className="m3-session">
-        <div className="m3-session-top">
-          <h3 className="m3-session-title">{session.name}</h3>
-          <span className="m3-livedot" />
+      {/* Active-session card — exact port of project-pb-workout-page.html .sesscard */}
+      <div className="pbw-sesscard">
+        <div className="pbw-sesstop">
+          <h3>{session.name}</h3>
+          <span className="pbw-livedot" />
         </div>
-        <div className="m3-stat">
-          <span>Active session tracked</span> · <b><ActiveWorkoutDuration startTime={session.startTime} /></b>
-        </div>
-        <svg className="m3-wave" viewBox="0 0 320 20" preserveAspectRatio="none">
-          <path d="M0 10 Q10 1 20 10 T40 10 T60 10 T80 10 T100 10 T120 10 T140 10 T160 10 T180 10 T200 10 T220 10 T240 10 T260 10 T280 10 T300 10 T320 10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-        </svg>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setShowDiscardConfirm(true); }}
-            className="m3-btn error sm"
-            style={{ flex: 1 }}
-          >
-            <Trash2 className="w-4 h-4" />
-            Discard
-          </button>
-          <button onClick={handleFinishClick} className="m3-btn success sm" style={{ flex: 1.3 }}>
-            <CheckCircle className="w-4 h-4" />
-            Finish workout
-          </button>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {restTimerTarget !== null && (
+        {restTimerTarget !== null ? (
           <RestTimerOverlay
-            key="rest-timer"
             target={restTimerTarget}
             onCancel={cancelRestTimer}
             onReachedZero={reconcileRest}
             onAddSeconds={(secs) => {
-              setRestTimerTarget((prev) => {
-                if (!prev) return null;
-                return {
-                  ...prev,
-                  endTime: prev.endTime + secs * 1000,
-                  total: prev.total + secs,
-                };
-              });
+              setRestTimerTarget((prev) => prev ? { ...prev, endTime: prev.endTime + secs * 1000, total: prev.total + secs } : null);
             }}
             onSubtractSeconds={(secs) => {
-              setRestTimerTarget((prev) => {
-                if (!prev) return null;
-                const newEndTime = Math.max(Date.now(), prev.endTime - secs * 1000);
-                return {
-                  ...prev,
-                  endTime: newEndTime,
-                };
-              });
+              setRestTimerTarget((prev) => prev ? { ...prev, endTime: Math.max(Date.now(), prev.endTime - secs * 1000) } : null);
             }}
             session={session}
             exercisesList={exercisesList}
             activeTab={activeTab}
           />
+        ) : (
+          <div className="m3-stat" style={{ marginBottom: "12px" }}>
+            <span>Active session tracked</span> · <b><ActiveWorkoutDuration startTime={session.startTime} /></b>
+          </div>
         )}
-      </AnimatePresence>
+        <div className="pbw-sessbtns">
+          <button
+            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setShowDiscardConfirm(true); }}
+            className="pbw-sbtn discard"
+          >
+            <Trash2 /> Discard
+          </button>
+          <button onClick={handleFinishClick} className="pbw-sbtn finish">
+            <CheckCircle /> Finish workout
+          </button>
+        </div>
+      </div>
 
       {/* Workout notes */}
       <div>
@@ -1390,7 +1318,8 @@ export default function ActiveWorkout({
                 return (
                   <div 
                     key={group.id} 
-                    className="p-4 bg-white dark:bg-black border-2 border-indigo-500/30 rounded-2xl shadow-xl relative space-y-4 animate-fadeIn"
+                    className="aw-card p-4 border-2 border-indigo-500/30 rounded-[22px] relative space-y-4 animate-fadeIn"
+                    style={{ background: "var(--m3-sc-low)" }}
                   >
                     {/* Superset Group Indicator */}
                     <div className="flex items-center justify-between border-b border-indigo-550/20 pb-2.5">
@@ -1539,7 +1468,7 @@ export default function ActiveWorkout({
                                             exercises: updatedExercises,
                                           });
                                         }}
-                                        className="w-10 text-[12px] font-mono font-bold text-center bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none p-0 text-indigo-805 dark:text-indigo-250 h-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        className="aw-bare w-10 text-[12px] font-mono font-bold text-center bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none p-0 text-indigo-805 dark:text-indigo-250 h-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         style={{ appearance: "none", MozAppearance: "textfield" }}
                                         title="Custom rest time in seconds"
                                       />
@@ -1961,18 +1890,14 @@ export default function ActiveWorkout({
                     onDragOver={(e) => handleDragOver(e, workoutEx.id)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, workoutEx.id)}
-                    style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
-                    className={`aw-card relative overflow-hidden rounded-[22px] shadow-sm group min-h-[140px] transition-all duration-300 animate-fadeIn ${
-                      isOver ? "ring-2 ring-indigo-400 border-dashed scale-[1.015]" : ""
+                    style={{ background: "transparent" }}
+                    className={`pbw-exswipe group min-h-[140px] transition-all duration-300 animate-fadeIn ${
+                      isOver ? "ring-2 ring-indigo-400 scale-[1.015]" : ""
                     }`}
                   >
-                    {/* Swipe delete hint underlay */}
+                    {/* Exercise swipe-to-delete reveal pane (Gmail-style) */}
                     {draggingExerciseId === workoutEx.id && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent to-rose-500/20 dark:to-rose-600/30 flex items-center justify-end px-6 rounded-xl pointer-events-none">
-                        <div className="flex items-center space-x-1.5 text-rose-400 font-extrabold text-xs uppercase font-mono bg-white dark:bg-black px-2.5 py-1 rounded-xl border border-rose-500/20">
-                          <span>Release to Delete</span>
-                        </div>
-                      </div>
+                      <div className="pbw-delpane"><span className="rl">Release to delete</span><Trash2 /></div>
                     )}
 
                     <motion.div
@@ -1996,62 +1921,48 @@ export default function ActiveWorkout({
                         x: isPendingDelete ? -120 : 0
                       }}
                       transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                      style={{ background: "var(--m3-sc-low)", borderRadius: "26px", padding: "18px" }}
                       className="relative z-10 w-full h-full"
                     >
-                      <div className="p-4 flex flex-col">
-                        <div className="flex items-start justify-between w-full gap-4">
+                      <div className="flex flex-col">
+                        <div className="pbw-exhd">
                           <div className="flex-1 min-w-0">
                             <h4
                               onClick={() => exerciseDetails && openExerciseGuide(exerciseDetails)}
-                              className="text-[18px] sm:text-[20px] font-bold text-[var(--m3-on)] leading-tight tracking-tight hover:underline transition-colors cursor-pointer select-text"
+                              className="pbw-exnm cursor-pointer select-text"
                               title="Click to view setup and guide demonstration"
                             >
                               {mainTitle}
                             </h4>
                             {subtitleModifier && (
-                              <div className="text-[13px] font-semibold text-[var(--m3-primary)] mt-1 leading-snug">
+                              <div className="text-[13px] font-medium text-[var(--m3-primary)] mt-1 leading-snug">
                                 {subtitleModifier}
                               </div>
                             )}
-                            <div className="text-[11px] sm:text-[12px] font-mono tracking-wide font-bold text-[var(--m3-on-dim)] uppercase mt-1">
-                              {exerciseDetails?.category} &bull; {exerciseDetails?.equipment}
+                            <div className="pbw-exmeta">
+                              {exerciseDetails?.category} · {exerciseDetails?.equipment}
                             </div>
                           </div>
-                          <div 
-                            className="cursor-grab active:cursor-grabbing p-1.5 text-slate-400 hover:text-indigo-505 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition-colors shrink-0 mt-0.5" 
+                          <button
+                            className="pbw-drag"
                             title="Drag and drop this onto another exercise to group as a Superset"
                           >
-                            <ListFilter className="w-5 h-5 text-indigo-405 shrink-0" />
-                          </div>
+                            <ListFilter />
+                          </button>
                         </div>
 
-                        <div className="flex flex-row items-center justify-between w-full mt-1 gap-3">
-                          <div className="flex items-center gap-2 overflow-x-auto invisible-scrollbar">
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              initial={{ scale: 0.95, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
+                        <div className="flex flex-col w-full mt-1 gap-2">
+                          <div className="pbw-extools">
+                            <button
                               type="button"
-                              onClick={() => {
-                                if (exerciseDetails) {
-                                  handleOpenExerciseNotes(exerciseDetails.id);
-                                }
-                              }}
-                              className="inline-flex items-center space-x-1.5 px-3.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm shadow-indigo-500/25 active:shadow-none transition-all cursor-pointer shrink-0 h-8"
+                              onClick={() => { if (exerciseDetails) { handleOpenExerciseNotes(exerciseDetails.id); } }}
+                              className="pbw-notebtn"
                             >
-                              <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
-                              <span>{exerciseNotes?.[workoutEx.exerciseId] ? "Notes 📝" : "+ Note"}</span>
-                            </motion.button>
-                            {exerciseNotes?.[workoutEx.exerciseId] && (
-                              <span className="text-[10px] text-indigo-500 dark:text-indigo-200/65 font-medium italic truncate max-w-[100px] sm:max-w-[150px]" title={exerciseNotes[workoutEx.exerciseId]}>
-                                "{exerciseNotes[workoutEx.exerciseId]}"
-                              </span>
-                            )}
+                              <Sparkles /> {exerciseNotes?.[workoutEx.exerciseId] ? "Notes" : "+ Note"}
+                            </button>
 
-                            <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-full px-3.5 text-xs font-mono shrink-0">
-                              <Timer className="w-4 h-4 text-indigo-400 shrink-0" />
-                              <span className="font-extrabold select-none whitespace-nowrap uppercase tracking-wider text-[10px]">Rest:</span>
+                            <span className="pbw-infopill">
+                              <Timer /> Rest:
                               <input
                                 type="number"
                                 inputMode="numeric"
@@ -2073,17 +1984,14 @@ export default function ActiveWorkout({
                                     exercises: updatedExercises,
                                   });
                                 }}
-                                className="w-10 text-[12px] font-mono font-bold text-center bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none p-0 text-indigo-805 dark:text-indigo-250 h-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                style={{ appearance: "none", MozAppearance: "textfield" }}
                                 title="Custom rest time in seconds"
                               />
-                              <span className="text-indigo-500/80 dark:text-indigo-400/85 font-mono font-extrabold uppercase text-[10px]">s</span>
-                            </div>
+                              <b>s</b>
+                            </span>
 
                             {exerciseDetails?.equipment === 'Barbell' && (
-                              <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-full px-3.5 text-xs font-mono shrink-0">
-                                <Dumbbell className="w-4 h-4 text-indigo-400 shrink-0" />
-                                <span className="font-extrabold select-none whitespace-nowrap uppercase tracking-wider text-[10px]" title="Set bar weight">Bar:</span>
+                              <span className="pbw-infopill">
+                                <Dumbbell /> Bar:
                                 <input
                                   type="number"
                                   min="0"
@@ -2093,67 +2001,43 @@ export default function ActiveWorkout({
                                     const val = parseFloat(e.target.value) || 0;
                                     onUpdateExerciseBarWeight?.(workoutEx.exerciseId, val);
                                   }}
-                                  className="w-9 text-[12px] font-mono font-bold text-center bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none p-0 text-indigo-855 dark:text-indigo-255 h-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  style={{ appearance: "none", MozAppearance: "textfield" }}
                                   title="Weight of the bar separately from the KG plates"
                                 />
-                                <span className="text-indigo-500/80 dark:text-indigo-400/85 font-extrabold text-[10px]">kg</span>
-                              </div>
-                            )}
-
-                            {memory && (
-                              <span className="text-[10px] bg-indigo-500/5 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 px-2.5 h-8 rounded-lg border border-indigo-500/15 dark:border-indigo-500/10 font-mono font-extrabold flex items-center gap-1 leading-none shrink-0 cursor-default">
-                                <History className="w-3 h-3 text-indigo-400 shrink-0" />
-                                <span className="uppercase tracking-wider text-[9px]">Last: {memory.setsStr}</span>
+                                <b>kg</b>
                               </span>
                             )}
+
+                            <span className="pbw-infopill">
+                              <History /> Last: <b>{memory ? memory.setsStr : "—"}</b>
+                            </span>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono italic whitespace-nowrap select-none">
-                              Swipe to delete &rarr;
-                            </span>
+                          <div className="pbw-swipehint" style={{ marginBottom: 0 }}>
+                            Swipe to delete &rarr;
                           </div>
                         </div>
                       </div>
 
-                      {/* Sets List (Flex Layout) */}
-                      <div className="flex flex-col gap-1 mx-1 sm:mx-2 my-2">
-                        {/* Sets Header */}
-                        <div className="flex items-center text-[9px] sm:text-[10px] text-[var(--m3-on-dim)] uppercase tracking-widest font-bold pb-1.5 mb-1 sm:pb-2 border-b px-2" style={{ borderColor: "var(--m3-outline-q)" }}>
-                          <div className="w-8 sm:w-12 text-center shrink-0">Set</div>
-                          <div className="w-[4.4rem] sm:w-20 shrink-0 px-0.5">Type</div>
-                          {isCardio ? (
-                            <div className="flex-1 px-1 text-center">Duration</div>
-                          ) : (
-                            <>
-                              <div className="flex-1 px-1 text-center">Weight</div>
-                              <div className="w-14 sm:w-16 px-1 text-center">Reps</div>
-                            </>
-                          )}
-                          <div className="w-10 sm:w-12 text-center shrink-0">Done</div>
-                        </div>
+                      {/* Set grid — exact port of project-pb-workout-page.html .setgrid */}
+                      <div className="pbw-setgrid">
+                        <div className="pbw-gh" style={{ textAlign: "center" }}>Set</div>
+                        <div className="pbw-gh">Type</div>
+                        <div className="pbw-gh" style={{ textAlign: "center" }}>{isCardio ? "Duration" : "Weight"}</div>
+                        <div className="pbw-gh" style={{ textAlign: "center" }}>{isCardio ? "RPE" : "Reps"}</div>
+                        <div className="pbw-gh" style={{ textAlign: "center" }}>Done</div>
 
                         {workoutEx.sets.map((set, idx) => {
-                          const sliderTheme = getSliderColourTheme(set.rpe || 5);
-                          const rpePercentage = (((set.rpe || 5) - 1) / 9) * 100;
-
+                          const typeLabel = set.type.charAt(0).toUpperCase() + set.type.slice(1);
                           return (
-                          <div key={set.id} className="relative rounded-xl overflow-hidden shrink-0">
-                            {/* Swipe delete hint underlay */}
+                          <div key={set.id} className="pbw-setswipe">
                             {draggingSetId === set.id && (
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-rose-500/20 dark:to-rose-600/30 flex items-center justify-end px-3 rounded-xl pointer-events-none">
-                                <div className="flex items-center justify-center bg-white dark:bg-black rounded-lg border border-rose-500/20 px-2 py-1 shadow-sm">
-                                  <span className="text-rose-500 text-[10px] font-bold uppercase tracking-wider font-mono">Delete</span>
-                                </div>
-                              </div>
+                              <div className="pbw-delpane"><span className="rl">Release</span><Trash2 /></div>
                             )}
-
                             <motion.div
                               drag="x"
                               dragDirectionLock
-                              dragConstraints={{ left: -100, right: 0 }}
-                              dragElastic={{ left: 0.15, right: 0 }}
+                              dragConstraints={{ left: -86, right: 0 }}
+                              dragElastic={{ left: 0.12, right: 0 }}
                               onDragStart={() => {
                                 setDraggingSetId(set.id);
                                 if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(5);
@@ -2165,151 +2049,87 @@ export default function ActiveWorkout({
                                   onRemoveSet(workoutEx.exerciseId, idx);
                                 }
                               }}
-                              className="flex flex-col relative z-10 w-full py-1.5 px-2 rounded-xl cursor-grab active:cursor-grabbing transition-colors"
+                              className={`pbw-setrow-inner ${set.isCompleted ? "done" : ""}`}
                             >
-                              <div className="flex items-center w-full">
-                                {/* Inner fader wrapper for completed state */}
-                                <div className={`flex items-center flex-1 min-w-0 ${set.isCompleted ? "opacity-45" : ""}`}>
-                                  {/* Set number */}
-                                  <div className="w-8 sm:w-12 text-center text-xs font-bold text-[var(--m3-primary)] font-mono shrink-0">
-                                    {idx + 1}
-                                  </div>
-
-                                  {/* Type */}
-                                  <div className="w-[4.4rem] sm:w-20 shrink-0 px-0.5">
-                                    <select
+                              <div className="pbw-snum">{idx + 1}</div>
+                              <div className="pbw-typesel">
+                                {typeLabel} <ChevronDown />
+                                <select
+                                  disabled={set.isCompleted}
+                                  value={set.type}
+                                  onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { type: e.target.value as SetType })}
+                                >
+                                  <option value="normal">Normal</option>
+                                  <option value="warmup">Warmup</option>
+                                  <option value="drop">Drop</option>
+                                  <option value="failure">Failure</option>
+                                </select>
+                              </div>
+                              {isCardio ? (
+                                <>
+                                  <div className="pbw-winput">
+                                    <button
+                                      type="button"
                                       disabled={set.isCompleted}
-                                      value={set.type}
-                                      onChange={(e) =>
-                                        onUpdateSet(workoutEx.exerciseId, idx, {
-                                          type: e.target.value as SetType,
-                                        })
-                                      }
-                                      className="text-[10px] sm:text-xs border border-gray-250 dark:border-zinc-800 rounded-lg p-1 sm:p-1 pr-3 bg-white dark:bg-zinc-950 text-gray-805 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full disabled:opacity-40 font-semibold cursor-pointer"
+                                      onClick={() => openDurationPicker(workoutEx.exerciseId, idx, set.duration || 0)}
+                                      style={{ background: "transparent", border: "none", color: "var(--m3-on)", fontFamily: "var(--m3-mono-font)", fontSize: "13px", fontWeight: 500, cursor: "pointer", width: "100%" }}
+                                      title="Set duration"
                                     >
-                                      <option value="normal" className="bg-white dark:bg-zinc-900 text-gray-800 dark:text-slate-200">Normal</option>
-                                      <option value="warmup" className="bg-white dark:bg-zinc-900 text-gray-800 dark:text-slate-200">Warmup</option>
-                                      <option value="drop" className="bg-white dark:bg-zinc-900 text-gray-800 dark:text-slate-200">Drop</option>
-                                      <option value="failure" className="bg-white dark:bg-zinc-900 text-gray-800 dark:text-slate-200">Failure</option>
-                                    </select>
+                                      {formatHumanFriendlyDuration(set.duration || 0)}
+                                    </button>
                                   </div>
-
-                                  {isCardio ? (
-                                    <div className="flex-1 px-1 flex justify-center">
-                                      <button
-                                                 disabled={set.isCompleted}
-                                                 type="button"
-                                                 onClick={() => openDurationPicker(workoutEx.exerciseId, idx, set.duration || 0)}
-                                                 className="w-full text-center max-w-[95px] border border-indigo-500/20 dark:border-indigo-500/10 rounded-xl py-1 bg-indigo-500/5 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/10 dark:hover:bg-indigo-500/20 shadow-sm active:scale-95 transition-all disabled:opacity-40 overflow-hidden flex items-center justify-center"
-                                                 title="Set duration utilising wheel drums"
-                                               >
-                                                 <span style={{ fontSize: '12px', transform: 'scale(0.8)', transformOrigin: 'center', display: 'inline-block' }} className="font-mono font-bold whitespace-nowrap">
-                                                   {formatHumanFriendlyDuration(set.duration || 0)}
-                                                 </span>
-                                               </button>
-                                    </div>
-                                  ) : (
-                                    <>
-                                  {/* Weight */}
-                                  <div className="flex-1 px-1 flex flex-col gap-1 items-center justify-center">
-                                    {exerciseDetails?.equipment === 'Barbell' ? (
-                                        <>
-                                            {/* Disabled Total Weight */}
-                                            <div className="flex items-center space-x-1 justify-center w-full">
-                                              <input
-                                                disabled={true}
-                                                type="number"
-                                                value={set.weight === 0 ? "" : set.weight}
-                                                className="w-full text-center max-w-[50px] sm:max-w-20 text-[11px] sm:text-xs border border-gray-200 dark:border-white/10 rounded-lg p-1 bg-gray-50 dark:bg-black/60 shadow-inner text-gray-500 font-mono focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-70"
-                                                style={{ appearance: "none", MozAppearance: "textfield" }}
-                                                title="Total Weight (Bar + Plates)"
-                                              />
-                                              <span className="text-[9px] text-gray-500 font-mono select-none -ml-0.5">tot</span>
-                                            </div>
-
-                                            {/* Editable PLATES */}
-                                            {workoutEx.barWeight !== undefined && workoutEx.barWeight > 0 && (
-                                              <div className="flex flex-col space-y-0 w-full items-center">
-                                                <div className="flex items-center space-x-1 justify-center">
-                                                  <input
-                                                    disabled={set.isCompleted}
-                                                    type="number"
-                                                    value={set.weight - workoutEx.barWeight > 0 ? Number((set.weight - workoutEx.barWeight).toFixed(2)) : ""}
-                                                    placeholder="Plts"
-                                                    onChange={(e) => {
-                                                      const plates = e.target.value === "" ? 0 : parseFloat(e.target.value) || 0;
-                                                      onUpdateSet(workoutEx.exerciseId, idx, {
-                                                        weight: plates + (workoutEx.barWeight || 0),
-                                                      });
-                                                    }}
-                                                    className="w-full text-center max-w-[50px] sm:max-w-20 text-[10px] sm:text-xs border border-dashed border-indigo-400/40 dark:border-indigo-400/20 rounded-lg p-0.5 sm:p-1 bg-white dark:bg-black shadow-sm text-indigo-700 dark:text-indigo-300 font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
-                                                    style={{ appearance: "none", MozAppearance: "textfield" }}
-                                                    title="Input plates weight (total excluding bar)"
-                                                  />
-                                                  <span className="text-[9px] text-gray-500 font-mono select-none -ml-0.5">plt</span>
-                                                </div>
-                                              </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div className="flex items-center space-x-0.5 justify-center w-full">
-                                          <input
-                                            disabled={set.isCompleted}
-                                            type="number"
-                                            value={set.weight === 0 ? "" : set.weight}
-                                            placeholder="Wgt"
-                                            onChange={(e) =>
-                                              onUpdateSet(workoutEx.exerciseId, idx, {
-                                                weight: e.target.value === "" ? 0 : parseFloat(e.target.value) || 0,
-                                              })
-                                            }
-                                            className="w-full text-center max-w-[52px] sm:max-w-[70px] text-[11px] sm:text-xs border border-gray-200 dark:border-white/10 rounded-lg p-1 bg-white dark:bg-black shadow-sm text-gray-900 dark:text-gray-100 font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
-                                            style={{ appearance: "none", MozAppearance: "textfield" }}
-                                            title="Total Weight"
-                                          />
-                                          <span className="text-[9px] text-gray-500 font-mono select-none">kg</span>
-                                        </div>
-                                    )}
+                                  <div className="pbw-rinput">
+                                    <input disabled={set.isCompleted} type="number" value={set.rpe || 5} onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { rpe: parseInt(e.target.value) || 5 })} />
                                   </div>
-
-                                  {/* Reps */}
-                                  <div className="w-14 sm:w-16 shrink-0 px-1 text-center">
+                                </>
+                              ) : (
+                                <>
+                                  <div className="pbw-winput">
                                     <input
                                       disabled={set.isCompleted}
                                       type="number"
-                                      value={set.reps === 0 ? "" : set.reps}
-                                      placeholder="-"
-                                      onChange={(e) =>
-                                        onUpdateSet(workoutEx.exerciseId, idx, {
-                                          reps: e.target.value === "" ? 0 : parseInt(e.target.value) || 0,
-                                        })
+                                      placeholder="Wgt"
+                                      value={
+                                        exerciseDetails?.equipment === 'Barbell' && workoutEx.barWeight
+                                          ? (set.weight - workoutEx.barWeight > 0 ? Number((set.weight - workoutEx.barWeight).toFixed(2)) : "")
+                                          : (set.weight === 0 ? "" : set.weight)
                                       }
-                                      className="w-full text-center max-w-[44px] sm:max-w-[60px] mx-auto text-[11px] sm:text-xs border border-gray-200 dark:border-white/5 rounded-lg p-0.5 sm:p-1.5 bg-white dark:bg-black shadow-sm text-gray-900 dark:text-gray-100 font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
-                                      style={{ appearance: "none", MozAppearance: "textfield" }}
+                                      onChange={(e) => {
+                                        const raw = e.target.value === "" ? 0 : parseFloat(e.target.value) || 0;
+                                        const w = exerciseDetails?.equipment === 'Barbell' ? raw + (workoutEx.barWeight || 0) : raw;
+                                        onUpdateSet(workoutEx.exerciseId, idx, { weight: w });
+                                      }}
+                                      title="Weight"
+                                    />
+                                    <span className="u">kg</span>
+                                  </div>
+                                  <div className="pbw-rinput">
+                                    <input
+                                      disabled={set.isCompleted}
+                                      type="number"
+                                      placeholder="–"
+                                      value={set.reps === 0 ? "" : set.reps}
+                                      onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { reps: e.target.value === "" ? 0 : parseInt(e.target.value) || 0 })}
                                     />
                                   </div>
-                                  </>
-                                  )}
-                                </div>
-
-                                {/* Done */}
-                                <div className="w-10 sm:w-12 flex items-center justify-center shrink-0">
-                                  <AnimatedTickButton
-                                    isCompleted={set.isCompleted}
-                                    onClick={() => {
-                                      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-                                      const nextState = !set.isCompleted;
-                                      onUpdateSet(workoutEx.exerciseId, idx, { isCompleted: nextState });
-                                      if (nextState) {
-                                        const restSec = workoutEx.restTime !== undefined ? workoutEx.restTime : 90;
-                                        triggerRestTimer(restSec, exerciseDetails?.name || "Exercise");
-                                      } else {
-                                        cancelRestTimer();
-                                      }
-                                    }}
-                                  />
-                                </div>
-                              </div>
+                                </>
+                              )}
+                              <button
+                                className={`pbw-donebox ${set.isCompleted ? "on" : ""}`}
+                                onClick={() => {
+                                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+                                  const nextState = !set.isCompleted;
+                                  onUpdateSet(workoutEx.exerciseId, idx, { isCompleted: nextState });
+                                  if (nextState) {
+                                    const restSec = workoutEx.restTime !== undefined ? workoutEx.restTime : 90;
+                                    triggerRestTimer(restSec, exerciseDetails?.name || "Exercise");
+                                  } else {
+                                    cancelRestTimer();
+                                  }
+                                }}
+                              >
+                                <Check />
+                              </button>
                               
                               {isCardio && (
                                 <div className={`w-full mt-2 pt-2 border-t border-gray-100 dark:border-white/5 flex flex-col transition-all duration-300 ${set.isCompleted ? "opacity-35" : ""} ${activeRpeSlide === `${workoutEx.exerciseId}-${idx}` ? "relative z-[52]" : ""}`}>
@@ -2403,14 +2223,10 @@ export default function ActiveWorkout({
                         })}
                       </div>
 
-                      {/* Adding Sets Footer */}
-                      <div className="px-3 pb-3 pt-1 flex justify-end">
-                        <button
-                          onClick={() => onAddSet(workoutEx.exerciseId)}
-                          className="px-4 py-1.5 hover:bg-white/5 text-[var(--m3-primary)] text-xs font-bold rounded-full border border-[color:var(--m3-outline)] flex items-center space-x-1 transition-colors"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add Set</span>
+                      {/* Add Set — exact port .addset */}
+                      <div className="pbw-addset">
+                        <button onClick={() => onAddSet(workoutEx.exerciseId)}>
+                          <Plus /> Add Set
                         </button>
                       </div>
                     </motion.div>
@@ -2461,30 +2277,21 @@ export default function ActiveWorkout({
           })()
         )}
 
-        {/* Global trigger buttons at bottom */}
+        {/* Bottom action buttons — exact port (.addex lime + .botbtns) */}
         {session.exercises.length > 0 && (
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="w-full sm:w-auto px-5 py-2.5 border border-[color:var(--m3-outline)] hover:border-[color:var(--m3-primary)] text-[var(--m3-primary)] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-all group cursor-pointer"
-            >
-              <Plus className="w-4 h-4 group-hover:scale-110" />
-              <span>Add Exercise</span>
+          <div className="pt-4">
+            <button onClick={() => setShowAddModal(true)} className="pbw-addex">
+              <Plus /> Add Exercise
             </button>
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
+            <div className="pbw-botbtns">
               <button
                 onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setShowDiscardConfirm(true); }}
-                className="flex-1 sm:flex-none flex items-center justify-center space-x-1 sm:space-x-1.5 px-3 sm:px-4 md:px-6 py-2.5 bg-rose-500 hover:bg-rose-400 text-white text-[10px] md:text-xs font-black rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all cursor-pointer whitespace-nowrap"
+                className="pbw-botbtn discard"
               >
-                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span>Discard Workout</span>
+                <Trash2 /> Discard
               </button>
-              <button
-                onClick={handleFinishClick}
-                className="flex-1 sm:flex-none flex items-center justify-center space-x-1 sm:space-x-1.5 px-3 sm:px-4 md:px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] md:text-xs font-black rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all cursor-pointer whitespace-nowrap"
-              >
-                <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span>Finish Workout</span>
+              <button onClick={handleFinishClick} className="pbw-botbtn finish">
+                <CheckCircle /> Finish Workout
               </button>
             </div>
           </div>
@@ -2654,7 +2461,7 @@ export default function ActiveWorkout({
 
       {/* Search / Add Exercise Picker Modal */}
       {showAddModal && createPortal(
-        <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/85 z-[9999] overflow-y-auto backdrop-blur-md">
+        <div className="fixed inset-0 z-[9999] overflow-y-auto" style={{ background: "rgba(8,6,14,.72)" }}>
           <div className="min-h-full flex items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -2662,57 +2469,43 @@ export default function ActiveWorkout({
               style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
               className="rounded-[28px] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[calc(100vh-32px)] md:max-h-[85vh] relative"
             >
-              {/* Modal Header */}
-              <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: "var(--m3-outline-q)" }}>
-                <h3 className="font-extrabold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
-                  <Dumbbell className="w-5 h-5 text-indigo-400 animate-pulse" />
-                  <span>Choose Workout Exercise</span>
-                </h3>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="p-2 flex items-center justify-center text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-900 bg-white dark:bg-black border border-gray-150/50 dark:border-white/10 shadow-sm rounded-xl transition-colors cursor-pointer shrink-0"
-                >
-                  <X className="w-4 h-4" />
+              <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true"><defs><symbol id="pbw-cookie" viewBox="0 0 100 100"><path d="M45.2 11.5 C45.8 10.6 54.2 10.6 54.8 11.5 L55.9 13.1 C56.5 14.0 68.2 18.3 69.2 18.0 L71.1 17.4 C72.1 17.1 78.6 22.5 78.5 23.6 L78.2 25.5 C78.1 26.6 84.3 37.4 85.3 37.8 L87.1 38.6 C88.1 39.0 89.6 47.3 88.8 48.1 L87.3 49.4 C86.5 50.1 84.4 62.4 84.9 63.3 L85.8 65.1 C86.3 66.0 82.0 73.4 81.0 73.4 L79.0 73.5 C77.9 73.6 68.4 81.6 68.1 82.6 L67.7 84.6 C67.5 85.6 59.5 88.5 58.7 87.9 L57.1 86.7 C56.2 86.0 43.8 86.0 42.9 86.7 L41.3 87.9 C40.5 88.5 32.5 85.6 32.3 84.6 L31.9 82.6 C31.6 81.6 22.1 73.6 21.0 73.5 L19.0 73.4 C18.0 73.4 13.7 66.0 14.2 65.1 L15.1 63.3 C15.6 62.4 13.5 50.1 12.7 49.4 L11.2 48.1 C10.4 47.3 11.9 39.0 12.9 38.6 L14.7 37.8 C15.7 37.4 21.9 26.6 21.8 25.5 L21.5 23.6 C21.4 22.5 27.9 17.1 28.9 17.4 L30.8 18.0 C31.8 18.3 43.5 14.0 44.1 13.1Z"/></symbol></defs></svg>
+              {/* Picker header — exact port .pkhead */}
+              <div className="pbw-pkhead" style={{ padding: "16px 16px 14px" }}>
+                <Dumbbell className="di" />
+                <h2>Choose Exercise</h2>
+                <button className="cl" onClick={() => setShowAddModal(false)}>
+                  <X />
                 </button>
               </div>
 
-              {/* Sub-header Filter controls */}
-              <div className="p-4 border-b space-y-3" style={{ borderColor: "var(--m3-outline-q)" }}>
-                <input
-                  type="text"
-                  placeholder="Search exercise library..."
-                  value={exerciseSearch}
-                  onChange={(e) => setExerciseSearch(e.target.value)}
-                  style={{ background: "var(--m3-sc)", border: "1px solid var(--m3-outline-q)" }}
-                  className="w-full text-xs font-bold rounded-full px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-
-                {/* Categorization tab scrolling list */}
-                <div className="w-full relative group">
-                  <div className="absolute right-0 top-0 bottom-1 w-12 bg-gradient-to-l from-white/80 dark:from-black/80 to-transparent pointer-events-none z-10 flex items-center justify-end pr-1 md:hidden">
-                    <ChevronRight className="w-4 h-4 text-indigo-500 opacity-60 animate-swipe-wiggle" />
-                  </div>
-                  <div className="flex items-center space-x-1.5 w-full overflow-x-auto pb-1 invisible-scrollbar touch-pan-x" style={{ WebkitOverflowScrolling: 'touch', paddingRight: '40px' }}>
-                    {categories.map((cat) => (
+              {/* Sub-header: search + filter chips */}
+              <div style={{ padding: "0 16px 14px" }}>
+                <div className="pbw-search">
+                  <Search />
+                  <input
+                    type="text"
+                    placeholder="Search exercise library…"
+                    value={exerciseSearch}
+                    onChange={(e) => setExerciseSearch(e.target.value)}
+                  />
+                </div>
+                <div className="pbw-fchips">
+                  {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1 rounded-full text-xs shrink-0 transition-all ${
-                        selectedCategory === cat
-                          ? "bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-extrabold shadow-lg"
-                          : "bg-[var(--m3-sc)] border border-[color:var(--m3-outline-q)] text-[var(--m3-on-var)]"
-                      }`}
+                      className={`pbw-fchip${selectedCategory === cat ? " sel" : ""}`}
                     >
                       {cat}
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
 
               {/* Custom exercise inline form switcher */}
               {showAddCustomInline ? (
-                <form onSubmit={handleSaveCustomInline} className="p-4 bg-white dark:bg-black border-b border-indigo-500/20 space-y-3 shrink-0">
+                <form onSubmit={handleSaveCustomInline} className="p-4 border-b border-indigo-500/20 space-y-3 shrink-0" style={{ background: "var(--m3-sc)" }}>
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-gray-900 dark:text-gray-100 flex items-center space-x-1">
                       <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
@@ -2788,21 +2581,16 @@ export default function ActiveWorkout({
                   </div>
                 </form>
               ) : (
-                <div className="p-3 border-b flex items-center justify-between gap-2.5 shrink-0" style={{ borderColor: "var(--m3-outline-q)" }}>
-                  <span className="text-[11px] text-gray-500 dark:text-slate-400">Can't find your exercise?</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddCustomInline(true)}
-                    className="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-[11px] font-bold rounded-lg transition-colors flex items-center space-x-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Create Custom</span>
+                <div className="pbw-customrow" style={{ marginLeft: "16px", marginRight: "16px" }}>
+                  <span className="q">Can't find your exercise?</span>
+                  <button type="button" onClick={() => setShowAddCustomInline(true)} className="pbw-ccbtn">
+                    <Plus /> Create Custom
                   </button>
                 </div>
               )}
 
               {/* Database scrolling list */}
-              <div className="flex-1 overflow-y-auto divide-y divide-[#171725]">
+              <div className="flex-1 overflow-y-auto">
                 {filteredExercises.length === 0 ? (
                   <div className="p-8 text-center text-gray-500 text-xs">
                     No matching exercises found in library.
@@ -2811,47 +2599,20 @@ export default function ActiveWorkout({
                   filteredExercises.map((ex) => {
                     const isAlreadyAdded = session.exercises.some((se) => se.exerciseId === ex.id);
                     return (
-                      <div
-                        key={ex.id}
-                        className="p-3.5 flex items-center justify-between transition-colors hover:bg-white/5"
-                      >
-                        <div>
-                          <h4
-                            onClick={() => openExerciseGuide(ex)}
-                            className="font-extrabold text-gray-900 dark:text-gray-100 text-xs md:text-sm cursor-pointer hover:text-indigo-350 hover:underline transition-colors"
-                            title="Click to view setup and guide demonstration"
-                          >
-                            {ex.name}
-                          </h4>
-                          <p className="text-[10px] text-indigo-600 dark:text-indigo-300/60 font-mono mt-0.5">
-                            {ex.category} • {ex.equipment}
-                          </p>
+                      <div key={ex.id} className="pbw-exrow" style={{ marginLeft: "16px", marginRight: "16px" }}>
+                        <div className="pbw-exbadge">
+                          <svg className="sf" viewBox="0 0 100 100"><use href="#pbw-cookie" fill="var(--m3-primary-cont)" /></svg>
+                          <Dumbbell className="ic" />
+                        </div>
+                        <div className="pbw-exinfo">
+                          <div className="nm" onClick={() => openExerciseGuide(ex)} title="Click to view setup and guide demonstration">{ex.name}</div>
+                          <div className="ct">{ex.category} · {ex.equipment}</div>
                         </div>
                         <button
-                          onClick={() => {
-                            if (isAlreadyAdded) {
-                              onRemoveExercise(ex.id);
-                            } else {
-                              onAddExercise(ex.id);
-                            }
-                          }}
-                          className={`text-xs px-3 py-1.5 rounded-lg flex items-center space-x-1 font-bold transition-all ${
-                            isAlreadyAdded
-                              ? "bg-rose-950/40 border border-rose-500/20 text-rose-300 hover:bg-rose-900/30"
-                              : "bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md"
-                          }`}
+                          onClick={() => { if (isAlreadyAdded) { onRemoveExercise(ex.id); } else { onAddExercise(ex.id); } }}
+                          className={`pbw-addbtn${isAlreadyAdded ? " added" : ""}`}
                         >
-                          {isAlreadyAdded ? (
-                            <>
-                              <X className="w-3.5 h-3.5" />
-                              <span>Remove</span>
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Add</span>
-                            </>
-                          )}
+                          {isAlreadyAdded ? (<><X /> Remove</>) : (<><Plus /> Add</>)}
                         </button>
                       </div>
                     );
@@ -2859,12 +2620,9 @@ export default function ActiveWorkout({
                 )}
               </div>
 
-              {/* Modal footer close controls */}
-              <div className="p-4 bg-white dark:bg-black dark:border-white/10 shadow-sm border-t border-gray-200 dark:border-white/5 flex justify-end">
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 hover:bg-white/10 text-slate-600 text-xs font-bold rounded-lg transition-colors"
-                >
+              {/* Modal footer — Close Picker (.closepk) */}
+              <div style={{ padding: "0 16px", display: "flex", justifyContent: "flex-end" }}>
+                <button onClick={() => setShowAddModal(false)} className="pbw-closepk">
                   Close Picker
                 </button>
               </div>
