@@ -984,7 +984,8 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "110%", opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-24 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-md z-49 bg-white/95 dark:bg-zinc-950/95 text-gray-900 dark:text-white border border-gray-200/85 dark:border-white/10 p-4 pt-2 shadow-2xl rounded-2xl backdrop-blur-md cursor-pointer text-left select-none"
+              style={{ background: "var(--m3-sc)", border: "1px solid var(--m3-outline-q)" }}
+              className="fixed bottom-28 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-md z-49 text-gray-900 dark:text-white p-4 pt-2 shadow-2xl rounded-[28px] cursor-pointer text-left select-none"
               onTap={() => {
                 if (!isDraggingInfoRef.current) {
                   if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
