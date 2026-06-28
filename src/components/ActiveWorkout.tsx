@@ -2612,25 +2612,23 @@ export default function ActiveWorkout({
 
       {/* Discard Workout Confirmation Modal */}
       {showDiscardConfirm && createPortal(
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/80 z-[10000] flex items-center justify-center p-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4" style={{ background: "rgba(5,4,10,.82)" }}>
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl space-y-4 shadow-black/10 dark:shadow-black/50"
+            className="w-full max-w-sm overflow-hidden"
+            style={{ background: "var(--m3-sc)", borderRadius: "28px", border: "1px solid var(--m3-outline-q)", padding: "24px 20px 18px", boxShadow: "0 16px 40px -12px rgba(0,0,0,.5)" }}
           >
-            <div className="text-center space-y-3">
-              <div className="mx-auto w-12 h-12 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center ring-1 ring-rose-500/20">
-                <AlertTriangle className="w-6 h-6 animate-pulse" />
+            <div style={{ textAlign: "center" }}>
+              <div className="m3-shape lg center" style={{ marginBottom: 6 }}>
+                <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-error-cont)" /></svg>
+                <span className="si"><AlertTriangle style={{ width: 26, height: 26, color: "var(--m3-error)" }} /></span>
               </div>
-              <h3 className="text-base font-extrabold text-gray-900 dark:text-gray-100">
-                Discard Active Workout?
-              </h3>
-              <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed px-1">
-                Are you sure you want to discard this workout? This will clear your current tracked exercises and cannot be undone.
-              </p>
+              <h2 className="m3-h center" style={{ fontSize: "var(--m3-headline-md)", marginTop: 4 }}>Discard active workout?</h2>
+              <p className="m3-body center">This clears your currently tracked exercises and can't be undone.</p>
             </div>
 
-            <div className="pt-2">
+            <div style={{ paddingTop: 14 }}>
               <DiscardSwipeSlider
                 onSwipeLeft={() => {
                   setShowDiscardConfirm(false);
