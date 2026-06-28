@@ -11,6 +11,7 @@ import {
   Check,
   Plus,
   Trash2,
+  Pause,
   X,
   Timer,
   Clock,
@@ -2610,7 +2611,7 @@ export default function ActiveWorkout({
 
       {/* Discard Workout Confirmation Modal */}
       {showDiscardConfirm && createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4" style={{ background: "rgba(5,4,10,.82)" }}>
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4" style={{ background: "rgba(8,6,14,.5)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -2626,16 +2627,18 @@ export default function ActiveWorkout({
               <p className="m3-body center">This clears your currently tracked exercises and can't be undone.</p>
             </div>
 
-            <div style={{ paddingTop: 14 }}>
-              <DiscardSwipeSlider
-                onSwipeLeft={() => {
-                  setShowDiscardConfirm(false);
-                  onDiscard();
-                }}
-                onSwipeRight={() => {
-                  setShowDiscardConfirm(false);
-                }}
-              />
+            <div style={{ paddingTop: 16 }}>
+              <div className="m3-bgroup">
+                <button className="seg danger" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(12); setShowDiscardConfirm(false); onDiscard(); }}>
+                  <Trash2 className="w-4 h-4" /> Discard
+                </button>
+                <button className="seg pausebtn" onClick={() => setShowDiscardConfirm(false)} aria-label="Keep workout">
+                  <Pause className="w-[18px] h-[18px]" />
+                </button>
+                <button className="seg go" onClick={() => setShowDiscardConfirm(false)}>
+                  Continue <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>,
@@ -2649,10 +2652,11 @@ export default function ActiveWorkout({
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-white dark:bg-black dark:border-white/10 shadow-sm rounded-2xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col max-h-[calc(100vh-32px)] md:max-h-[85vh] w-full relative"
+              style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
+              className="rounded-[28px] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[calc(100vh-32px)] md:max-h-[85vh] relative"
             >
               {/* Modal Header */}
-              <div className="p-4 bg-white dark:bg-black dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 flex items-center justify-between">
+              <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: "var(--m3-outline-q)" }}>
                 <h3 className="font-extrabold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
                   <Dumbbell className="w-5 h-5 text-indigo-400 animate-pulse" />
                   <span>Choose Workout Exercise</span>
@@ -2666,13 +2670,14 @@ export default function ActiveWorkout({
               </div>
 
               {/* Sub-header Filter controls */}
-              <div className="p-4 bg-white dark:bg-black dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 space-y-3">
+              <div className="p-4 border-b space-y-3" style={{ borderColor: "var(--m3-outline-q)" }}>
                 <input
                   type="text"
                   placeholder="Search exercise library..."
                   value={exerciseSearch}
                   onChange={(e) => setExerciseSearch(e.target.value)}
-                  className="w-full text-xs font-bold border border-gray-200 dark:border-white/10 rounded-xl p-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400"
+                  style={{ background: "var(--m3-sc)", border: "1px solid var(--m3-outline-q)" }}
+                  className="w-full text-xs font-bold rounded-full px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
 
                 {/* Categorization tab scrolling list */}
@@ -2688,7 +2693,7 @@ export default function ActiveWorkout({
                       className={`px-3 py-1 rounded-full text-xs shrink-0 transition-all ${
                         selectedCategory === cat
                           ? "bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-extrabold shadow-lg"
-                          : "bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 text-slate-350 hover:bg-white/10"
+                          : "bg-[var(--m3-sc)] border border-[color:var(--m3-outline-q)] text-[var(--m3-on-var)]"
                       }`}
                     >
                       {cat}
@@ -2776,7 +2781,7 @@ export default function ActiveWorkout({
                   </div>
                 </form>
               ) : (
-                <div className="p-3 bg-white dark:bg-black dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 flex items-center justify-between gap-2.5 shrink-0">
+                <div className="p-3 border-b flex items-center justify-between gap-2.5 shrink-0" style={{ borderColor: "var(--m3-outline-q)" }}>
                   <span className="text-[11px] text-gray-500 dark:text-slate-400">Can't find your exercise?</span>
                   <button
                     type="button"
@@ -2801,7 +2806,7 @@ export default function ActiveWorkout({
                     return (
                       <div
                         key={ex.id}
-                        className="p-3.5 flex items-center justify-between hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm transition-colors"
+                        className="p-3.5 flex items-center justify-between transition-colors hover:bg-white/5"
                       >
                         <div>
                           <h4

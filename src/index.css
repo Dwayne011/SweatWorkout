@@ -385,6 +385,9 @@ html.light {
 .m3-bgroup { display: flex; gap: 4px; background: var(--m3-sc-high); padding: 5px; border-radius: var(--m3-r-full); }
 .m3-bgroup .seg { flex: 1; border: none; cursor: pointer; padding: 11px 8px; border-radius: var(--m3-r-full); font-family: var(--m3-body-font); font-weight: 500; font-size: var(--m3-label-lg); display: flex; align-items: center; justify-content: center; gap: 7px; background: transparent; color: var(--m3-on-var); }
 .m3-bgroup .seg.sel { background: var(--m3-primary-fill); color: #fff; }
+.m3-bgroup .seg.danger { color: var(--m3-error); }
+.m3-bgroup .seg.go { color: var(--m3-success); }
+.m3-bgroup .seg.pausebtn { flex: 0 0 48px; background: var(--m3-sc-highest); border-radius: 14px; color: var(--m3-primary); }
 .m3-seg2 { display: flex; gap: 5px; background: var(--m3-sc-low); padding: 6px; border-radius: var(--m3-r-l); }
 .m3-seg2 button { flex: 1; border: none; cursor: pointer; padding: 13px 10px; border-radius: 16px; font-family: var(--m3-body-font); font-weight: 500; font-size: var(--m3-label-lg); background: transparent; color: var(--m3-on-var); display: flex; align-items: center; justify-content: center; gap: 7px; }
 .m3-seg2 button.sel { background: var(--m3-primary-fill); color: #fff; }
