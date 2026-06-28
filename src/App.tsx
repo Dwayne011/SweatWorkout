@@ -561,7 +561,7 @@ export default function App() {
 
       {/* 1. INITIAL GOOGLE LOGIN WELCOME GREETING GATE */}
       {!state.user && !hasDismissedGate && (
-        <div className="fixed inset-0 z-[100] bg-white dark:bg-black backdrop-blur-2xl flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto" style={{ background: "var(--m3-bg)" }}>
           {/* Interactive ambient lights */}
           <div className="absolute top-[20%] left-[20%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-3xl" />
           <div className="absolute bottom-[20%] right-[20%] w-[50vw] h-[50vw] rounded-full bg-purple-600/10 blur-3xl" />
@@ -569,58 +569,52 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-white dark:bg-black border border-indigo-500/30 rounded-3xl p-6 md:p-8 text-center space-y-8 shadow-[0_0_50px_rgba(99,102,241,0.25)] relative overflow-hidden"
+            className="w-full max-w-lg rounded-3xl p-6 md:p-8 text-center space-y-7 relative overflow-hidden"
+            style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
           >
             {/* Logo details */}
-            <div className="space-y-3 relative">
-              <div className="inline-flex items-center justify-center p-4 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl hover:scale-105 transition-transform">
-                <Dumbbell className="w-8 h-8 text-gray-900 dark:text-gray-100 animate-pulse" />
+            <div className="space-y-2 relative">
+              <div className="inline-flex items-center justify-center p-4 rounded-2xl" style={{ background: "linear-gradient(150deg, var(--m3-primary-fill), #a06bff)" }}>
+                <Dumbbell className="w-8 h-8 text-white animate-pulse" />
               </div>
-              <div className="text-gray-900 dark:text-gray-100 flex justify-center">
+              <div className="flex justify-center" style={{ color: "var(--m3-on)" }}>
                 <div className="pb-logo hero" style={{ color: "currentColor" }}>
                   <span>PROJECT</span><span className="dot" /><span className="pb">PB</span>
                 </div>
               </div>
-              <p className="text-[10px] font-mono text-indigo-600 dark:text-indigo-300 tracking-widest uppercase font-extrabold">
-                Your Personal Strength Companion
-              </p>
+              <p className="pb-sub" style={{ marginTop: 6 }}>Your personal strength companion</p>
             </div>
 
-            <div className="space-y-4 max-w-md mx-auto text-gray-600 dark:text-slate-300">
-              <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100">Let's build your strength journey together</h2>
-              <p className="text-xs leading-relaxed text-gray-500 dark:text-slate-400">
-                Keep track of your exercises, monitor sets and weight, view progressive statistics, and save your custom routines easily.
-              </p>
-              <div className="p-3 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-xl text-[11px] text-indigo-600 dark:text-indigo-300/90 font-semibold font-mono flex items-center justify-center gap-1.5">
-                <CheckCircle className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span>Save and restore your workouts across any device</span>
+            <div className="space-y-3 max-w-md mx-auto">
+              <h2 className="m3-h center" style={{ fontSize: "var(--m3-title-lg)", margin: 0 }}>Let's build your strength journey together</h2>
+              <p className="m3-body center">Keep track of exercises, monitor sets and weight, view progressive statistics, and save custom routines.</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--m3-sc)", borderRadius: 14, padding: "12px 14px", textAlign: "left" }}>
+                <CheckCircle style={{ width: 20, height: 20, color: "var(--m3-success)", flex: "none" }} />
+                <span style={{ fontFamily: "var(--m3-mono-font)", fontSize: "var(--m3-body-md)", fontWeight: 500, color: "var(--m3-on-var)" }}>Save and restore your workouts across any device</span>
               </div>
             </div>
 
             {/* Triggers */}
-            <div className="flex flex-col gap-3.5 pt-2">
-              <button
-                onClick={handleGoogleLogin}
-                className="w-full py-4 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 font-bold text-sm rounded-2xl shadow-xl transition-all hover:scale-[1.01] flex items-center justify-center space-x-2 shrink-0 cursor-pointer text-white"
-              >
-                <LogIn className="w-5 h-5 text-gray-900 dark:text-gray-100" />
+            <div className="m3-stack" style={{ paddingTop: 2 }}>
+              <button onClick={handleGoogleLogin} className="m3-btn fill">
+                <LogIn className="w-[18px] h-[18px]" />
                 <span>Sync with Google Account</span>
               </button>
 
               {window.self !== window.top && (
-                <p className="text-[10px] text-[#f59e0b] leading-normal font-mono bg-amber-500/5 border border-amber-500/10 p-3 rounded-xl max-w-sm mx-auto text-left">
-                  ⚠️ <strong>Framed Preview Hint:</strong> Google Authentication popups are blocked inside iframes by modern browser privacy controls. Click <strong>"Open in a new tab"</strong> at the top right of your screen to log in safely.
+                <p style={{ fontFamily: "var(--m3-mono-font)", fontSize: 11, lineHeight: 1.5, color: "#d9920a", background: "rgba(245,158,11,.06)", border: "1px solid rgba(245,158,11,.18)", padding: 12, borderRadius: 14, maxWidth: 360, margin: "0 auto", textAlign: "left" }}>
+                  ⚠️ <strong>Framed preview hint:</strong> Google login popups are blocked inside iframes. Click <strong>"Open in a new tab"</strong> at the top-right to log in safely.
                 </p>
               )}
-              
+
               <button
                 onClick={() => {
                   sessionStorage.setItem("projectpb_dismissed_gate", "true");
                   setHasDismissedGate(true);
                 }}
-                className="text-xs text-slate-500 hover:text-gray-600 dark:text-slate-300 underline font-mono tracking-wide uppercase transition-colors"
-               >
-                Continue Offline Sandbox
+                className="pb-skip"
+              >
+                Continue offline sandbox
               </button>
             </div>
           </motion.div>

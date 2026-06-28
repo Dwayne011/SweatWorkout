@@ -377,6 +377,7 @@ html.light {
 .pb-logo.hero { font-size: clamp(30px, 9vw, 42px); gap: .3em; }
 .pb-sub { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .18em; color: var(--m3-on-dim); text-transform: uppercase; line-height: 1.4; margin-top: 4px; }
 .pb-sub.hero { letter-spacing: .22em; margin-top: 10px; }
+.pb-skip { font-family: var(--m3-mono-font); font-size: var(--m3-label-md); font-weight: 500; letter-spacing: .04em; color: var(--m3-on-dim); text-decoration: underline; text-underline-offset: 3px; text-transform: uppercase; background: none; border: none; cursor: pointer; }
 
 /* Fill the viewport background so overscroll / past-content area isn't black */
 html.dark { background-color: #0b0910; }
