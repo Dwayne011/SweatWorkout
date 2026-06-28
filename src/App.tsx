@@ -141,23 +141,25 @@ function WorkoutBanner({ activeWorkout, setActiveTab, activeTab, exercises, rest
           if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
           setActiveTab("workouts");
         }}
-        className="bg-gray-150 dark:bg-zinc-950 border-b border-black/5 dark:border-white/10 p-3 pt-4 flex items-center justify-between cursor-pointer relative overflow-hidden shrink-0 shadow-md touch-none"
+        style={{ background: "var(--m3-err-solid)" }}
+        className={`${isTimerRunning ? "pbw-breathe " : ""}p-3 pt-4 flex items-center justify-between cursor-pointer relative overflow-hidden shrink-0 touch-none`}
       >
         {/* Visual pull drag-up indicator bar */}
-        <div className="absolute top-1 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none opacity-80 z-20">
-          <div className="w-8 h-[3.5px] bg-zinc-500/80 dark:bg-white/45 rounded-full shadow-[0_0.5px_1px_rgba(0,0,0,0.15)] dark:shadow-none" />
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-20">
+          <div className="w-[46px] h-[4px] bg-white/50 rounded-full" />
         </div>
 
-        {/* Retracting Red-to-Rose Background Accent Section (scaleX = GPU-composited, no layout thrash) */}
-        <motion.div
-          animate={{ scaleX: Math.max(0, Math.min(1, progressPercent / 100)) }}
-          transition={{ duration: 1, ease: "linear" }}
-          style={{ transformOrigin: "left" }}
-          className="absolute inset-y-0 left-0 w-full origin-left bg-gradient-to-r from-red-600 to-rose-600"
-        />
-        
-        {/* Background patterns overlay */}
-        <div className="absolute inset-0 bg-black/5 mix-blend-overlay pointer-events-none" />
+        {/* Thin progress line at the seam with the nav — drains as rest counts down */}
+        {isTimerRunning && (
+          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black/25 z-20">
+            <motion.div
+              className="h-full origin-left"
+              style={{ background: "rgba(255,255,255,.9)", transformOrigin: "left" }}
+              animate={{ scaleX: Math.max(0, Math.min(1, (restSecondsLeft || 0) / (restTimerTarget?.total || 90))) }}
+              transition={{ duration: 1, ease: "linear" }}
+            />
+          </div>
+        )}
 
         <div className="flex items-center justify-between gap-3 relative z-10 w-full min-w-0 pr-2">
           <div className="flex items-center gap-3 w-full min-w-0">

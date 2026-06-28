@@ -592,6 +592,10 @@ html.light { background-color: #fcfaff; }
 /* exercise-level swipe reveal */
 .pbw-exswipe { position: relative; border-radius: 26px; overflow: hidden; }
 .pbw-rpe-row { grid-column: 1 / -1; }
+/* Docked rest-timer bar — gently breathes between the two controlled reds */
+@keyframes pbw-breathe { 0%, 100% { background: var(--m3-errd); } 50% { background: var(--m3-err-solid); } }
+.pbw-breathe { animation: pbw-breathe 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pbw-breathe { animation: none; } }
 
 /* The fluid-glow loop (scale/rotate/translate on big blurred gradients) is a
    constant GPU compositor cost. Keep the static gradient but drop the animation
