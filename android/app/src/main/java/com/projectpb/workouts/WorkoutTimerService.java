@@ -283,7 +283,6 @@ public class WorkoutTimerService extends Service {
                 b.setWhen(workoutStartTime).setUsesChronometer(true).setChronometerCountDown(false);
             }
             b.addAction(0, "Done", actionIntent(ACTION_DONE));
-            b.addAction(0, "End", actionIntent(ACTION_END));
         }
 
         if (alerting) {

@@ -1044,7 +1044,14 @@ export default function ActiveWorkout({
     const exerciseName = exDef ? exDef.name : ((currentEx as any).name || "Exercise");
     const idx = currentEx.sets.findIndex((s: any) => !s.isCompleted);
     const setNum = idx !== -1 ? idx + 1 : currentEx.sets.length;
-    const setLabel = currentEx.sets.length > 0 ? `Set ${setNum} of ${currentEx.sets.length}` : "";
+    let setLabel = currentEx.sets.length > 0 ? `Set ${setNum} of ${currentEx.sets.length}` : "";
+    const activeSet = currentEx.sets[idx !== -1 ? idx : currentEx.sets.length - 1];
+    if (activeSet) {
+      const w = activeSet.weight || 0, r = activeSet.reps || 0;
+      if (w > 0 && r > 0) setLabel += ` · ${w} kg × ${r} reps`;
+      else if (r > 0) setLabel += ` · ${r} reps`;
+      else if (w > 0) setLabel += ` · ${w} kg`;
+    }
     return { exerciseName, setLabel };
   }, [session.exercises, exercisesList]);
 
