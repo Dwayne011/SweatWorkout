@@ -1067,47 +1067,15 @@ export default function App() {
                       <div className="flex flex-col gap-1 max-h-[140px] overflow-y-auto pr-1">
                         {currentEx.sets.map((set: any, idx: number) => {
                           const isCurrent = !set.isCompleted && (idx === 0 || currentEx.sets[idx - 1]?.isCompleted);
+                          const state = set.isCompleted ? "done" : isCurrent ? "active" : "pending";
                           return (
-                            <div 
-                              key={set.id}
-                              className={`flex items-center justify-between p-2 rounded-lg text-xs leading-none border transition-all ${
-                                set.isCompleted 
-                                  ? "bg-emerald-500/10 dark:bg-emerald-500/10 border-emerald-500/20 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
-                                  : isCurrent
-                                  ? "bg-indigo-500/5 dark:bg-indigo-500/20 border-indigo-500/30 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-extrabold shadow-sm"
-                                  : "bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-500 dark:text-gray-400"
-                              }`}
-                            >
-                              <div className="flex items-center space-x-2">
-                                <span className={`font-mono text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                                  set.isCompleted
-                                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                                    : isCurrent
-                                    ? "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300"
-                                    : "bg-gray-200/60 dark:bg-white/10 text-gray-600 dark:text-gray-400"
-                                }`}>
-                                  Set {idx + 1}
-                                </span>
-                                {set.type !== "normal" && (
-                                  <span className="text-[8px] font-mono font-black tracking-wider uppercase px-1 rounded bg-amber-500/15 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
-                                    {set.type}
-                                  </span>
-                                )}
-                                <span className="font-semibold text-[11px] text-gray-800 dark:text-gray-200">{set.weight} kg × {set.reps} reps</span>
-                              </div>
-                              
-                              <div className="flex items-center">
-                                {set.isCompleted ? (
-                                  <span className="bg-emerald-600 dark:bg-emerald-500 text-white rounded-full p-0.5 flex items-center justify-center">
-                                    <Check className="w-2.5 h-2.5 stroke-[3]" />
-                                  </span>
-                                ) : isCurrent ? (
-                                  <span className="text-[8px] font-bold bg-indigo-600 dark:bg-indigo-550 text-white rounded px-1.5 py-0.5 font-mono animate-pulse">
-                                    ACTIVE
-                                  </span>
-                                ) : (
-                                  <span className="w-3.5 h-3.5 rounded-full border border-gray-300 dark:border-white/15" />
-                                )}
+                            <div key={set.id} className={`pbw-setrow ${state}`}>
+                              <span className="set-badge">Set {idx + 1}</span>
+                              <span className="set-data">
+                                {set.weight} kg × {set.reps} reps{set.type !== "normal" ? ` · ${set.type}` : ""}
+                              </span>
+                              <div className="set-check">
+                                {set.isCompleted ? <Check /> : isCurrent ? <span>Active</span> : null}
                               </div>
                             </div>
                           );
