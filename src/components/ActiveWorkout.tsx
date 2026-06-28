@@ -710,6 +710,9 @@ export default function ActiveWorkout({
   const [showNoCompletedSetsModal, setShowNoCompletedSetsModal] = useState(false);
   const [emptyWorkoutAction, setEmptyWorkoutAction] = useState<"continue" | "discard">("continue");
   const [draggingSetId, setDraggingSetId] = useState<string | null>(null);
+  // Tracks whether the current swipe is past the delete threshold, so the
+  // threshold-cross haptic fires exactly once per crossing (not every frame).
+  const swipeArmedRef = useRef(false);
   const [activeRpeSlide, setActiveRpeSlide] = useState<string | null>(null);
   const [draggingExerciseId, setDraggingExerciseId] = useState<string | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -1905,14 +1908,19 @@ export default function ActiveWorkout({
                       dragDirectionLock
                       dragConstraints={{ left: -140, right: 0 }}
                       dragElastic={{ left: 0.15, right: 0 }}
-                      onDragStart={() => {
-                        setDraggingExerciseId(workoutEx.id);
-                        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(5);
+                      onDragStart={() => { setDraggingExerciseId(workoutEx.id); }}
+                      onDrag={(e, info) => {
+                        const armed = info.offset.x < -80;
+                        if (armed !== swipeArmedRef.current) {
+                          swipeArmedRef.current = armed;
+                          if (armed) haptics.swipeThreshold();
+                        }
                       }}
                       onDragEnd={(e, info) => {
                         setDraggingExerciseId(null);
+                        swipeArmedRef.current = false;
                         if (info.offset.x < -80) {
-                          if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                          haptics.deleteCommit();
                           setPendingDeleteExerciseId(workoutEx.exerciseId);
                         }
                       }}
@@ -2037,14 +2045,19 @@ export default function ActiveWorkout({
                               dragDirectionLock
                               dragConstraints={{ left: -86, right: 0 }}
                               dragElastic={{ left: 0.12, right: 0 }}
-                              onDragStart={() => {
-                                setDraggingSetId(set.id);
-                                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(5);
+                              onDragStart={() => { setDraggingSetId(set.id); }}
+                              onDrag={(e, info) => {
+                                const armed = info.offset.x < -60;
+                                if (armed !== swipeArmedRef.current) {
+                                  swipeArmedRef.current = armed;
+                                  if (armed) haptics.swipeThreshold();
+                                }
                               }}
                               onDragEnd={(e, info) => {
                                 setDraggingSetId(null);
+                                swipeArmedRef.current = false;
                                 if (info.offset.x < -60) {
-                                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                                  haptics.deleteCommit();
                                   onRemoveSet(workoutEx.exerciseId, idx);
                                 }
                               }}
