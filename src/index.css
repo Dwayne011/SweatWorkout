@@ -6,6 +6,31 @@
 @theme {
   --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Re-theme Tailwind "indigo" to the M3 violet brand so every legacy
+     Tailwind-styled component matches the M3 design system app-wide. */
+  --color-indigo-50:  #f2ecfe;
+  --color-indigo-100: #e8ddff;
+  --color-indigo-200: #d4c2ff;
+  --color-indigo-250: #c8b2ff;
+  --color-indigo-300: #b69cff;
+  --color-indigo-350: #ab8cff;
+  --color-indigo-400: #9b78f4;
+  --color-indigo-405: #9370f0;
+  --color-indigo-450: #885fee;
+  --color-indigo-500: #7b53f6;
+  --color-indigo-505: #744cf0;
+  --color-indigo-550: #6f47ec;
+  --color-indigo-600: #6a3fe6;
+  --color-indigo-650: #6138db;
+  --color-indigo-700: #5a2fd0;
+  --color-indigo-750: #4a2aae;
+  --color-indigo-800: #3a2580;
+  --color-indigo-805: #45288f;
+  --color-indigo-850: #2f1f6e;
+  --color-indigo-855: #2b1c66;
+  --color-indigo-900: #241258;
+  --color-indigo-950: #160a3a;
 }
 
 @layer base {
