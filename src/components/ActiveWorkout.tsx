@@ -1952,8 +1952,9 @@ export default function ActiveWorkout({
                     onDragOver={(e) => handleDragOver(e, workoutEx.id)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, workoutEx.id)}
-                    className={`relative overflow-hidden rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-2xl group min-h-[140px] transition-all duration-300 animate-fadeIn ${
-                      isOver ? "ring-2 ring-indigo-400 border-dashed border-indigo-405 bg-indigo-950/20 scale-[1.015]" : ""
+                    style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
+                    className={`relative overflow-hidden rounded-[22px] shadow-sm group min-h-[140px] transition-all duration-300 animate-fadeIn ${
+                      isOver ? "ring-2 ring-indigo-400 border-dashed scale-[1.015]" : ""
                     }`}
                   >
                     {/* Swipe delete hint underlay */}
@@ -1986,24 +1987,24 @@ export default function ActiveWorkout({
                         x: isPendingDelete ? -120 : 0
                       }}
                       transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      className="bg-white dark:bg-black dark:border-white/10 shadow-sm relative z-10 w-full h-full"
+                      className="relative z-10 w-full h-full"
                     >
-                      <div className="bg-white dark:bg-black p-4 flex flex-col border-b border-gray-200 dark:border-white/5">
+                      <div className="p-4 flex flex-col border-b" style={{ borderColor: "var(--m3-outline-q)" }}>
                         <div className="flex items-start justify-between w-full gap-4">
                           <div className="flex-1 min-w-0">
                             <h4
                               onClick={() => exerciseDetails && openExerciseGuide(exerciseDetails)}
-                              className="text-[18px] sm:text-[20px] font-extrabold text-gray-900 dark:text-gray-100 leading-tight tracking-tight hover:text-indigo-350 hover:underline transition-colors cursor-pointer select-text"
+                              className="text-[18px] sm:text-[20px] font-bold text-[var(--m3-on)] leading-tight tracking-tight hover:underline transition-colors cursor-pointer select-text"
                               title="Click to view setup and guide demonstration"
                             >
                               {mainTitle}
                             </h4>
                             {subtitleModifier && (
-                              <div className="text-[13px] font-semibold text-indigo-500 dark:text-indigo-300 mt-1 leading-snug">
+                              <div className="text-[13px] font-semibold text-[var(--m3-primary)] mt-1 leading-snug">
                                 {subtitleModifier}
                               </div>
                             )}
-                            <div className="text-[11px] sm:text-[12px] font-mono tracking-wide font-bold text-slate-400 dark:text-slate-500 uppercase mt-1">
+                            <div className="text-[11px] sm:text-[12px] font-mono tracking-wide font-bold text-[var(--m3-on-dim)] uppercase mt-1">
                               {exerciseDetails?.category} &bull; {exerciseDetails?.equipment}
                             </div>
                           </div>
@@ -2110,7 +2111,7 @@ export default function ActiveWorkout({
                       {/* Sets List (Flex Layout) */}
                       <div className="flex flex-col gap-1 mx-1 sm:mx-2 my-2">
                         {/* Sets Header */}
-                        <div className="flex items-center text-[9px] sm:text-[10px] text-indigo-600 dark:text-indigo-300/60 uppercase tracking-widest font-extrabold pb-1.5 mb-1 sm:pb-2 border-b border-gray-200 dark:border-white/5 px-2">
+                        <div className="flex items-center text-[9px] sm:text-[10px] text-[var(--m3-on-dim)] uppercase tracking-widest font-bold pb-1.5 mb-1 sm:pb-2 border-b px-2" style={{ borderColor: "var(--m3-outline-q)" }}>
                           <div className="w-8 sm:w-12 text-center shrink-0">Set</div>
                           <div className="w-[4.4rem] sm:w-20 shrink-0 px-0.5">Type</div>
                           {isCardio ? (
@@ -2123,7 +2124,7 @@ export default function ActiveWorkout({
                           )}
                           <div className="w-10 sm:w-12 text-center shrink-0">Done</div>
                         </div>
-                        
+
                         {workoutEx.sets.map((set, idx) => {
                           const sliderTheme = getSliderColourTheme(set.rpe || 5);
                           const rpePercentage = (((set.rpe || 5) - 1) / 9) * 100;
@@ -2155,17 +2156,16 @@ export default function ActiveWorkout({
                                   onRemoveSet(workoutEx.exerciseId, idx);
                                 }
                               }}
-                              className={`flex flex-col relative z-10 w-full py-1.5 px-2 rounded-xl cursor-grab active:cursor-grabbing border transition-colors ${
-                                set.isCompleted 
-                                  ? "bg-gray-100 dark:bg-zinc-950 text-slate-500 border-indigo-950/10 dark:border-white/5 saturate-[0.14]" 
-                                  : "bg-white dark:bg-black border-transparent shadow-sm hover:border-gray-200 dark:hover:border-white/10"
+                              style={{ background: set.isCompleted ? "var(--m3-sc-low)" : "var(--m3-sc)" }}
+                              className={`flex flex-col relative z-10 w-full py-1.5 px-2 rounded-xl cursor-grab active:cursor-grabbing border border-transparent transition-colors ${
+                                set.isCompleted ? "saturate-[0.6]" : "shadow-sm"
                               }`}
                             >
                               <div className="flex items-center w-full">
                                 {/* Inner fader wrapper for completed state */}
-                                <div className={`flex items-center flex-1 min-w-0 ${set.isCompleted ? "opacity-35" : ""}`}>
+                                <div className={`flex items-center flex-1 min-w-0 ${set.isCompleted ? "opacity-45" : ""}`}>
                                   {/* Set number */}
-                                  <div className="w-8 sm:w-12 text-center text-xs font-bold text-indigo-400 font-mono shrink-0">
+                                  <div className="w-8 sm:w-12 text-center text-xs font-bold text-[var(--m3-primary)] font-mono shrink-0">
                                     {idx + 1}
                                   </div>
 
