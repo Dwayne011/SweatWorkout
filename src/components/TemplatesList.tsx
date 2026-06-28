@@ -193,49 +193,30 @@ export default function TemplatesList({
         {allAvailableTemplates.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {allAvailableTemplates.map((tp) => (
-              <div
-                key={tp.id}
-                className="bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-5 shadow-2xl flex flex-col justify-between space-y-4"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <h4 className="font-extrabold text-gray-900 dark:text-gray-100 text-base md:text-lg leading-tight">
-                      {tp.name}
-                    </h4>
-                    <button
-                      onClick={() => onDeleteTemplate(tp.id)}
-                      className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-gray-50 dark:bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm rounded-lg transition-colors"
-                      title="Delete saved template"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+              <div key={tp.id} className="pbw-rchip">
+                <div className="rhead">
+                  <div className="rbadge">
+                    <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-primary-cont)" /></svg>
+                    <span>{tp.name.split(/\s+/).filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase()}</span>
                   </div>
-                  {tp.notes && <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">{tp.notes}</p>}
-                  
-                  {/* Exercises Checklist summary */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {tp.exercises.slice(0, 3).map((ex, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center text-xs bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm text-slate-350 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/5 font-normal"
-                      >
-                        {ex.sets.length}x {getExerciseName(ex.exerciseId)}
-                      </span>
-                    ))}
-                    {tp.exercises.length > 3 && (
-                      <span className="text-[10px] text-indigo-600 dark:text-indigo-300/60 font-semibold bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm px-2 rounded-lg border border-gray-200 dark:border-white/5 leading-6">
-                        +{tp.exercises.length - 3} more
-                      </span>
-                    )}
-                  </div>
+                  <div className="rtitle"><div className="rname">{tp.name}</div></div>
+                  <button className="rmenu" onClick={() => onDeleteTemplate(tp.id)} title="Delete saved routine">
+                    <Trash2 />
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => onStartFromTemplate(tp.id)}
-                  className="w-full py-2.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-bold text-xs rounded-xl transition-all shadow-lg flex items-center justify-center space-x-1 ring-1 ring-white/10"
-                >
-                  <Play className="w-3.5 h-3.5 fill-white" />
-                  <span>Launch Template</span>
+                <div className="rmeta">
+                  <b>{tp.exercises.length} exercise{tp.exercises.length === 1 ? "" : "s"}</b> &middot; {tp.exercises.reduce((a, ex) => a + ex.sets.length, 0)} sets
+                </div>
+                <div className="rchips">
+                  {tp.exercises.slice(0, 3).map((ex, idx) => (
+                    <span key={idx} className="rc"><span className="x">{ex.sets.length}&times; </span>{getExerciseName(ex.exerciseId)}</span>
+                  ))}
+                  {tp.exercises.length > 3 && (
+                    <span className="rc more">+{tp.exercises.length - 3} more</span>
+                  )}
+                </div>
+                <button className="rstart" onClick={() => onStartFromTemplate(tp.id)}>
+                  <Play /> Start routine
                 </button>
               </div>
             ))}

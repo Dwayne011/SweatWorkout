@@ -629,6 +629,25 @@ html.light { background-color: #fcfaff; }
 .pbw-jcard .jchev { color: var(--m3-on-dim); margin-left: auto; }
 .pbw-jcard .jchev svg { width: 18px; height: 18px; }
 
+/* Routines — v5 chip cards (.rchip, Variant 2) */
+.pbw-rchip { background: var(--m3-sc-low); border-radius: 28px; padding: 20px; margin-bottom: 14px; }
+.pbw-rchip .rhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.pbw-rchip .rbadge { width: 42px; height: 42px; position: relative; display: grid; place-items: center; flex: none; margin-right: 12px; }
+.pbw-rchip .rbadge svg.sf { position: absolute; width: 100%; height: 100%; }
+.pbw-rchip .rbadge span { position: relative; z-index: 1; font-weight: 700; font-size: 15px; color: var(--m3-primary); }
+.pbw-rchip .rtitle { flex: 1; min-width: 0; display: flex; align-items: center; }
+.pbw-rchip .rname { font-family: var(--m3-display-font); font-weight: 500; font-size: 22px; letter-spacing: -.01em; color: var(--m3-on); line-height: 1.1; }
+.pbw-rchip .rmenu { color: var(--m3-on-dim); flex: none; padding: 2px; cursor: pointer; background: none; border: none; }
+.pbw-rchip .rmenu svg { width: 22px; height: 22px; }
+.pbw-rchip .rmeta { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--m3-on-dim); margin: 10px 0 14px; }
+.pbw-rchip .rmeta b { color: var(--m3-primary); font-weight: 500; }
+.pbw-rchip .rchips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+.pbw-rchip .rc { background: var(--m3-sc); color: var(--m3-on-var); font-size: 13px; font-weight: 400; padding: 9px 14px; border-radius: 999px; white-space: nowrap; }
+.pbw-rchip .rc .x { color: var(--m3-primary); font-weight: 500; font-family: var(--m3-mono-font); font-size: 12px; }
+.pbw-rchip .rc.more { background: transparent; color: var(--m3-primary); font-weight: 500; }
+.pbw-rchip .rstart { width: 100%; border: none; cursor: pointer; background: var(--m3-primary-fill); color: #fff; border-radius: 999px; padding: 15px; font-family: var(--m3-display-font); font-weight: 500; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 9px; }
+.pbw-rchip .rstart svg { width: 18px; height: 18px; }
+
 /* The fluid-glow loop (scale/rotate/translate on big blurred gradients) is a
    constant GPU compositor cost. Keep the static gradient but drop the animation
    on the Android WebView and for anyone who prefers reduced motion. */
