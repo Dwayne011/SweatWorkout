@@ -246,95 +246,39 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                         setTimeout(() => onDeleteLog(log.id), 300);
                       }
                     }}
-                    className={`bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm shadow-inner backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden relative z-10 w-full h-full ${
+                    className={`bg-[var(--m3-sc)] rounded-[26px] overflow-hidden relative z-10 w-full h-full ${
                       deletingLogId === log.id ? 'translate-x-[-100vw] opacity-0 transition-all duration-300' : ''
                     }`}
                   >
-                  {/* Collapsed top bar summary card */}
+                  {/* Collapsed summary — v5 .jcard */}
                   <div
                     onClick={() => toggleExpand(log.id)}
-                    className="p-4 md:p-5 flex flex-wrap items-center justify-between cursor-pointer gap-4 bg-transparent hover:bg-gray-50 dark:bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm select-none transition-all"
+                    className="pbw-jcard"
+                    style={{ margin: 0, background: "transparent", borderRadius: 0, cursor: "pointer" }}
                   >
-                    <div className="flex items-center space-x-3.5">
-                      <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl ring-1 ring-indigo-500/20">
-                        <Calendar className="w-5 h-5 text-indigo-400" />
-                      </div>
-                      <div>
-                        <h4 className="font-extrabold text-gray-900 dark:text-gray-100 text-sm md:text-base leading-snug">
-                          {log.name}
-                        </h4>
-                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-indigo-350/60 font-mono mt-0.5">
-                          <span>{formatDate(log.startTime)}</span>
-                          <span>•</span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-indigo-400" />
-                            {duration} mins
-                          </span>
+                    <div className="jtop">
+                      <div className="jbadge"><Calendar /></div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="jname">{log.name}</div>
+                        <div className="jmeta">
+                          {formatDate(log.startTime)} <span>·</span> <Clock /> <span className="dur">{duration} mins</span>
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-slate-400 font-sans mt-1.5 flex flex-wrap gap-1.5 items-center">
-                          <span className="text-[10px] font-bold text-indigo-400 font-mono uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/10 shrink-0">
-                            Exercises
-                          </span>
-                          <span className="text-gray-600 dark:text-slate-300 text-[11px] font-medium whitespace-normal break-words max-w-full flex-1">
-                            {(log.exercises || []).map(ex => getExerciseName(ex.exerciseId)).join(", ") || "No exercises logged"}
-                          </span>
+                        <div className="jex">
+                          <span className="lbl">Exercises</span>
+                          <span className="nms">{(log.exercises || []).map(ex => getExerciseName(ex.exerciseId)).join(", ") || "No exercises logged"}</span>
                         </div>
                       </div>
                     </div>
-
-                    {/* Key volume stats summary badges */}
-                    <div className="flex items-center space-x-4 md:space-x-6">
-                      <div className="hidden sm:block text-right">
-                        <span className="block text-[9px] font-bold text-indigo-600 dark:text-indigo-300/40 uppercase tracking-widest font-mono">Lifting Volume</span>
-                        <span className="text-xs font-extrabold font-mono text-gray-900 dark:text-gray-100">{totalVolume} kg</span>
-                      </div>
-                      <div className="hidden sm:block text-right">
-                        <span className="block text-[10px] font-bold text-indigo-600 dark:text-indigo-300/40 uppercase tracking-widest font-mono">Completed Sets</span>
-                        <span className="text-xs font-extrabold font-mono text-gray-900 dark:text-gray-100">{completedSets} sets</span>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        {deletingLogId !== log.id && (
-                          log.analysis ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onViewAnalysis(log);
-                              }}
-                              className="px-3 py-1.5 bg-[var(--m3-sc-low)] hover:bg-indigo-950/80 border border-indigo-500/20 hover:border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:text-gray-900 dark:text-gray-100 rounded-xl flex items-center space-x-1.5 text-[10px] font-extrabold uppercase tracking-wider font-mono transition-all cursor-pointer shrink-0 border border-gray-200 dark:border-white/5 hover:scale-[1.02]"
-                              style={{ boxShadow: "0 0 12px rgba(99, 102, 241, 0.35), 0 0 8px rgba(168, 85, 247, 0.25)" }}
-                              title="View completed coaching insights"
-                            >
-                              <Sparkles className="w-3.5 h-3.5 text-yellow-350 fill-yellow-350 animate-pulse" />
-                              <span>View Insights</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onViewAnalysis(log);
-                              }}
-                              className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-650 hover:from-indigo-500 hover:to-purple-550 text-white rounded-xl flex items-center space-x-1.5 text-[10px] font-extrabold uppercase tracking-wider font-mono transition-all cursor-pointer shrink-0 border border-gray-200 dark:border-white/10 hover:scale-[1.02]"
-                              style={{ boxShadow: "0 0 18px rgba(99, 102, 241, 0.65), 0 0 12px rgba(168, 85, 247, 0.45)" }}
-                              title="Run post-workout coaching metrics report"
-                            >
-                              <Sparkles className="w-3.5 h-3.5 text-yellow-250 fill-yellow-250 shrink-0 animate-bounce" />
-                              <span>Analyze Workout</span>
-                            </button>
-                          )
-                        )}
-
-                        {deletingLogId === log.id ? (
-                          <span className="text-[10px] text-rose-500 font-mono italic px-2">Deleting...</span>
-                        ) : (
-                          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono italic px-2 col-span-1">← Swipe to delete</span>
-                        )}
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5 text-indigo-350/70" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-indigo-350/70" />
-                        )}
-                      </div>
+                    <div className="jfoot">
+                      {deletingLogId === log.id ? (
+                        <span className="text-[10px] text-rose-500 font-mono italic px-2">Deleting…</span>
+                      ) : (
+                        <button className="viewins" onClick={(e) => { e.stopPropagation(); onViewAnalysis(log); }}>
+                          <Sparkles /> {log.analysis ? "View insights" : "Analyze workout"}
+                        </button>
+                      )}
+                      <span className="jhint">&larr; Swipe to delete</span>
+                      <span className="jchev">{isExpanded ? <ChevronUp /> : <ChevronDown />}</span>
                     </div>
                   </div>
 

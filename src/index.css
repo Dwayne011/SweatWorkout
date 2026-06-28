@@ -597,6 +597,38 @@ html.light { background-color: #fcfaff; }
 .pbw-breathe { animation: pbw-breathe 2.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pbw-breathe { animation: none; } }
 
+/* Discard dialog — v5 destructive header sheet (slides up over a blurred scrim) */
+.pbw-dsheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--m3-surface); border-radius: 28px 28px 0 0; overflow: hidden; z-index: 40; box-shadow: 0 -10px 40px -10px rgba(0,0,0,.5); padding-bottom: env(safe-area-inset-bottom); }
+.pbw-dsheet .dhd { background: var(--m3-error-cont); padding: 22px 20px 20px; text-align: center; }
+.pbw-dsheet .dhd h2 { color: var(--m3-on-error-cont); font-size: 22px; font-weight: 400; line-height: 1.2; font-family: var(--m3-display-font); }
+.pbw-dsheet .dbd { padding: 18px 20px 26px; }
+.pbw-dsheet .dbd p { color: var(--m3-on-var); text-align: center; font-size: 14px; line-height: 1.5; font-family: var(--m3-body-font); }
+.pbw-dsheet .dbd p b { color: var(--m3-on); font-weight: 600; }
+.pbw-dsheet .drow { display: flex; gap: 10px; margin-top: 18px; }
+.pbw-dsheet .db { flex: 1; border: none; border-radius: 999px; padding: 15px; font-weight: 500; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-family: var(--m3-display-font); }
+.pbw-dsheet .db svg { width: 17px; height: 17px; }
+.pbw-dsheet .db.keep { background: transparent; border: 1.5px solid var(--m3-outline); color: var(--m3-on); }
+.pbw-dsheet .db.disc { background: var(--m3-err-solid); color: #fff; }
+
+/* History — v5 populated journal card */
+.pbw-jcard { background: var(--m3-sc); border-radius: 26px; padding: 16px; margin-bottom: 12px; position: relative; }
+.pbw-jcard .jtop { display: flex; gap: 13px; align-items: flex-start; }
+.pbw-jcard .jbadge { width: 46px; height: 46px; flex: none; border-radius: 14px; background: var(--m3-primary-cont); display: grid; place-items: center; color: var(--m3-primary); }
+.pbw-jcard .jbadge svg { width: 22px; height: 22px; }
+.pbw-jcard .jname { font-family: var(--m3-display-font); font-weight: 500; font-size: 20px; color: var(--m3-on); line-height: 1.1; letter-spacing: -.01em; }
+.pbw-jcard .jmeta { font-family: var(--m3-mono-font); font-size: 14px; font-weight: 500; color: var(--m3-on-var); display: flex; align-items: center; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+.pbw-jcard .jmeta svg { width: 15px; height: 15px; color: var(--m3-primary); }
+.pbw-jcard .jmeta .dur { color: var(--m3-primary); }
+.pbw-jcard .jex { display: flex; align-items: center; gap: 9px; margin-top: 11px; min-width: 0; }
+.pbw-jcard .jex .lbl { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-primary-cont); background: var(--m3-primary-cont); padding: 4px 9px; border-radius: 999px; flex: none; }
+.pbw-jcard .jex .nms { font-size: 14px; color: var(--m3-on); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pbw-jcard .jfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
+.pbw-jcard .viewins { display: inline-flex; align-items: center; gap: 7px; background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); border: none; padding: 11px 16px; border-radius: 999px; font-family: var(--m3-mono-font); font-weight: 500; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+.pbw-jcard .viewins svg { width: 15px; height: 15px; }
+.pbw-jcard .jhint { font-family: var(--m3-mono-font); font-size: 12px; font-style: italic; color: var(--m3-on-dim); display: flex; align-items: center; gap: 6px; }
+.pbw-jcard .jchev { color: var(--m3-on-dim); margin-left: auto; }
+.pbw-jcard .jchev svg { width: 18px; height: 18px; }
+
 /* The fluid-glow loop (scale/rotate/translate on big blurred gradients) is a
    constant GPU compositor cost. Keep the static gradient but drop the animation
    on the Android WebView and for anyone who prefers reduced motion. */

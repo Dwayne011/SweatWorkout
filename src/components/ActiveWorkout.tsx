@@ -2437,32 +2437,31 @@ export default function ActiveWorkout({
 
       {/* Discard Workout Confirmation Modal */}
       {showDiscardConfirm && createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4" style={{ background: "rgba(8,6,14,.5)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
+        <div className="fixed inset-0 z-[10000]" onClick={() => setShowDiscardConfirm(false)} style={{ background: "rgba(5,4,9,.55)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)" }}>
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-sm overflow-hidden"
-            style={{ background: "var(--m3-sc)", borderRadius: "28px", border: "1px solid var(--m3-outline-q)", padding: "24px 20px 18px", boxShadow: "0 16px 40px -12px rgba(0,0,0,.5)" }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 380, damping: 38 }}
+            className="pbw-dsheet"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ textAlign: "center" }}>
-              <div className="m3-shape lg center" style={{ marginBottom: 6 }}>
-                <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-error-cont)" /></svg>
-                <span className="si"><AlertTriangle style={{ width: 26, height: 26, color: "var(--m3-error)" }} /></span>
+            <div className="dhd">
+              <div className="m3-shape lg center" style={{ margin: "0 auto 10px" }}>
+                <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="rgba(255,255,255,.22)" /></svg>
+                <span className="si"><AlertTriangle style={{ width: 26, height: 26, color: "var(--m3-on-error-cont)" }} /></span>
               </div>
-              <h2 className="m3-h center" style={{ fontSize: "var(--m3-headline-md)", marginTop: 4 }}>Discard active workout?</h2>
-              <p className="m3-body center">This clears your currently tracked exercises and can't be undone.</p>
+              <h2>Discard workout?</h2>
             </div>
-
-            <div style={{ paddingTop: 16 }}>
-              <div className="m3-bgroup">
-                <button className="seg danger" onClick={() => { haptics.discardConfirm(); setShowDiscardConfirm(false); onDiscard(); }}>
-                  <Trash2 className="w-4 h-4" /> Discard
-                </button>
-                <button className="seg pausebtn" onClick={() => setShowDiscardConfirm(false)} aria-label="Keep workout">
-                  <Pause className="w-[18px] h-[18px]" />
-                </button>
-                <button className="seg go" onClick={() => setShowDiscardConfirm(false)}>
-                  Continue <ChevronRight className="w-4 h-4" />
+            <div className="dbd">
+              <p>
+                This clears the <b>{session.exercises.length} exercise{session.exercises.length === 1 ? "" : "s"}</b> and{" "}
+                <b>{session.exercises.reduce((a, ex) => a + ex.sets.length, 0)} set{session.exercises.reduce((a, ex) => a + ex.sets.length, 0) === 1 ? "" : "s"}</b> you've tracked. It can't be undone.
+              </p>
+              <div className="drow">
+                <button className="db keep" onClick={() => setShowDiscardConfirm(false)}>Keep</button>
+                <button className="db disc" onClick={() => { haptics.discardConfirm(); setShowDiscardConfirm(false); onDiscard(); }}>
+                  <Trash2 /> Discard
                 </button>
               </div>
             </div>
