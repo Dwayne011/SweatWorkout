@@ -678,7 +678,7 @@ export default function App() {
       </header>
 
       {/* 2. MAIN BENTO GRID FRAMEWORK */}
-      <main className="w-full max-w-4xl mx-auto px-4 md:px-6 relative z-10 min-h-[82vh]" style={{ paddingTop: "calc(env(safe-area-inset-top) + 88px)", paddingBottom: "calc(env(safe-area-inset-bottom) + 108px)" }}>
+      <main className="w-full max-w-4xl mx-auto px-4 md:px-6 relative z-10 min-h-[82vh]" style={{ paddingTop: "calc(env(safe-area-inset-top) + 88px)", paddingBottom: `calc(env(safe-area-inset-bottom) + ${state.activeWorkout && activeTab !== "workouts" ? 184 : 108}px)` }}>
         <div className="w-full">
 
           {/* ADVANCE NOTIFICATION PERMISSIONS PRIMING CARD */}
