@@ -1,5 +1,5 @@
 import React from "react";
-import { User, LogOut, LogIn, ExternalLink, Loader2, RefreshCw, Plus, CloudLightning } from "lucide-react";
+import { User, LogOut, LogIn, ExternalLink, Loader2, RefreshCw, Plus, CloudLightning, Pencil } from "lucide-react";
 
 interface AccountSettingsProps {
   state: any;
@@ -37,92 +37,57 @@ export default function AccountSettings({
   setIsEditingProfile,
 }: AccountSettingsProps) {
   return (
-    <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm shadow-inner shadow-md dark:shadow-none backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/5 p-6 shadow-2xl space-y-6">
-      <div className="flex flex-col sm:flex-row items-center justify-between border-b border-gray-200 dark:border-white/5 pb-5 gap-4">
+    <div className="space-y-5">
+      <div className="m3-appbar" style={{ alignItems: "center" }}>
         <div>
-          <h3 className="font-extrabold text-gray-900 dark:text-gray-100 text-lg md:text-xl">Account Settings</h3>
-          <p className="text-xs text-gray-500 dark:text-slate-400">Configure cloud synchronization and save custom routines safely.</p>
+          <h2 className="m3-h" style={{ fontSize: "var(--m3-headline-md)", margin: "2px 0 4px" }}>Account settings</h2>
+          <p className="m3-body">Configure cloud sync and save custom routines safely.</p>
         </div>
-
-        <div className="flex items-center gap-3">
-          {state.user ? (
-            <button
-              onClick={handleGoogleLogout}
-              className="px-4 py-2 bg-rose-600/10 hover:bg-rose-600/20 text-rose-500 dark:text-rose-450 border border-rose-500/20 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-all font-mono"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Disconnect Sync</span>
-            </button>
-          ) : null}
-        </div>
+        {state.user ? (
+          <button onClick={handleGoogleLogout} className="m3-btn error sm" style={{ width: "auto", flex: "none" }}>
+            <LogOut className="w-[16px] h-[16px]" />
+            <span>Disconnect</span>
+          </button>
+        ) : null}
       </div>
 
-      {/* My Profile Section */}
-      <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h4 className="font-extrabold text-gray-900 dark:text-gray-100 text-sm flex items-center space-x-2">
-              <User className="w-4 h-4 text-indigo-500" />
-              <span>My Athlete Profile</span>
-            </h4>
-            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium">
+      {/* My athlete profile */}
+      <div className="m3-card hi">
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <div className="m3-shape md">
+            <svg className="sf" viewBox="0 0 100 100"><use href="#shape-flower" fill="var(--m3-primary-cont)" /></svg>
+            <span className="si"><User style={{ width: 24, height: 24, color: "var(--m3-primary)" }} /></span>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 500, fontSize: "var(--m3-title-lg)", color: "var(--m3-on)" }}>My athlete profile</div>
+            <p style={{ fontFamily: "var(--m3-mono-font)", fontSize: "var(--m3-label-sm)", color: "var(--m3-on-var)", marginTop: 4, lineHeight: 1.5 }}>
               {state.userProfile
-                ? `${state.userProfile.age} yo ${state.userProfile.biologicalSex} • ${state.userProfile.preferredUnits === 'Metric' ? `${state.userProfile.weightKg} kg` : `${Math.round(state.userProfile.weightKg * 2.20462)} lbs`} • Goal: ${state.userProfile.primaryGoal}`
+                ? `${state.userProfile.age} yo · ${state.userProfile.biologicalSex} · ${state.userProfile.preferredUnits === 'Metric' ? `${state.userProfile.weightKg} kg` : `${Math.round(state.userProfile.weightKg * 2.20462)} lbs`}`
                 : "No profile data set."}
+              {state.userProfile ? <><br />Goal: {state.userProfile.primaryGoal}</> : null}
             </p>
           </div>
-          <button
-            onClick={() => setIsEditingProfile(true)}
-            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 font-bold text-xs rounded-lg border border-indigo-200 dark:border-indigo-800 transition-colors"
-          >
-            Edit Profile
-          </button>
         </div>
+        <div style={{ height: 14 }} />
+        <button onClick={() => setIsEditingProfile(true)} className="m3-btn tonal-primary sm" style={{ width: "auto" }}>
+          <Pencil className="w-[16px] h-[16px]" /> Edit profile
+        </button>
       </div>
 
-      {/* App Appearance Settings */}
-      <div className="bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 rounded-2xl p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h4 className="font-extrabold text-gray-900 dark:text-gray-100 text-sm flex items-center space-x-2">
-              <span>Application Theme</span>
-            </h4>
-            <p className="text-[11px] text-gray-500 dark:text-slate-400">
-              Toggle between Light Mode and Neural Expressive Dark Mode.
-            </p>
-          </div>
-        </div>
-        <div className="flex bg-purple-50/50 dark:bg-black p-1 rounded-xl w-full border border-purple-100 dark:border-purple-500/20 mt-4">
+      {/* Application theme */}
+      <div className="m3-card hi">
+        <h2 className="m3-h" style={{ fontSize: "var(--m3-title-lg)", marginTop: 0 }}>Application theme</h2>
+        <p className="m3-body">Toggle between Light and Neural Expressive Dark.</p>
+        <div style={{ height: 12 }} />
+        <div className="m3-bgroup">
           <button
-            role="tab"
-            aria-selected={theme === 'light'}
-            onClick={() => {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-              setTheme("light");
-            }}
-            className={`flex-1 flex items-center justify-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              theme === 'light'
-                ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white ring-1 ring-purple-200 dark:ring-purple-500/50 shadow-sm"
-                : "text-purple-600/70 dark:text-purple-300/70 hover:text-purple-700 dark:hover:text-purple-200 hover:bg-purple-100/50 dark:hover:bg-purple-500/10"
-            }`}
-          >
-            Light
-          </button>
+            className={`seg${theme === 'light' ? ' sel' : ''}`}
+            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setTheme("light"); }}
+          >Light</button>
           <button
-            role="tab"
-            aria-selected={theme === 'dark'}
-            onClick={() => {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-              setTheme("dark");
-            }}
-            className={`flex-1 flex items-center justify-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              theme === 'dark'
-                ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white ring-1 ring-purple-200 dark:ring-purple-500/50 shadow-sm"
-                : "text-purple-600/70 dark:text-purple-300/70 hover:text-purple-700 dark:hover:text-purple-200 hover:bg-purple-100/50 dark:hover:bg-purple-500/10"
-            }`}
-          >
-            Dark
-          </button>
+            className={`seg${theme === 'dark' ? ' sel' : ''}`}
+            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setTheme("dark"); }}
+          >Dark</button>
         </div>
       </div>
 
@@ -345,26 +310,22 @@ export default function AccountSettings({
           </div>
         </div>
       ) : (
-        <div className="text-center py-10 space-y-5">
-          <User className="w-16 h-16 text-indigo-500/20 mx-auto animate-pulse" />
-          <div className="space-y-1.5 max-w-sm mx-auto">
-            <h4 className="font-extrabold text-gray-900 dark:text-gray-100 text-base">You are surfing as Guest</h4>
-            <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">
-              Log in with your Google account to secure your custom work logs, track exercises, and load metrics instantly across desktops or phones.
-            </p>
+        <div style={{ textAlign: "center", padding: "12px 0 8px" }}>
+          <div className="m3-shape lg center" style={{ marginBottom: 10 }}>
+            <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-primary-cont)" /></svg>
+            <span className="si"><User style={{ width: 32, height: 32, color: "var(--m3-primary)" }} /></span>
           </div>
-
-          <button
-            onClick={handleGoogleLogin}
-            className="px-6 py-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white font-black text-xs rounded-xl shadow-lg inline-flex items-center space-x-2.5 transition-all cursor-pointer hover:scale-[1.03] active:scale-[0.96] ring-1 ring-white/10"
-          >
-            <LogIn className="w-4 h-4 text-white" />
-            <span>Sync with Google Account</span>
+          <div style={{ fontWeight: 500, fontSize: "var(--m3-title-lg)", color: "var(--m3-on)", margin: "6px 0 8px" }}>You're surfing as Guest</div>
+          <p className="m3-body center" style={{ maxWidth: 330, margin: "0 auto 18px" }}>
+            Log in with your Google account to secure your custom work logs, track exercises, and load metrics instantly across devices.
+          </p>
+          <button onClick={handleGoogleLogin} className="m3-btn accent">
+            <LogIn className="w-[18px] h-[18px]" />
+            <span>Sync with Google account</span>
           </button>
-
           {typeof window !== 'undefined' && window.self !== window.top && (
-            <p className="text-[10px] text-[#f59e0b] leading-normal font-mono bg-amber-500/5 border border-amber-500/10 p-3 rounded-xl max-w-sm mx-auto text-left">
-              ⚠️ <strong>Framed Sandbox Notice:</strong> This framed preview blocks Google login popups. Click <strong>"Open in a new tab"</strong> at the top-right of your screen to authorize safely.
+            <p style={{ fontFamily: "var(--m3-mono-font)", fontSize: 11, lineHeight: 1.5, color: "#d9920a", background: "rgba(245,158,11,.06)", border: "1px solid rgba(245,158,11,.18)", padding: 12, borderRadius: 14, maxWidth: 330, margin: "16px auto 0", textAlign: "left" }}>
+              ⚠️ <strong>Framed sandbox notice:</strong> this framed preview blocks Google login popups. Click <strong>"Open in a new tab"</strong> at the top-right to authorize safely.
             </p>
           )}
         </div>
