@@ -248,6 +248,7 @@ export default function OnboardingProfile({ onComplete, initialProfile }: Onboar
               if (val !== cur) {
                 if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
                 setHeightCm(preferredUnits === "Metric" ? val : parseFloat(inchesToCm(val).toFixed(2)));
+                setHeightInput(String(val));
               }
             }}
           />
@@ -315,6 +316,7 @@ export default function OnboardingProfile({ onComplete, initialProfile }: Onboar
               if (val !== cur) {
                 if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(6);
                 setWeightKg(preferredUnits === "Metric" ? val : parseFloat(lbsToKg(val).toFixed(2)));
+                setWeightInput(String(val));
               }
             }}
           />

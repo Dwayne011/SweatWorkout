@@ -495,8 +495,8 @@ export default function App() {
 
       {/* Edit Profile Modal */}
       {isEditingProfile && (
-        <div className="fixed inset-0 z-[60000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-md">
+        <div className="fixed inset-0 z-[60000] bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 56px)", paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}>
+          <div className="relative w-full max-w-md overflow-hidden" style={{ background: "var(--m3-surface)", borderRadius: "28px", border: "1px solid var(--m3-outline-q)" }}>
             <button 
               onClick={() => setIsEditingProfile(false)}
               className="absolute -top-12 right-0 text-white hover:text-indigo-400 font-bold p-2"

@@ -51,11 +51,33 @@ export default function AccountSettings({
         ) : null}
       </div>
 
+      {!state.user && (
+        <div style={{ textAlign: "center", padding: "4px 0 0" }}>
+          <div className="m3-shape lg center" style={{ marginBottom: 10 }}>
+            <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-primary-cont)" /></svg>
+            <span className="si"><User style={{ width: 32, height: 32, color: "var(--m3-primary)" }} /></span>
+          </div>
+          <div style={{ fontWeight: 500, fontSize: "var(--m3-title-lg)", color: "var(--m3-on)", margin: "6px 0 8px" }}>You're surfing as Guest</div>
+          <p className="m3-body center" style={{ maxWidth: 330, margin: "0 auto 18px" }}>
+            Log in with your Google account to secure your custom work logs, track exercises, and load metrics instantly across devices.
+          </p>
+          <button onClick={handleGoogleLogin} className="m3-btn accent">
+            <LogIn className="w-[18px] h-[18px]" />
+            <span>Sync with Google account</span>
+          </button>
+          {typeof window !== 'undefined' && window.self !== window.top && (
+            <p style={{ fontFamily: "var(--m3-mono-font)", fontSize: 11, lineHeight: 1.5, color: "#d9920a", background: "rgba(245,158,11,.06)", border: "1px solid rgba(245,158,11,.18)", padding: 12, borderRadius: 14, maxWidth: 330, margin: "16px auto 0", textAlign: "left" }}>
+              ⚠️ <strong>Framed sandbox notice:</strong> this framed preview blocks Google login popups. Click <strong>"Open in a new tab"</strong> at the top-right to authorize safely.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* My athlete profile */}
       <div className="m3-card hi">
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
           <div className="m3-shape md">
-            <svg className="sf" viewBox="0 0 100 100"><use href="#shape-flower" fill="var(--m3-primary-cont)" /></svg>
+            <svg className="sf" viewBox="0 0 100 100"><use href="#shape-scallop" fill="var(--m3-primary-cont)" /></svg>
             <span className="si"><User style={{ width: 24, height: 24, color: "var(--m3-primary)" }} /></span>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -91,7 +113,7 @@ export default function AccountSettings({
         </div>
       </div>
 
-      {state.user ? (
+      {state.user && (
         <div className="space-y-6">
           {/* Connected Profile Summary */}
           <div className="bg-white/3 border border-gray-200 dark:border-white/5 p-4 rounded-xl flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
@@ -308,26 +330,6 @@ export default function AccountSettings({
               </p>
             </div>
           </div>
-        </div>
-      ) : (
-        <div style={{ textAlign: "center", padding: "12px 0 8px" }}>
-          <div className="m3-shape lg center" style={{ marginBottom: 10 }}>
-            <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-primary-cont)" /></svg>
-            <span className="si"><User style={{ width: 32, height: 32, color: "var(--m3-primary)" }} /></span>
-          </div>
-          <div style={{ fontWeight: 500, fontSize: "var(--m3-title-lg)", color: "var(--m3-on)", margin: "6px 0 8px" }}>You're surfing as Guest</div>
-          <p className="m3-body center" style={{ maxWidth: 330, margin: "0 auto 18px" }}>
-            Log in with your Google account to secure your custom work logs, track exercises, and load metrics instantly across devices.
-          </p>
-          <button onClick={handleGoogleLogin} className="m3-btn accent">
-            <LogIn className="w-[18px] h-[18px]" />
-            <span>Sync with Google account</span>
-          </button>
-          {typeof window !== 'undefined' && window.self !== window.top && (
-            <p style={{ fontFamily: "var(--m3-mono-font)", fontSize: 11, lineHeight: 1.5, color: "#d9920a", background: "rgba(245,158,11,.06)", border: "1px solid rgba(245,158,11,.18)", padding: 12, borderRadius: 14, maxWidth: 330, margin: "16px auto 0", textAlign: "left" }}>
-              ⚠️ <strong>Framed sandbox notice:</strong> this framed preview blocks Google login popups. Click <strong>"Open in a new tab"</strong> at the top-right to authorize safely.
-            </p>
-          )}
         </div>
       )}
     </div>
