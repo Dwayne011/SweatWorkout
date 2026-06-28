@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { haptics } from "../lib/haptics";
 import {
   Play,
   Check,
@@ -243,10 +244,8 @@ function RestTimerOverlay({
             }
           } catch (err) {}
 
-          // Intense vibration pattern
-          if (typeof navigator !== "undefined" && navigator.vibrate) {
-            navigator.vibrate([400, 100, 400, 100, 400]);
-          }
+          // Notification haptic when the rest timer hits zero
+          haptics.timerDone();
         }
         clearInterval(intervalId);
         // Don't end on our own (possibly stale) clock — the rest may have been
@@ -279,9 +278,9 @@ function RestTimerOverlay({
           </div>
         </div>
         <div className="ctls">
-          <button className="ctlbtn" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); onAddSeconds(30); }}>+30s</button>
-          <button className="ctlbtn" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); onSubtractSeconds(30); }}>&minus;30s</button>
-          <button className="skip" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); handleManualCancel(); }}>Skip</button>
+          <button className="ctlbtn" onClick={() => onAddSeconds(30)}>+30s</button>
+          <button className="ctlbtn" onClick={() => onSubtractSeconds(30)}>&minus;30s</button>
+          <button className="skip" onClick={() => handleManualCancel()}>Skip</button>
         </div>
       </div>
     </div>
@@ -863,7 +862,7 @@ export default function ActiveWorkout({
     if (!hasCompletedSet) {
       setShowNoCompletedSetsModal(true);
     } else {
-      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+      haptics.finishWorkout();
       onFinish();
     }
   };
@@ -2117,10 +2116,10 @@ export default function ActiveWorkout({
                               <button
                                 className={`pbw-donebox ${set.isCompleted ? "on" : ""}`}
                                 onClick={() => {
-                                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
                                   const nextState = !set.isCompleted;
                                   onUpdateSet(workoutEx.exerciseId, idx, { isCompleted: nextState });
                                   if (nextState) {
+                                    haptics.setComplete();
                                     const restSec = workoutEx.restTime !== undefined ? workoutEx.restTime : 90;
                                     triggerRestTimer(restSec, exerciseDetails?.name || "Exercise");
                                   } else {
@@ -2443,7 +2442,7 @@ export default function ActiveWorkout({
 
             <div style={{ paddingTop: 16 }}>
               <div className="m3-bgroup">
-                <button className="seg danger" onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(12); setShowDiscardConfirm(false); onDiscard(); }}>
+                <button className="seg danger" onClick={() => { haptics.discardConfirm(); setShowDiscardConfirm(false); onDiscard(); }}>
                   <Trash2 className="w-4 h-4" /> Discard
                 </button>
                 <button className="seg pausebtn" onClick={() => setShowDiscardConfirm(false)} aria-label="Keep workout">

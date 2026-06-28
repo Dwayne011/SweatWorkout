@@ -6,6 +6,7 @@ import React, { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { useWorkoutState } from "./useWorkoutState";
 import AIAssistant from "./components/AIAssistant";
 import TabSkeleton from "./components/TabSkeleton";
+import { haptics } from "./lib/haptics";
 // Phase 1A: code-split the main tab views — each becomes its own chunk loaded
 // on first visit. ActiveWorkout (the largest) only downloads once a workout starts.
 const ActiveWorkout = lazy(() => import("./components/ActiveWorkout"));
@@ -241,6 +242,16 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState<"workouts" | "history" | "templates" | "exercises" | "account">("workouts");
+  // Page-transition direction: tracks which way the slide goes so the incoming
+  // page enters from the correct side. Tap-driven nav routes through goToTab.
+  const TAB_ORDER = ["workouts", "history", "templates", "exercises", "account"] as const;
+  const navDir = useRef(0);
+  const goToTab = (key: typeof activeTab) => {
+    if (key === activeTab) return;
+    navDir.current = TAB_ORDER.indexOf(key) > TAB_ORDER.indexOf(activeTab) ? 1 : -1;
+    haptics.pageCommit();
+    setActiveTab(key);
+  };
   const [latestCompletedWorkout, setLatestCompletedWorkout] = useState<WorkoutSession | null>(null);
   const aiAssistantRef = useRef<any>(null);
   const isDraggingInfoRef = useRef(false);
@@ -736,13 +747,19 @@ export default function App() {
           <section className="space-y-6">
 
             {/* TAB SCREENS CONDITIONAL PRESENTATION */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" custom={navDir.current}>
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                custom={navDir.current}
+                variants={{
+                  enter: (d: number) => ({ opacity: 0, x: d >= 0 ? 40 : -40 }),
+                  center: { opacity: 1, x: 0 },
+                  exit: (d: number) => ({ opacity: 0, x: d >= 0 ? -40 : 40 }),
+                }}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "spring", stiffness: 360, damping: 34, mass: 0.85 }}
               >
                 {/* Always render ActiveWorkout so background timers and service worker listeners continue */}
                 <WorkoutTabSegment activeTab={activeTab}>
@@ -922,7 +939,7 @@ export default function App() {
             <a
               key={key}
               className={activeTab === key ? "on" : ""}
-              onClick={() => { if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10); setActiveTab(key); }}
+              onClick={() => goToTab(key as typeof activeTab)}
             >
               <span className="pill"><Icon className="w-5 h-5" /></span>
               <span className="lbl">{label}</span>

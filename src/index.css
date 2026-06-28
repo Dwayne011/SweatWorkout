@@ -240,7 +240,10 @@ html, body {
   --m3-error: #ff6b80;
   --m3-error-cont: #5e1626;
   --m3-on-error-cont: #ffd9de;
-  --m3-delpane: #5e1626;
+  --m3-on-error: #48121d;
+  --m3-delpane: #c4314b;
+  --m3-err-solid: #c4314b;
+  --m3-errd: #a8273d;
 
   --m3-r-s: 12px; --m3-r-m: 16px; --m3-r-l: 28px; --m3-r-xl: 32px; --m3-r-full: 999px;
 
@@ -288,7 +291,10 @@ html.light {
   --m3-error: #b3261e;
   --m3-error-cont: #f9dedc;
   --m3-on-error-cont: #410e0b;
+  --m3-on-error: #ffffff;
   --m3-delpane: #ba1a1a;
+  --m3-err-solid: #ba1a1a;
+  --m3-errd: #9e1414;
 }
 
 /* cards */
@@ -464,6 +470,9 @@ html.light { background-color: #fcfaff; }
 .m3-nav a.on .pill { background: var(--m3-primary-fill); }
 .m3-nav a.on { color: var(--m3-primary); }
 .m3-nav a.on .pill svg { color: #fff; }
+/* Aligned-pill: active tab shows icon only — label hidden but holds its space
+   so the bar height never jumps and icons stay on one shared baseline. */
+.m3-nav a.on .lbl { visibility: hidden; }
 .m3-nav .lbl { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 
 /* ============================================================
@@ -525,7 +534,7 @@ html.light { background-color: #fcfaff; }
 .pbw-rinput input { width: 100%; background: transparent; border: none; outline: none; text-align: center; font-family: var(--m3-mono-font); font-size: 14px; font-weight: 500; color: var(--m3-on); -moz-appearance: textfield; }
 .pbw-rinput input::placeholder { color: var(--m3-on-dim); }
 .pbw-rinput input::-webkit-outer-spin-button, .pbw-rinput input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.pbw-donebox { width: 30px; height: 30px; border: 2px solid var(--m3-success); border-radius: 999px; display: grid; place-items: center; cursor: pointer; background: transparent; justify-self: center; padding: 0; }
+.pbw-donebox { width: 26px; height: 26px; border: 2px solid var(--m3-success); border-radius: 8px; display: grid; place-items: center; cursor: pointer; background: transparent; justify-self: center; padding: 0; }
 .pbw-donebox svg { width: 16px; height: 16px; color: var(--m3-success); opacity: 0; }
 .pbw-donebox.on { background: var(--m3-success); }
 .pbw-donebox.on svg { color: var(--m3-on-success); opacity: 1; }
