@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { WorkoutSession, WorkoutExercise, WorkoutSet, Exercise, SetType } from "../types";
 import { motion, AnimatePresence, useMotionValue, useTransform, useDragControls } from "motion/react";
+import { Button } from "./ui/Button";
 import { openExerciseGuide } from "./ExerciseGuideModal";
 import { getNotificationService } from "../services/notifications";
 
@@ -469,9 +470,9 @@ function RestTimerOverlay({
           </div>
         </div>
         <div className="ctls">
-          <button className="ctlbtn" onClick={() => onAddSeconds(30)}>+30s</button>
-          <button className="ctlbtn" onClick={() => onSubtractSeconds(30)}>&minus;30s</button>
-          <button className="skip" onClick={() => handleManualCancel()}>Skip</button>
+          <Button variant="none" className="ctlbtn" onClick={() => onAddSeconds(30)}>+30s</Button>
+          <Button variant="none" className="ctlbtn" onClick={() => onSubtractSeconds(30)}>&minus;30s</Button>
+          <Button variant="none" className="skip" onClick={() => handleManualCancel()}>Skip</Button>
         </div>
       </div>
     </div>
@@ -1432,15 +1433,16 @@ export default function ActiveWorkout({
           </>
         )}
         <div className="pbw-sessbtns">
-          <button
+          <Button
+            variant="tonal"
             onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setShowDiscardConfirm(true); }}
             className="pbw-sbtn discard"
           >
             <Trash2 /> Discard
-          </button>
-          <button onClick={handleFinishClick} className="pbw-sbtn finish">
+          </Button>
+          <Button variant="tonal" onClick={handleFinishClick} className="pbw-sbtn finish">
             <CheckCircle /> Finish
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1448,9 +1450,9 @@ export default function ActiveWorkout({
       <div>
         <div className="m3-seclabel">
           <span className="l">Exercises</span>
-          <button onClick={() => setIsNotesExpanded(!isNotesExpanded)} className="m3-txtbtn">
+          <Button variant="text" onClick={() => setIsNotesExpanded(!isNotesExpanded)} className="m3-txtbtn">
             {session.notes ? "Notes ✓" : "Notes"}
-          </button>
+          </Button>
         </div>
         {isNotesExpanded && (
           <textarea
@@ -1475,10 +1477,10 @@ export default function ActiveWorkout({
             <h2 className="m3-h center" style={{ fontSize: "var(--m3-title-lg)" }}>No exercises added yet</h2>
             <p className="m3-body center">Add one below, or say to Gemini: "Add bench press, 3 sets of 100&nbsp;kg".</p>
             <div style={{ height: "14px" }} />
-            <button onClick={() => setShowAddModal(true)} className="m3-btn fill" style={{ maxWidth: "260px", margin: "0 auto" }}>
+            <Button variant="primary" onClick={() => setShowAddModal(true)} className="m3-btn fill" style={{ maxWidth: "260px", margin: "0 auto" }}>
               <Plus className="w-5 h-5" />
               Add exercise
-            </button>
+            </Button>
           </div>
         ) : (
           (() => {
@@ -2153,13 +2155,14 @@ export default function ActiveWorkout({
                         </div>
 
                         <div className="pbw-extools">
-                          <button
+                          <Button
+                            variant="primary"
                             type="button"
                             onClick={() => { if (exerciseDetails) { handleOpenExerciseNotes(exerciseDetails.id); } }}
                             className="pbw-notebtn"
                           >
                             <Sparkles /> {exerciseNotes?.[workoutEx.exerciseId] ? "Notes" : "+ Note"}
-                          </button>
+                          </Button>
                           <span className="pbw-restpill">
                             <Timer /> Rest:&nbsp;
                             <input
@@ -2293,7 +2296,8 @@ export default function ActiveWorkout({
                                   />
                                 </>
                               )}
-                              <button
+                              <Button
+                                variant="none"
                                 className={`pbw-donebox ${set.isCompleted ? "on" : ""}`}
                                 onClick={() => {
                                   const nextState = !set.isCompleted;
@@ -2308,7 +2312,7 @@ export default function ActiveWorkout({
                                 }}
                               >
                                 <Check />
-                              </button>
+                              </Button>
                               
                               {isCardio && (
                                 <div className={`w-full mt-2 pt-2 border-t border-gray-100 dark:border-white/5 flex flex-col transition-all duration-300 ${set.isCompleted ? "opacity-35" : ""} ${activeRpeSlide === `${workoutEx.exerciseId}-${idx}` ? "relative z-[52]" : ""}`}>
@@ -2404,9 +2408,9 @@ export default function ActiveWorkout({
 
                       {/* Add Set — exact port .addset */}
                       <div className="pbw-addset">
-                        <button onClick={() => onAddSet(workoutEx.exerciseId)}>
+                        <Button variant="none" onClick={() => onAddSet(workoutEx.exerciseId)}>
                           <Plus /> Add Set
-                        </button>
+                        </Button>
                       </div>
                     </motion.div>
 
@@ -2459,9 +2463,9 @@ export default function ActiveWorkout({
         {/* Bottom — tonal "Add exercise" (master main active workout; Discard/Finish live in the session card) */}
         {session.exercises.length > 0 && (
           <div style={{ padding: "10px 0 4px" }}>
-            <button onClick={() => setShowAddModal(true)} className="pbw-addex-tonal">
+            <Button variant="tonal" onClick={() => setShowAddModal(true)} className="pbw-addex-tonal">
               <Plus /> Add exercise
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -2486,9 +2490,9 @@ export default function ActiveWorkout({
                   <Sparkles />
                   <span>Personal Exercise Notes</span>
                 </span>
-                <button type="button" onClick={() => setNotesExerciseId(null)} className="nclose">
+                <Button variant="icon" type="button" onClick={() => setNotesExerciseId(null)} className="nclose">
                   <X />
-                </button>
+                </Button>
               </div>
 
               <div className="nbd">
@@ -2509,10 +2513,11 @@ export default function ActiveWorkout({
                 />
 
                 <div className="nrow">
-                  <button type="button" onClick={() => setNotesExerciseId(null)} className="nb cancel">
+                  <Button variant="outline" type="button" onClick={() => setNotesExerciseId(null)} className="nb cancel">
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="primary"
                     type="button"
                     onClick={async () => {
                       if (notesExerciseId && onUpdateExerciseNotes) {
@@ -2532,7 +2537,7 @@ export default function ActiveWorkout({
                   >
                     <Check />
                     <span>{isNotesSaving ? "Saving..." : "Save Notes"}</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </motion.div>
@@ -2609,10 +2614,10 @@ export default function ActiveWorkout({
                 <b>{session.exercises.reduce((a, ex) => a + ex.sets.length, 0)} set{session.exercises.reduce((a, ex) => a + ex.sets.length, 0) === 1 ? "" : "s"}</b> you've tracked. It can't be undone.
               </p>
               <div className="drow">
-                <button className="db keep" onClick={() => setShowDiscardConfirm(false)}>Keep</button>
-                <button className="db disc" onClick={() => { haptics.discardConfirm(); setShowDiscardConfirm(false); onDiscard(); }}>
+                <Button variant="outline" className="db keep" onClick={() => setShowDiscardConfirm(false)}>Keep</Button>
+                <Button variant="tonal" className="db disc" onClick={() => { haptics.discardConfirm(); setShowDiscardConfirm(false); onDiscard(); }}>
                   <Trash2 /> Discard
-                </button>
+                </Button>
               </div>
             </div>
           </motion.div>
@@ -2638,9 +2643,9 @@ export default function ActiveWorkout({
               <div className="pbw-pkhead" style={{ padding: "16px 16px 14px" }}>
                 <Dumbbell className="di" />
                 <h2>Choose Exercise</h2>
-                <button className="cl" onClick={() => setShowAddModal(false)}>
+                <Button variant="icon" className="cl" onClick={() => setShowAddModal(false)}>
                   <X />
-                </button>
+                </Button>
               </div>
 
               {/* Sub-header: search + filter chips */}
@@ -2656,13 +2661,14 @@ export default function ActiveWorkout({
                 </div>
                 <div className="pbw-fchips">
                   {categories.map((cat) => (
-                    <button
+                    <Button
+                      variant="none"
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
                       className={`pbw-fchip${selectedCategory === cat ? " sel" : ""}`}
                     >
                       {cat}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -2675,13 +2681,14 @@ export default function ActiveWorkout({
                       <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
                       <span>Quick Custom Exercise</span>
                     </h4>
-                    <button
+                    <Button
+                      variant="icon"
                       type="button"
                       onClick={() => setShowAddCustomInline(false)}
                       className="p-1 text-gray-400 hover:text-gray-900 dark:text-gray-100 rounded hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm"
                     >
                       <X className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
                   </div>
                   <div>
                     <label className="block text-[10px] font-mono tracking-wider text-indigo-600 dark:text-indigo-300 uppercase mb-1">Exercise Name</label>
@@ -2728,28 +2735,30 @@ export default function ActiveWorkout({
                     </div>
                   </div>
                   <div className="flex justify-end space-x-2 pt-1.5">
-                    <button
+                    <Button
+                      variant="outline"
                       type="button"
                       onClick={() => setShowAddCustomInline(false)}
                       className="px-3 py-1.5 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/5 hover:bg-white/10 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg transition-colors"
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="primary"
                       type="submit"
                       disabled={isSavingInline || !inlineName.trim()}
                       className="px-3.5 py-1.5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-550 hover:to-purple-555 text-white text-xs font-bold rounded-lg transition-all shadow-md disabled:opacity-50"
                     >
                       {isSavingInline ? "Saving..." : "Create & Add"}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               ) : (
                 <div className="pbw-customrow" style={{ marginLeft: "16px", marginRight: "16px" }}>
                   <span className="q">Can't find your exercise?</span>
-                  <button type="button" onClick={() => setShowAddCustomInline(true)} className="pbw-ccbtn">
+                  <Button variant="none" type="button" onClick={() => setShowAddCustomInline(true)} className="pbw-ccbtn">
                     <Plus /> Create Custom
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -2772,12 +2781,13 @@ export default function ActiveWorkout({
                           <div className="nm" onClick={() => openExerciseGuide(ex)} title="Click to view setup and guide demonstration">{ex.name}</div>
                           <div className="ct">{ex.category} · {ex.equipment}</div>
                         </div>
-                        <button
+                        <Button
+                          variant="none"
                           onClick={() => { if (isAlreadyAdded) { onRemoveExercise(ex.id); } else { onAddExercise(ex.id); } }}
                           className={`pbw-addbtn${isAlreadyAdded ? " added" : ""}`}
                         >
                           {isAlreadyAdded ? (<><X /> Remove</>) : (<><Plus /> Add</>)}
-                        </button>
+                        </Button>
                       </div>
                     );
                   })
@@ -2786,9 +2796,9 @@ export default function ActiveWorkout({
 
               {/* Modal footer — Close Picker (.closepk) */}
               <div style={{ padding: "0 16px", display: "flex", justifyContent: "flex-end" }}>
-                <button onClick={() => setShowAddModal(false)} className="pbw-closepk">
+                <Button variant="tonal" onClick={() => setShowAddModal(false)} className="pbw-closepk">
                   Close Picker
-                </button>
+                </Button>
               </div>
             </motion.div>
           </div>
