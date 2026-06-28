@@ -1419,8 +1419,9 @@ export default function ActiveWorkout({
                             onDragOver={(e) => handleDragOver(e, workoutEx.id)}
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, workoutEx.id)}
-                            className={`relative overflow-hidden rounded-xl border border-indigo-500/10 bg-white dark:bg-black/55 shadow-md group min-h-[140px] transition-all duration-300 ${
-                              isOver ? "ring-2 ring-indigo-400 border-dashed border-indigo-400 bg-indigo-950/30 scale-[1.015]" : ""
+                            style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
+                            className={`relative overflow-hidden rounded-[22px] shadow-md group min-h-[140px] transition-all duration-300 ${
+                              isOver ? "ring-2 ring-indigo-400 border-dashed scale-[1.015]" : ""
                             }`}
                           >
                             {/* Swipe delete hint underlay */}
@@ -1453,24 +1454,24 @@ export default function ActiveWorkout({
                                 x: isPendingDelete ? -120 : 0
                               }}
                               transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                              className="bg-white dark:bg-black dark:border-white/10 shadow-sm relative z-10 w-full h-full"
+                              className="relative z-10 w-full h-full"
                             >
-                              <div className="bg-white dark:bg-black p-4 flex flex-col border-b border-gray-200 dark:border-white/5">
+                              <div className="p-4 flex flex-col border-b" style={{ borderColor: "var(--m3-outline-q)" }}>
                                 <div className="flex items-start justify-between w-full gap-4">
                                   <div className="flex-1 min-w-0">
                                     <h4
                                       onClick={() => exerciseDetails && openExerciseGuide(exerciseDetails)}
-                                      className="text-[18px] sm:text-[20px] font-extrabold text-gray-900 dark:text-gray-100 leading-tight tracking-tight hover:text-indigo-350 hover:underline transition-colors cursor-pointer select-text"
+                                      className="text-[18px] sm:text-[20px] font-bold text-[var(--m3-on)] leading-tight tracking-tight hover:underline transition-colors cursor-pointer select-text"
                                       title="Click to view setup and guide demonstration"
                                     >
                                       {mainTitle}
                                     </h4>
                                     {subtitleModifier && (
-                                      <div className="text-[13px] font-semibold text-indigo-500 dark:text-indigo-300 mt-1 leading-snug">
+                                      <div className="text-[13px] font-semibold text-[var(--m3-primary)] mt-1 leading-snug">
                                         {subtitleModifier}
                                       </div>
                                     )}
-                                    <div className="text-[11px] sm:text-[12px] font-mono tracking-wide font-bold text-slate-400 dark:text-slate-500 uppercase mt-1">
+                                    <div className="text-[11px] sm:text-[12px] font-mono tracking-wide font-bold text-[var(--m3-on-dim)] uppercase mt-1">
                                       {exerciseDetails?.category} &bull; {exerciseDetails?.equipment}
                                     </div>
                                   </div>
