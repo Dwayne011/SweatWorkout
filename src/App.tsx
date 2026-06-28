@@ -482,7 +482,7 @@ export default function App() {
 
       {/* Onboarding Profile Screen */}
       {!showIntro && showOnboarding && (
-        <div className="fixed inset-0 z-[60000] bg-white dark:bg-black flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[60000] flex items-start justify-center p-4 overflow-y-auto" style={{ background: "var(--m3-bg)", paddingTop: "calc(env(safe-area-inset-top) + 14px)", paddingBottom: "calc(env(safe-area-inset-bottom) + 14px)" }}>
           <OnboardingProfile
             initialProfile={state.userProfile}
             onComplete={(profile: UserProfile) => {
@@ -574,9 +574,7 @@ export default function App() {
           >
             {/* Logo details */}
             <div className="space-y-2 relative">
-              <div className="inline-flex items-center justify-center p-4 rounded-2xl" style={{ background: "linear-gradient(150deg, var(--m3-primary-fill), #a06bff)" }}>
-                <Dumbbell className="w-8 h-8 text-white animate-pulse" />
-              </div>
+              <img src="/pb-icon.png" alt="Project PB" className="w-20 h-20 rounded-2xl mx-auto" />
               <div className="flex justify-center" style={{ color: "var(--m3-on)" }}>
                 <div className="pb-logo hero" style={{ color: "currentColor" }}>
                   <span>PROJECT</span><span className="dot" /><span className="pb">PB</span>
@@ -626,11 +624,11 @@ export default function App() {
       <div className="absolute bottom-[20%] right-[-10%] w-[50vw] h-[50vw] max-w-[500px] rounded-full gemini-bg-glow-2 pointer-events-none z-0 opacity-80" />
 
       {/* 1. TOP HEADER NAVIGATION BLOCK */}
-      <header className="sticky top-0 z-40" style={{ background: "var(--m3-bg)" }}>
+      <header className="fixed top-0 left-0 right-0 z-40" style={{ background: "var(--m3-bg)", paddingTop: "env(safe-area-inset-top)", borderBottom: "1px solid var(--m3-outline-q)" }}>
         <div className="max-w-4xl mx-auto px-4 md:px-6 pt-3 pb-4 m3-appbar">
           {/* Brand */}
           <div className="m3-brand">
-            <div className="m3-logo"><FlexingArm className="w-5 h-5" /></div>
+            <img src="/pb-icon.png" alt="Project PB" className="w-10 h-10 rounded-xl shrink-0" />
             <div>
               <div className="pb-logo"><span>PROJECT</span><span className="dot" /><span className="pb">PB</span></div>
               <div className="pb-sub">Neural Hypertrophy Engine</div>
@@ -667,7 +665,7 @@ export default function App() {
       </header>
 
       {/* 2. MAIN BENTO GRID FRAMEWORK */}
-      <main className="w-full max-w-4xl mx-auto px-4 md:px-6 py-6 pb-52 relative z-10 min-h-[82vh]">
+      <main className="w-full max-w-4xl mx-auto px-4 md:px-6 relative z-10 min-h-[82vh]" style={{ paddingTop: "calc(env(safe-area-inset-top) + 88px)", paddingBottom: "calc(env(safe-area-inset-bottom) + 108px)" }}>
         <div className="w-full">
 
           {/* ADVANCE NOTIFICATION PERMISSIONS PRIMING CARD */}
@@ -909,10 +907,7 @@ export default function App() {
 
       {/* UNIFIED PREMIUM FLOATING BOTTOM CONSOLE & NAVIGATION DOCK WITH BREATHING GLOW */}
       {/* Floating bottom nav + active-workout banner */}
-      <div
-        className="fixed left-3 right-3 z-45 mx-auto"
-        style={{ bottom: "calc(14px + env(safe-area-inset-bottom))", maxWidth: "460px" }}
-      >
+      <div className="fixed left-0 right-0 bottom-0 z-45">
         <AnimatePresence>
           <WorkoutBanner activeWorkout={state.activeWorkout} setActiveTab={setActiveTab} activeTab={activeTab} exercises={state.exercises} restTimerTarget={restTimerTarget} showSwipeUpInfo={showSwipeUpInfo} setShowSwipeUpInfo={setShowSwipeUpInfo} />
         </AnimatePresence>

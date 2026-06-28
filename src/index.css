@@ -409,6 +409,10 @@ html.light {
 .m3-goal { padding: 10px 16px; border-radius: var(--m3-r-full); border: 1.5px solid var(--m3-outline-q); color: var(--m3-on-var); font-size: var(--m3-label-lg); font-weight: 500; background: transparent; cursor: pointer; font-family: var(--m3-body-font); }
 .m3-goal.sel { border-color: var(--m3-primary-fill); background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); }
 
+/* Active-workout exercise card — one consistent surface + pill inputs */
+.aw-card input[type=number], .aw-card select { border-radius: var(--m3-r-full) !important; background: var(--m3-sc) !important; border: 1px solid var(--m3-outline-q) !important; box-shadow: none !important; }
+.aw-card select { padding-right: 18px !important; }
+
 /* app bar (header) */
 .m3-appbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .m3-brand { display: flex; gap: 12px; align-items: center; }
@@ -429,10 +433,10 @@ html.light { background-color: #fcfaff; }
 
 /* floating bottom nav (the wrapper handles fixed placement) */
 .m3-nav {
-  background: rgba(30, 25, 42, .94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--m3-outline-q); border-radius: 28px;
-  display: flex; justify-content: space-between; padding: 10px 12px 8px;
-  box-shadow: 0 12px 30px -10px rgba(0,0,0,.6);
+  background: var(--m3-sc-low);
+  border-top: 1px solid var(--m3-outline-q);
+  display: flex; justify-content: space-between;
+  padding: 9px 16px calc(9px + env(safe-area-inset-bottom));
 }
 .native-android .m3-nav { backdrop-filter: none; -webkit-backdrop-filter: none; }
 .m3-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--m3-on-dim); }

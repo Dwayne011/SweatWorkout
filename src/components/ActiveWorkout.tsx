@@ -92,7 +92,7 @@ function AnimatedTickButton({ isCompleted, onClick }: AnimatedTickButtonProps) {
             : {
                 scale: 1,
                 boxShadow: "0 0 0px rgba(0,0,0,0)",
-                borderColor: "rgba(16, 185, 129, 0.35)",
+                borderColor: "rgba(39, 212, 136, 0.9)",
               }
         }
         transition={{
@@ -100,8 +100,8 @@ function AnimatedTickButton({ isCompleted, onClick }: AnimatedTickButtonProps) {
           times: [0, 0.3, 0.7, 1],
           ease: "easeInOut",
         }}
-        className={`absolute inset-0 rounded-md border ${
-          isCompleted ? "bg-emerald-600/90" : "bg-white dark:bg-black border-emerald-500/25 dark:border-emerald-400/30 hover:bg-emerald-500/5 dark:hover:bg-emerald-400/5 shadow-sm"
+        className={`absolute inset-0 rounded-lg border-2 ${
+          isCompleted ? "bg-emerald-600/90 border-emerald-500" : "border-emerald-500/80 hover:bg-emerald-500/10"
         } transition-colors duration-250`}
       />
 
@@ -1456,7 +1456,7 @@ export default function ActiveWorkout({
                               transition={{ type: "spring", stiffness: 350, damping: 28 }}
                               className="relative z-10 w-full h-full"
                             >
-                              <div className="p-4 flex flex-col border-b" style={{ borderColor: "var(--m3-outline-q)" }}>
+                              <div className="p-4 flex flex-col">
                                 <div className="flex items-start justify-between w-full gap-4">
                                   <div className="flex-1 min-w-0">
                                     <h4
@@ -1507,7 +1507,7 @@ export default function ActiveWorkout({
                                       </span>
                                     )}
 
-                                    <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-lg px-3.5 text-xs font-mono shrink-0">
+                                    <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-full px-3.5 text-xs font-mono shrink-0">
                                       <Timer className="w-4 h-4 text-indigo-400 shrink-0" />
                                       <span className="font-extrabold select-none whitespace-nowrap uppercase tracking-wider text-[10px]">Rest:</span>
                                       <input
@@ -1539,7 +1539,7 @@ export default function ActiveWorkout({
                                     </div>
 
                                     {exerciseDetails?.equipment === 'Barbell' && (
-                                      <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-lg px-3.5 text-xs font-mono shrink-0">
+                                      <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-full px-3.5 text-xs font-mono shrink-0">
                                         <Dumbbell className="w-4 h-4 text-indigo-400 shrink-0" />
                                         <span className="font-extrabold select-none whitespace-nowrap uppercase tracking-wider text-[10px]" title="Set bar weight">Bar:</span>
                                         <input
@@ -1954,7 +1954,7 @@ export default function ActiveWorkout({
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, workoutEx.id)}
                     style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
-                    className={`relative overflow-hidden rounded-[22px] shadow-sm group min-h-[140px] transition-all duration-300 animate-fadeIn ${
+                    className={`aw-card relative overflow-hidden rounded-[22px] shadow-sm group min-h-[140px] transition-all duration-300 animate-fadeIn ${
                       isOver ? "ring-2 ring-indigo-400 border-dashed scale-[1.015]" : ""
                     }`}
                   >
@@ -1990,7 +1990,7 @@ export default function ActiveWorkout({
                       transition={{ type: "spring", stiffness: 350, damping: 28 }}
                       className="relative z-10 w-full h-full"
                     >
-                      <div className="p-4 flex flex-col border-b" style={{ borderColor: "var(--m3-outline-q)" }}>
+                      <div className="p-4 flex flex-col">
                         <div className="flex items-start justify-between w-full gap-4">
                           <div className="flex-1 min-w-0">
                             <h4
@@ -2017,8 +2017,8 @@ export default function ActiveWorkout({
                           </div>
                         </div>
 
-                        <div className="flex flex-row items-center justify-between w-full mt-3.5 pt-3 border-t border-gray-100 dark:border-white/5 gap-3">
-                          <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-row items-center justify-between w-full mt-1 gap-3">
+                          <div className="flex items-center gap-2 overflow-x-auto invisible-scrollbar">
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
@@ -2030,7 +2030,7 @@ export default function ActiveWorkout({
                                   handleOpenExerciseNotes(exerciseDetails.id);
                                 }
                               }}
-                              className="inline-flex items-center space-x-1.5 px-3 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 border border-white/10 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm shadow-indigo-500/25 active:shadow-none transition-all cursor-pointer shrink-0 h-8"
+                              className="inline-flex items-center space-x-1.5 px-3.5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-550 hover:to-purple-550 text-white rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm shadow-indigo-500/25 active:shadow-none transition-all cursor-pointer shrink-0 h-8"
                             >
                               <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
                               <span>{exerciseNotes?.[workoutEx.exerciseId] ? "Notes 📝" : "+ Note"}</span>
@@ -2041,7 +2041,7 @@ export default function ActiveWorkout({
                               </span>
                             )}
 
-                            <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-lg px-3.5 text-xs font-mono shrink-0">
+                            <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-full px-3.5 text-xs font-mono shrink-0">
                               <Timer className="w-4 h-4 text-indigo-400 shrink-0" />
                               <span className="font-extrabold select-none whitespace-nowrap uppercase tracking-wider text-[10px]">Rest:</span>
                               <input
@@ -2073,7 +2073,7 @@ export default function ActiveWorkout({
                             </div>
 
                             {exerciseDetails?.equipment === 'Barbell' && (
-                              <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-lg px-3.5 text-xs font-mono shrink-0">
+                              <div className="flex items-center space-x-2 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 dark:border-indigo-500/10 text-indigo-700 dark:text-indigo-300 h-8 rounded-full px-3.5 text-xs font-mono shrink-0">
                                 <Dumbbell className="w-4 h-4 text-indigo-400 shrink-0" />
                                 <span className="font-extrabold select-none whitespace-nowrap uppercase tracking-wider text-[10px]" title="Set bar weight">Bar:</span>
                                 <input
@@ -2157,10 +2157,7 @@ export default function ActiveWorkout({
                                   onRemoveSet(workoutEx.exerciseId, idx);
                                 }
                               }}
-                              style={{ background: set.isCompleted ? "var(--m3-sc-low)" : "var(--m3-sc)" }}
-                              className={`flex flex-col relative z-10 w-full py-1.5 px-2 rounded-xl cursor-grab active:cursor-grabbing border border-transparent transition-colors ${
-                                set.isCompleted ? "saturate-[0.6]" : "shadow-sm"
-                              }`}
+                              className="flex flex-col relative z-10 w-full py-1.5 px-2 rounded-xl cursor-grab active:cursor-grabbing transition-colors"
                             >
                               <div className="flex items-center w-full">
                                 {/* Inner fader wrapper for completed state */}
@@ -2399,12 +2396,12 @@ export default function ActiveWorkout({
                       </div>
 
                       {/* Adding Sets Footer */}
-                      <div className="p-3 bg-white dark:bg-black dark:border-white/10 shadow-sm flex justify-end">
+                      <div className="px-3 pb-3 pt-1 flex justify-end">
                         <button
                           onClick={() => onAddSet(workoutEx.exerciseId)}
-                          className="px-3 py-1 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-lg border border-gray-200 dark:border-white/5 flex items-center space-x-1 transition-colors"
+                          className="px-4 py-1.5 hover:bg-white/5 text-[var(--m3-primary)] text-xs font-bold rounded-full border border-[color:var(--m3-outline)] flex items-center space-x-1 transition-colors"
                         >
-                          <Plus className="w-3 h-3 text-indigo-400" />
+                          <Plus className="w-3.5 h-3.5" />
                           <span>Add Set</span>
                         </button>
                       </div>
@@ -2458,12 +2455,12 @@ export default function ActiveWorkout({
 
         {/* Global trigger buttons at bottom */}
         {session.exercises.length > 0 && (
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 dark:border-white/5">
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <button
               onClick={() => setShowAddModal(true)}
-              className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-black dark:border-white/10 shadow-sm border border-gray-200 dark:border-white/10 hover:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-xl flex items-center justify-center space-x-1.5 transition-all shadow-md group cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 border border-[color:var(--m3-outline)] hover:border-[color:var(--m3-primary)] text-[var(--m3-primary)] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-all group cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-indigo-400 group-hover:scale-110" />
+              <Plus className="w-4 h-4 group-hover:scale-110" />
               <span>Add Exercise</span>
             </button>
             <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
