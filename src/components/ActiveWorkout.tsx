@@ -41,6 +41,197 @@ import { getNotificationService } from "../services/notifications";
 // without touching this component (see src/services/notifications/index.ts).
 const notificationService = getNotificationService();
 
+// Set types in fixed cycle order; the dot colour for each comes from a CSS
+// class (--m3 tokens), never a hardcoded hex. failure wraps back to normal.
+const SET_TYPES: { id: SetType; label: string }[] = [
+  { id: "normal", label: "Normal" },
+  { id: "warmup", label: "Warmup" },
+  { id: "drop", label: "Drop" },
+  { id: "failure", label: "Failure" },
+];
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * Tap-cycle set-type control. A short tap advances to the next type (with a
+ * colour flash + light haptic); a press-and-hold (~420ms) opens the full list
+ * as a fallback. The list is portalled so the swipe row's overflow:hidden never
+ * clips it, and flips above the pill when there isn't room below.
+ */
+function SetTypeControl({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: string;
+  disabled?: boolean;
+  onChange: (v: SetType) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [flashing, setFlashing] = useState(false);
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number; width: number; up: boolean } | null>(null);
+
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const holdTimer = useRef<number | null>(null);
+  const flashTimer = useRef<number | null>(null);
+  const heldRef = useRef(false);
+  // Latest value, so rapid taps cycle cleanly without reading a stale prop.
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  const current = SET_TYPES.find((t) => t.id === value) || SET_TYPES[0];
+
+  useEffect(
+    () => () => {
+      if (holdTimer.current) clearTimeout(holdTimer.current);
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+    },
+    []
+  );
+
+  // Close the open list on any pointer-down outside the pill or the menu.
+  useEffect(() => {
+    if (!open) return;
+    const onDocDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (menuRef.current?.contains(t) || btnRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDocDown);
+    return () => document.removeEventListener("pointerdown", onDocDown);
+  }, [open]);
+
+  const flash = () => {
+    if (prefersReducedMotion()) return;
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    setFlashing(true);
+    flashTimer.current = window.setTimeout(() => setFlashing(false), 220);
+  };
+
+  const cycle = () => {
+    const i = SET_TYPES.findIndex((t) => t.id === valueRef.current);
+    const next = SET_TYPES[(i + 1) % SET_TYPES.length].id;
+    valueRef.current = next;
+    onChange(next);
+    flash();
+    haptics.setTypeCycle();
+  };
+
+  const openMenu = () => {
+    if (disabled || !btnRef.current) return;
+    const r = btnRef.current.getBoundingClientRect();
+    const MENU_H = 178;
+    const MARGIN = 8;
+    const menuW = Math.max(r.width, 168);
+    // Flip above the pill if there isn't room below.
+    const up = r.bottom + MENU_H + 12 > window.innerHeight;
+    // Centre the menu under the trigger, then clamp inside the viewport.
+    let left = r.left + r.width / 2 - menuW / 2;
+    left = Math.max(MARGIN, Math.min(left, window.innerWidth - menuW - MARGIN));
+    setPos({
+      left,
+      width: menuW,
+      up,
+      // Anchor by the edge nearest the pill so the gap is exact regardless of height.
+      top: up ? undefined : r.bottom + 6,
+      bottom: up ? window.innerHeight - r.top + 6 : undefined,
+    });
+    setOpen(true);
+  };
+
+  const onPointerDown = () => {
+    if (disabled) return;
+    heldRef.current = false;
+    holdTimer.current = window.setTimeout(() => {
+      heldRef.current = true;
+      openMenu();
+    }, 420);
+  };
+  const cancelHold = () => {
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+  };
+  const onPointerUp = () => {
+    if (disabled) return;
+    cancelHold();
+    if (heldRef.current) return; // hold opened the list — swallow the tap
+    if (open) return; // list already open — ignore
+    cycle();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      cycle();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      openMenu();
+    }
+  };
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        className={`pbw-typsel ${current.id}${flashing ? " flash" : ""}`}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-label={`Set type: ${current.label}. Tap to change, hold for the full list.`}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerLeave={cancelHold}
+        onPointerCancel={cancelHold}
+        onKeyDown={onKeyDown}
+      >
+        <span className={`pbw-typdot ${current.id}`} />
+        <span className="pbw-typlabel">{current.label}</span>
+        <span className="pbw-taphint">TAP</span>
+      </button>
+      {open && pos &&
+        createPortal(
+          <motion.div
+            ref={menuRef}
+            className="pbw-typmenu"
+            role="listbox"
+            aria-label="Set type"
+            style={{ ...(pos.up ? { bottom: pos.bottom } : { top: pos.top }), left: pos.left, width: pos.width, transformOrigin: pos.up ? "bottom center" : "top center" }}
+            initial={prefersReducedMotion() ? false : { opacity: 0, scale: 0.92, y: pos.up ? 4 : -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.14, ease: [0.34, 1.56, 0.64, 1] }}
+          >
+            {SET_TYPES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="option"
+                aria-selected={t.id === value}
+                className={`pbw-typopt ${t.id === value ? "on" : ""}`}
+                onClick={() => {
+                  onChange(t.id);
+                  valueRef.current = t.id;
+                  setOpen(false);
+                }}
+              >
+                <span className={`pbw-typdot ${t.id}`} />
+                <span>{t.label}</span>
+                {t.id === value && <Check />}
+              </button>
+            ))}
+          </motion.div>,
+          document.body
+        )}
+    </>
+  );
+}
+
 interface ActiveWorkoutProps {
   session: WorkoutSession;
   exercisesList: Exercise[];
@@ -2045,17 +2236,11 @@ export default function ActiveWorkout({
                               className={`pbw-setrow-inner ${set.isCompleted ? "done" : ""}`}
                             >
                               <span className="pbw-snum">{idx + 1}</span>
-                              <select
-                                className="pbw-typsel"
+                              <SetTypeControl
                                 disabled={set.isCompleted}
                                 value={set.type}
-                                onChange={(e) => onUpdateSet(workoutEx.exerciseId, idx, { type: e.target.value as SetType })}
-                              >
-                                <option value="normal">Normal</option>
-                                <option value="warmup">Warmup</option>
-                                <option value="drop">Drop</option>
-                                <option value="failure">Failure</option>
-                              </select>
+                                onChange={(v) => onUpdateSet(workoutEx.exerciseId, idx, { type: v })}
+                              />
                               {isCardio ? (
                                 <>
                                   <button
@@ -2283,54 +2468,48 @@ export default function ActiveWorkout({
 
       {/* Exercise Persistent Personal Notes Modal */}
       {notesExerciseId && createPortal(
-        <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/85 z-[9999] overflow-y-auto backdrop-blur-md">
+        <div
+          className="fixed inset-0 z-[9999] overflow-y-auto"
+          style={{ background: "rgba(0,0,0,.62)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+          onClick={() => setNotesExerciseId(null)}
+        >
           <div className="min-h-full flex items-center justify-center p-4">
             <motion.div
-              initial={{ scale: 0.8, y: 25, opacity: 0 }}
+              initial={{ scale: 0.85, y: 22, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 350, damping: 18, mass: 0.8 }}
-              className="bg-white dark:bg-black backdrop-blur-xl rounded-2xl w-full max-w-sm overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col relative"
+              transition={{ type: "spring", stiffness: 360, damping: 24, mass: 0.8 }}
+              className="pbw-nsheet"
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="p-4 bg-gray-50/50 dark:bg-black/30 border-b border-gray-200 dark:border-white/5 flex items-center justify-between">
-                <h3 className="font-extrabold text-sm text-gray-900 dark:text-gray-100 flex items-center space-x-2">
-                  <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
+              <div className="nhd">
+                <span className="nttl">
+                  <Sparkles />
                   <span>Personal Exercise Notes</span>
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setNotesExerciseId(null)}
-                  className="p-1 text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:bg-black dark:border-white/10 shadow-sm rounded-lg transition-colors border-0"
-                >
-                  <X className="w-5 h-5" />
+                </span>
+                <button type="button" onClick={() => setNotesExerciseId(null)} className="nclose">
+                  <X />
                 </button>
               </div>
 
-              <div className="p-5 space-y-4">
-                <div>
-                  <h4 className="font-extrabold text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
-                    {exercisesList.find((ex) => ex.id === notesExerciseId)?.name || "Exercise Notes"}
-                  </h4>
-                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                    These custom notes will persist across workouts and sync with your account.
-                  </p>
+              <div className="nbd">
+                <div className="nexname">
+                  {exercisesList.find((ex) => ex.id === notesExerciseId)?.name || "Exercise Notes"}
                 </div>
+                <p className="nhint">
+                  These custom notes will persist across workouts and sync with your account.
+                </p>
 
                 <textarea
+                  className="nta"
                   rows={5}
                   maxLength={1000}
                   placeholder="e.g., Focus on a slow eccentric phase, drop shoulders, or record your barbell plate patterns here..."
                   value={notesInputText}
                   onChange={(e) => setNotesInputText(e.target.value)}
-                  className="w-full text-xs font-semibold bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-950 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 shadow-inner"
                 />
 
-                <div className="flex justify-end gap-2.5 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setNotesExerciseId(null)}
-                    className="px-4 py-2 bg-white dark:bg-black dark:border-white/10 shadow-sm hover:bg-white/10 border border-gray-200 dark:border-white/5 text-slate-500 text-xs font-bold rounded-xl transition-all"
-                  >
+                <div className="nrow">
+                  <button type="button" onClick={() => setNotesExerciseId(null)} className="nb cancel">
                     Cancel
                   </button>
                   <button
@@ -2349,9 +2528,9 @@ export default function ActiveWorkout({
                       }
                     }}
                     disabled={isNotesSaving}
-                    className="px-4 py-2 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center space-x-1"
+                    className="nb save"
                   >
-                    <Check className="w-4 h-4" />
+                    <Check />
                     <span>{isNotesSaving ? "Saving..." : "Save Notes"}</span>
                   </button>
                 </div>
@@ -2444,12 +2623,15 @@ export default function ActiveWorkout({
       {/* Search / Add Exercise Picker Modal */}
       {showAddModal && createPortal(
         <div className="fixed inset-0 z-[9999] overflow-y-auto" style={{ background: "rgba(8,6,14,.72)" }}>
-          <div className="min-h-full flex items-center justify-center p-4">
+          <div
+            className="min-h-full flex items-center justify-center"
+            style={{ padding: "calc(env(safe-area-inset-top, 0px) + 14px) 14px calc(env(safe-area-inset-bottom, 0px) + 14px)" }}
+          >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)" }}
-              className="rounded-[28px] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[calc(100vh-32px)] md:max-h-[85vh] relative"
+              style={{ background: "var(--m3-sc-low)", border: "1px solid var(--m3-outline-q)", maxHeight: "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 28px)" }}
+              className="rounded-[28px] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col relative"
             >
               <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true"><defs><symbol id="pbw-cookie" viewBox="0 0 100 100"><path d="M45.2 11.5 C45.8 10.6 54.2 10.6 54.8 11.5 L55.9 13.1 C56.5 14.0 68.2 18.3 69.2 18.0 L71.1 17.4 C72.1 17.1 78.6 22.5 78.5 23.6 L78.2 25.5 C78.1 26.6 84.3 37.4 85.3 37.8 L87.1 38.6 C88.1 39.0 89.6 47.3 88.8 48.1 L87.3 49.4 C86.5 50.1 84.4 62.4 84.9 63.3 L85.8 65.1 C86.3 66.0 82.0 73.4 81.0 73.4 L79.0 73.5 C77.9 73.6 68.4 81.6 68.1 82.6 L67.7 84.6 C67.5 85.6 59.5 88.5 58.7 87.9 L57.1 86.7 C56.2 86.0 43.8 86.0 42.9 86.7 L41.3 87.9 C40.5 88.5 32.5 85.6 32.3 84.6 L31.9 82.6 C31.6 81.6 22.1 73.6 21.0 73.5 L19.0 73.4 C18.0 73.4 13.7 66.0 14.2 65.1 L15.1 63.3 C15.6 62.4 13.5 50.1 12.7 49.4 L11.2 48.1 C10.4 47.3 11.9 39.0 12.9 38.6 L14.7 37.8 C15.7 37.4 21.9 26.6 21.8 25.5 L21.5 23.6 C21.4 22.5 27.9 17.1 28.9 17.4 L30.8 18.0 C31.8 18.3 43.5 14.0 44.1 13.1Z"/></symbol></defs></svg>
               {/* Picker header — exact port .pkhead */}

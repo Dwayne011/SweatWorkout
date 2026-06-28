@@ -34,6 +34,8 @@ export const haptics = {
   deleteCommit: () => impact(ImpactStyle.Medium, 18),
   /** Confirm — checking the done-box on a set. */
   setComplete: () => impact(ImpactStyle.Light, 10),
+  /** Light tick when tapping the set-type control to advance to the next type. */
+  setTypeCycle: () => impact(ImpactStyle.Light, 6),
   /** Success-style notification on finishing a workout. */
   finishWorkout: () => notify(NotificationType.Success, [12, 40, 18]),
   /** One medium tick confirming Discard in the dialog. */
