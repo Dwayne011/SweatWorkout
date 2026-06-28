@@ -5,8 +5,6 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Dumbbell, Sparkles } from "lucide-react";
-import FlexingArm from "./FlexingArm";
 
 interface IntroSplashProps {
   onComplete: () => void;
@@ -69,9 +67,9 @@ export default function IntroSplash({ onComplete }: IntroSplashProps) {
           />
 
           <div className="relative z-10 flex flex-col items-center space-y-6 text-center max-w-lg px-4">
-            {/* Animated Logo Shield */}
+            {/* Animated Logo */}
             <motion.div
-              initial={{ scale: 0.2, rotate: -45, opacity: 0 }}
+              initial={{ scale: 0.2, rotate: -8, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
               transition={{
                 type: "spring",
@@ -79,11 +77,13 @@ export default function IntroSplash({ onComplete }: IntroSplashProps) {
                 damping: 15,
                 delay: 0.1,
               }}
-              className="relative p-5 bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 text-white rounded-3xl shadow-[0_0_35px_rgba(99,102,241,0.4)] border border-gray-200 dark:border-white/10 flex items-center justify-center mb-2"
+              className="mb-2"
             >
-              <FlexingArm className="w-10 h-10 text-gray-900 dark:text-gray-100 animate-pulse" />
-              {/* Decorative extra spark */}
-              <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 animate-bounce" />
+              <img
+                src="/pb-icon.png"
+                alt="Project PB"
+                className="w-24 h-24 rounded-[22px] shadow-[0_0_38px_rgba(124,58,237,0.5)]"
+              />
             </motion.div>
 
             {/* Wordmark */}
