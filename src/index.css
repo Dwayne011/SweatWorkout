@@ -31,6 +31,24 @@
   --color-indigo-855: #2b1c66;
   --color-indigo-900: #241258;
   --color-indigo-950: #160a3a;
+
+  /* Re-theme the neutral grays (gray/slate/zinc) to M3 violet-tinted
+     tonal neutrals — same lightness as stock Tailwind so text contrast
+     is preserved, but surfaces/text pick up the M3 lavender tint. */
+  --color-gray-50:  #f6f4fb;  --color-slate-50:  #f6f4fb;  --color-zinc-50:  #f6f4fb;
+  --color-gray-100: #ede9f5;  --color-slate-100: #ede9f5;  --color-zinc-100: #ede9f5;
+  --color-gray-150: #e6e1f1;
+  --color-gray-200: #ddd7ec;  --color-slate-200: #ddd7ec;  --color-zinc-200: #ddd7ec;
+  --color-gray-250: #d2cbe4;
+  --color-gray-300: #c6bfd8;  --color-slate-300: #c6bfd8;  --color-zinc-300: #c6bfd8;
+  --color-gray-400: #9c93af;  --color-slate-400: #9c93af;  --color-zinc-400: #9c93af;
+  --color-gray-500: #6f6781;  --color-slate-500: #6f6781;  --color-zinc-500: #6f6781;
+  --color-gray-600: #534b64;  --color-slate-600: #534b64;  --color-zinc-600: #534b64;
+  --color-gray-700: #3c344b;  --color-slate-700: #3c344b;  --color-zinc-700: #3c344b;
+  --color-gray-750: #312942;  --color-slate-750: #312942;  --color-zinc-750: #312942;
+  --color-gray-800: #261f33;  --color-slate-800: #261f33;  --color-zinc-800: #261f33;
+  --color-gray-900: #171121;  --color-slate-900: #171121;  --color-zinc-900: #1a1426;
+  --color-gray-950: #0c0814;  --color-slate-950: #0c0814;  --color-zinc-950: #0b0910;
 }
 
 @layer base {
