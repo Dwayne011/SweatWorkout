@@ -15,6 +15,7 @@ const HistoryLogs = lazy(() => import("./components/HistoryLogs"));
 const ExerciseLibrary = lazy(() => import("./components/ExerciseLibrary"));
 const AccountSettings = lazy(() => import("./components/AccountSettings"));
 import WorkoutSplashScene from "./components/WorkoutSplashScene";
+import CoachAnalysis from "./components/CoachAnalysis";
 import IntroSplash from "./components/IntroSplash";
 import OnboardingProfile from "./components/OnboardingProfile";
 import { WorkoutSession, UserProfile } from "./types";
@@ -927,7 +928,7 @@ export default function App() {
 
       {/* DETAILED WORKOUT COMPLETED SPLASH CONGRATULATIONS SCENE */}
       {latestCompletedWorkout && (
-        <WorkoutSplashScene
+        <CoachAnalysis
           completedWorkout={latestCompletedWorkout}
           history={state.history}
           exercisesList={state.exercises}
