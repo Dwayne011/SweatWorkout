@@ -828,6 +828,52 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-curveempty .ei svg { width: 26px; height: 26px; }
 .pbw-curveempty p { font-size: 13px; color: var(--m3-on-var); line-height: 1.5; max-width: 280px; margin: 0 auto; }
 
+/* Exercise detail — bottom sheet (exercise-detail.html, exact values; --xx -> --m3-xx,
+   only the gradient stops + figure intensity colours are literals) */
+.pbw-edsheet { position: relative; width: 100%; max-width: 440px; max-height: 94vh; background: var(--m3-bg); border-radius: 30px 30px 0 0; overflow: hidden; display: flex; flex-direction: column; }
+.pbw-edsheet .handle { width: 40px; height: 5px; border-radius: 999px; background: var(--m3-sc-high); margin: 10px auto 0; flex: none; }
+.pbw-edsheet .sclose { position: absolute; top: 14px; right: 18px; width: 34px; height: 34px; border-radius: 999px; border: none; background: var(--m3-sc-low); color: var(--m3-on-var); display: grid; place-items: center; cursor: pointer; z-index: 3; }
+.pbw-edsheet .sclose svg { width: 17px; height: 17px; }
+.pbw-edsheet .exhd { padding: 10px 20px 14px; flex: none; }
+.pbw-edsheet .chips { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pbw-edsheet .cat { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--m3-on-primary-cont); background: var(--m3-primary-cont); padding: 5px 11px; border-radius: 999px; }
+.pbw-edsheet .chips .dot { color: var(--m3-on-dim); }
+.pbw-edsheet .exname { font-family: var(--m3-display-font); font-weight: 500; font-size: 25px; color: var(--m3-on); letter-spacing: -.01em; line-height: 1.1; }
+.pbw-edsheet .sheetbody { padding: 2px 16px 18px; overflow-y: auto; flex: 1; }
+.pbw-edsheet .sheetbody { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+.pbw-edsheet .sec { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--m3-on-dim); margin: 20px 2px 10px; }
+.pbw-edsheet .card { background: var(--m3-sc-low); border-radius: 22px; padding: 16px 18px; }
+.pbw-edsheet .demo { position: relative; margin-bottom: 6px; }
+.pbw-edsheet .demoframe { height: 200px; border-radius: 22px; background: radial-gradient(circle at 1px 1px, rgba(182,171,200,.10) 1px, transparent 0), var(--m3-sc-low); background-size: 16px 16px, auto; display: grid; place-items: center; overflow: hidden; }
+.pbw-edsheet .demoframe img, .pbw-edsheet .demoframe video { width: 100%; height: 100%; object-fit: cover; }
+.pbw-edsheet .demoplay { width: 58px; height: 58px; border-radius: 999px; background: rgba(123,83,246,.22); color: var(--m3-primary); display: grid; place-items: center; border: 1.5px solid rgba(182,171,200,.25); }
+.pbw-edsheet .demoplay svg { width: 24px; height: 24px; margin-left: 3px; }
+.pbw-edsheet .demotag { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; font-family: var(--m3-mono-font); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-var); background: rgba(11,9,16,.7); padding: 6px 10px; border-radius: 999px; }
+.pbw-edsheet .demotag svg { width: 13px; height: 13px; }
+.pbw-edsheet .steps { display: flex; flex-direction: column; gap: 14px; }
+.pbw-edsheet .step { display: flex; gap: 12px; }
+.pbw-edsheet .sn { width: 26px; height: 26px; flex: none; border-radius: 999px; background: var(--m3-primary-fill); color: #fff; font-family: var(--m3-mono-font); font-weight: 500; font-size: 13px; display: grid; place-items: center; }
+.pbw-edsheet .step p { font-size: 14px; color: var(--m3-on); line-height: 1.5; }
+.pbw-edsheet .cardprose { font-size: 14px; color: var(--m3-on); line-height: 1.5; }
+.pbw-edsheet .whycard { background: linear-gradient(160deg, rgba(123,83,246,.2), rgba(213,102,200,.1)); border: 1px solid var(--m3-primary-cont); border-radius: 22px; padding: 18px; margin-top: 18px; }
+.pbw-edsheet .whyhd { display: flex; align-items: center; gap: 9px; color: var(--m3-primary); font-weight: 500; font-size: 15px; margin-bottom: 10px; }
+.pbw-edsheet .whyhd svg { width: 20px; height: 20px; }
+.pbw-edsheet .whycard p { font-size: 14px; color: var(--m3-on); line-height: 1.55; }
+.pbw-edsheet .muscle { display: flex; gap: 16px; align-items: center; }
+.pbw-edsheet .figwrap { flex: none; background: radial-gradient(circle at 1px 1px, rgba(182,171,200,.10) 1px, transparent 0); background-size: 14px 14px; border-radius: 14px; padding: 6px; }
+.pbw-edsheet .mcols { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.pbw-edsheet .mlab { display: flex; align-items: center; gap: 6px; font-family: var(--m3-mono-font); font-size: 10px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-dim); margin-bottom: 8px; }
+.pbw-edsheet .mlab svg { width: 13px; height: 13px; color: var(--m3-primary); }
+.pbw-edsheet .mrow { display: flex; flex-wrap: wrap; gap: 6px; }
+.pbw-edsheet .mchip { font-family: var(--m3-display-font); font-size: 13px; font-weight: 500; color: var(--m3-on); background: var(--m3-sc-high); padding: 6px 12px; border-radius: 999px; }
+.pbw-edsheet .mchip.p { background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); }
+.pbw-edsheet .misscard { display: flex; flex-direction: column; gap: 0; }
+.pbw-edsheet .miss { font-size: 14px; color: var(--m3-on-var); line-height: 1.5; padding: 11px 0 11px 14px; border-left: 2px solid var(--m3-error); }
+.pbw-edsheet .miss + .miss { margin-top: 2px; }
+.pbw-edsheet .miss b { color: var(--m3-on); font-weight: 500; }
+.pbw-edsheet .gotit { width: 100%; border: none; cursor: pointer; border-radius: 999px; padding: 16px; margin-top: 22px; background: linear-gradient(95deg, var(--m3-primary-fill), #d566c8 92%); color: #fff; font-weight: 500; font-size: 16px; box-shadow: 0 10px 24px -8px rgba(123,83,246,.6); font-family: var(--m3-display-font); }
+.pbw-edempty { font-size: 14px; color: var(--m3-on-var); line-height: 1.5; }
+
 /* Routines — v5 chip cards (.rchip, Variant 2) */
 .pbw-rchip { background: var(--m3-sc-low); border-radius: 28px; padding: 20px; margin-bottom: 14px; }
 .pbw-rchip .rhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
