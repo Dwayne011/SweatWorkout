@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Trash2, Dumbbell, Calendar, Clock, Trophy, ChevronDown, ChevronUp, ChevronRight, Sparkles, MessageSquare, BarChart3, ListCollapse } from "lucide-react";
 import { WorkoutSession, Exercise } from "../types";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import InsightsTrends from "./InsightsTrends";
 import { Button } from "./ui/Button";
 
@@ -190,26 +190,43 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
     setExpandedLogId((prev) => (prev === logId ? null : logId));
   };
 
+  // seg2 tab switch — directional slide + fade. Journals (left) <-> Insights (right).
+  const reduceMotion = useReducedMotion();
+  const tabDir = useRef(0);
+  const switchTab = (m: "logs" | "analytics") => {
+    if (m === viewMode) return;
+    tabDir.current = m === "analytics" ? 1 : -1;
+    setViewMode(m);
+  };
+  const panelOffset = reduceMotion ? 0 : 40;
+  const panelVariants = {
+    enter: (d: number) => ({ opacity: 0, x: d >= 0 ? panelOffset : -panelOffset }),
+    center: { opacity: 1, x: 0 },
+    exit: (d: number) => ({ opacity: 0, x: d >= 0 ? -panelOffset : panelOffset }),
+  };
+
   return (
     <div className="space-y-4">
       {/* History header + segmented tabs */}
       <div><span className="m3-eyebrow primary">Workout history</span></div>
       <div className="m3-seg2">
-        <Button variant="none" onClick={() => setViewMode("logs")} className={viewMode === "logs" ? "sel" : ""}>
+        <Button variant="none" onClick={() => switchTab("logs")} className={viewMode === "logs" ? "sel" : ""}>
           <ListCollapse className="w-4 h-4" /> Journals timeline
         </Button>
-        <Button variant="none" onClick={() => setViewMode("analytics")} className={viewMode === "analytics" ? "sel" : ""}>
+        <Button variant="none" onClick={() => switchTab("analytics")} className={viewMode === "analytics" ? "sel" : ""}>
           <BarChart3 className="w-4 h-4" /> Insights &amp; trends
         </Button>
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" custom={tabDir.current}>
         <motion.div
           key={viewMode}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.12 }}
+          custom={tabDir.current}
+          variants={panelVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
           className="space-y-3 pb-40"
         >
           {viewMode === "analytics" ? (
