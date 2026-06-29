@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { Trash2, Dumbbell, Calendar, Clock, Trophy, ChevronDown, ChevronUp, ChevronRight, Sparkles, MessageSquare, BarChart3, ListCollapse } from "lucide-react";
 import { WorkoutSession, Exercise } from "../types";
 import { motion, AnimatePresence } from "motion/react";
-import WorkoutAnalytics from "./WorkoutAnalytics";
+import InsightsTrends from "./InsightsTrends";
 import { Button } from "./ui/Button";
 
 interface HistoryLogsProps {
@@ -213,7 +213,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
           className="space-y-3 pb-40"
         >
           {viewMode === "analytics" ? (
-            <WorkoutAnalytics
+            <InsightsTrends
               history={history}
               exercisesList={exercisesList}
               onAskGemini={onAskGemini}
