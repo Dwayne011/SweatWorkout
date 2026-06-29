@@ -6,6 +6,7 @@
 import React, { useState, useMemo } from "react";
 import { WorkoutSession, Exercise } from "../types";
 import { robustFetch } from "../utils/network";
+import { apiUrl, getAuthHeader } from "../aiClient";
 import { 
   TrendingUp, 
   TrendingDown,
@@ -134,9 +135,9 @@ export default function WorkoutAnalytics({ history, exercisesList, onAskGemini }
     setDiagnosticLoading(true);
     setDiagnosticError("");
     try {
-      const response = await robustFetch("/api/ai/diagnostic-insights", {
+      const response = await robustFetch(apiUrl("/api/ai/diagnostic-insights"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await getAuthHeader()) },
         body: JSON.stringify(diagnosticPayload),
       }, {
         useCache: true,

@@ -6,6 +6,7 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { robustFetch } from "../utils/network";
+import { apiUrl, getAuthHeader } from "../aiClient";
 import {
   Plus,
   Search,
@@ -201,9 +202,9 @@ export default function ExerciseLibrary({
     setIsAnalyzingMedia(true);
     setAnalysisError("");
     try {
-      const response = await robustFetch("/api/ai/analyze-media", {
+      const response = await robustFetch(apiUrl("/api/ai/analyze-media"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await getAuthHeader()) },
         body: JSON.stringify({
           name: editName,
           mediaData: selectedFileForAnalysis.base64,

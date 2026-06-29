@@ -5,6 +5,7 @@
 import React, { useState } from "react";
 import { useWorkoutState } from "../useWorkoutState";
 import { robustFetch } from "../utils/network";
+import { apiUrl, getAuthHeader } from "../aiClient";
 import { Exercise, WorkoutSession, UserProfile } from "../types";
 import { 
   Sparkles, 
@@ -81,10 +82,11 @@ export default function AIGeneratorLab({
     setGeneratedWorkout(null);
 
     try {
-      const response = await robustFetch("/api/ai/generate-workout", {
+      const response = await robustFetch(apiUrl("/api/ai/generate-workout"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(await getAuthHeader()),
         },
         body: JSON.stringify({
           goal,

@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { robustFetch } from "../utils/network";
+import { apiUrl, getAuthHeader } from "../aiClient";
 import {
   Sparkles,
   Award,
@@ -475,9 +476,9 @@ export default function WorkoutSplashScene({
         setLoading(true);
         setError(null);
 
-        const response = await robustFetch("/api/ai/analyze-workout", {
+        const response = await robustFetch(apiUrl("/api/ai/analyze-workout"), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...(await getAuthHeader()) },
           body: JSON.stringify({ workout: completedWorkout, history })
         }, {
           useCache: true,

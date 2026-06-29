@@ -7,6 +7,8 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import { initializeApp, getApps } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 
 dotenv.config();
 
@@ -19,6 +21,40 @@ const ai = new GoogleGenAI({
   },
 });
 
+// Model name is a config value so it can be swapped without code changes.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
+
+// Firebase Admin — used only to VERIFY caller ID tokens. Verification needs the
+// project id (public certs are fetched from Google), no service account. On
+// Cloud Run GOOGLE_CLOUD_PROJECT is injected automatically.
+const FIREBASE_PROJECT_ID =
+  process.env.FIREBASE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || "gen-lang-client-0615336375";
+try {
+  if (!getApps().length) initializeApp({ projectId: FIREBASE_PROJECT_ID });
+} catch (e) {
+  console.error("Firebase Admin init failed:", e);
+}
+
+// Reject any AI call without a valid Firebase ID token. Always JSON, never HTML.
+async function verifyAuth(req: any, res: any, next: any) {
+  const header = String(req.headers.authorization || "");
+  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  if (!token) {
+    res.status(401).json({ error: "auth_required", message: "Sign in to use the coach features." });
+    return;
+  }
+  try {
+    const decoded = await getAuth().verifyIdToken(token);
+    (req as any).uid = decoded.uid;
+    next();
+  } catch (e) {
+    res.status(401).json({ error: "auth_invalid", message: "Your session has expired. Sign in again." });
+  }
+}
+
+const keyConfigured = () =>
+  !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "MY_GEMINI_API_KEY";
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -27,7 +63,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
   // API Route for Gemini Command Processing
-  app.post("/api/ai/command", async (req, res) => {
+  app.post("/api/ai/command", verifyAuth, async (req, res) => {
     try {
       const { message, currentState, chatHistory } = req.body;
 
@@ -121,7 +157,7 @@ Supported Actions:
       ];
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: GEMINI_MODEL,
         contents,
         config: {
           responseMimeType: "application/json",
@@ -171,7 +207,7 @@ Supported Actions:
     }
   });
 
-  app.post("/api/ai/generate-workout", async (req, res) => {
+  app.post("/api/ai/generate-workout", verifyAuth, async (req, res) => {
     try {
       const { goal, fitnessLevel, equipment, includePastHistory, feedback, exercisesList, historyList, userProfile, rpeTarget, weightModifier } = req.body;
 
@@ -239,7 +275,7 @@ Provide a clear, personal, motivating S&C response (2-3 sentences max) under 're
       ];
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: GEMINI_MODEL,
         contents,
         config: {
           responseMimeType: "application/json",
@@ -301,7 +337,7 @@ Provide a clear, personal, motivating S&C response (2-3 sentences max) under 're
   });
 
   // API Route for AI Workout Finisher & Progression Analyst
-  app.post("/api/ai/analyze-workout", async (req, res) => {
+  app.post("/api/ai/analyze-workout", verifyAuth, async (req, res) => {
     try {
       if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "MY_GEMINI_API_KEY") {
         res.status(500).json({
@@ -339,7 +375,7 @@ Voice/Grammar: Maintain a deeply professional, highly encouraging, and objective
 Your response must be structured as valid JSON matching the specified response schema exactly.`;
 
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: GEMINI_MODEL,
           contents: [{ role: "user", parts: [{ text: scoredPrompt }] }],
           config: {
             responseMimeType: "application/json",
@@ -416,7 +452,7 @@ CRITICAL DIRECTIONS:
 You must reply with a valid JSON payload matching the requested response schema exactly.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: GEMINI_MODEL,
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: {
           responseMimeType: "application/json",
@@ -487,7 +523,7 @@ You must reply with a valid JSON payload matching the requested response schema 
   });
 
   // API Route for performance diagnostic coaching insights
-  app.post("/api/ai/diagnostic-insights", async (req, res) => {
+  app.post("/api/ai/diagnostic-insights", verifyAuth, async (req, res) => {
     try {
       if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "MY_GEMINI_API_KEY") {
         res.status(500).json({
@@ -605,7 +641,7 @@ Your task is to ingest workout metrics and generate exactly three easy-to-unders
 - Absolutely do NOT invent any other data points. Directly address the actual calculated and array entries supplied.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: GEMINI_MODEL,
         contents: [{ role: "user", parts: [{ text: diagnosticPrompt }] }],
         config: {
           responseMimeType: "application/json",
@@ -649,7 +685,7 @@ Your task is to ingest workout metrics and generate exactly three easy-to-unders
   });
 
   // API Route for Analyzing Custom Exercise Demonstration Video/Images
-  app.post("/api/ai/analyze-media", async (req, res) => {
+  app.post("/api/ai/analyze-media", verifyAuth, async (req, res) => {
     try {
       const { name, mediaData, mimeType } = req.body;
 
@@ -694,7 +730,7 @@ Extract and return:
 Respond STRICTLY with a JSON matching the expected schema.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: GEMINI_MODEL,
         contents: { parts: [mediaPart, { text: promptText }] },
         config: {
           responseMimeType: "application/json",
@@ -733,6 +769,54 @@ Respond STRICTLY with a JSON matching the expected schema.`;
       res.status(500).json({
         error: error instanceof Error ? error.message : "Internal Server Error in Gemini Media Analyst",
       });
+    }
+  });
+
+  // Unified coach endpoint — per-workout read, all-time read, and passive notes.
+  // The CLIENT computes the deterministic metrics and sends them; the model only
+  // interprets them into plain coaching prose and returns structured JSON (no
+  // markdown), so nothing can leak into the UI. The model never recomputes or
+  // invents a number. kind: "workout" | "alltime" | "notes".
+  app.post("/api/ai/coach", verifyAuth, async (req, res) => {
+    try {
+      if (!keyConfigured()) {
+        res.status(503).json({ error: "not_configured", message: "The AI coach is not set up yet." });
+        return;
+      }
+      const { kind, payload } = req.body || {};
+      const voice =
+        "Plain coaching language, like a person talking, not a clinical readout. No medical or sci-fi jargon, no \"diagnostic\", no \"motor-unit fatigue\", no \"stimulation index\". No em dashes, no \"seamless\" or \"robust\". Use only the numbers provided, never invent or recompute any figure.";
+
+      if (kind === "alltime") {
+        const r = await ai.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: [{ role: "user", parts: [{ text: `You are a strength coach giving an athlete an all-time read on their training so far, from these computed facts:\n${JSON.stringify(payload)}\n\nWrite a short readout (3 to 5 short paragraphs) on their splits, their consistency, and where their strength is going. ${voice}` }] }],
+          config: { responseMimeType: "application/json", responseSchema: { type: Type.OBJECT, properties: { readout: { type: Type.STRING } }, required: ["readout"] } },
+        });
+        res.json(JSON.parse((r.text || "{}").trim()));
+        return;
+      }
+
+      if (kind === "notes") {
+        const r = await ai.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: [{ role: "user", parts: [{ text: `You are a strength coach. From these computed facts:\n${JSON.stringify(payload)}\nwrite two short passive observations the athlete can glance at, each a title and a sentence. ${voice}` }] }],
+          config: { responseMimeType: "application/json", responseSchema: { type: Type.OBJECT, properties: { notes: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, body: { type: Type.STRING } }, required: ["title", "body"] } } }, required: ["notes"] } },
+        });
+        res.json(JSON.parse((r.text || "{}").trim()));
+        return;
+      }
+
+      // default: per-workout — one short interpretive line over the facts.
+      const r = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: [{ role: "user", parts: [{ text: `You are a strength coach reading back one completed workout from these computed facts:\n${JSON.stringify(payload)}\n\nWrite "summary": one short plain-language line on the session, a real observation, not "you crushed it". If the session has no completed sets, say plainly there is not enough logged here to analyse. ${voice}` }] }],
+        config: { responseMimeType: "application/json", responseSchema: { type: Type.OBJECT, properties: { summary: { type: Type.STRING } }, required: ["summary"] } },
+      });
+      res.json(JSON.parse((r.text || "{}").trim()));
+    } catch (error) {
+      console.error("AI Coach Error:", error);
+      res.status(500).json({ error: "coach_error", message: error instanceof Error ? error.message : "Coach request failed" });
     }
   });
 

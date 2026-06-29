@@ -7,18 +7,20 @@
  *
  * The two AI surfaces are deliberately distinct:
  *   - "Ask the coach"  — on-demand all-time readout (user presses it).
- *   - "Coach notes"    — passive auto observations (deterministic for now).
+ *   - "Coach notes"    — passive auto observations (fires in the background).
  *
- * TODO(data-model / AI): the per-call request + response shapes for the Gemini
- * coach are not wired here — they go through the backend proxy with an absolute
- * base URL once the exercise/set model and prompt contracts are finalised. Keep
- * those shapes in one place (the ai service), never a relative /api path, never
- * the Gemini key on the client. This file only renders the UI + states.
+ * Both go through aiClient (coachAlltime / coachNotes): the backend proxy at an
+ * absolute base URL, with the Firebase ID token, never a relative /api path,
+ * never the Gemini key on the client. The model only interprets the metrics this
+ * file computes; when it isn't available (backend not set up, signed out,
+ * offline) each surface falls back to a deterministic read built from the same
+ * numbers, so the page is always useful.
  */
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { WorkoutSession, Exercise } from "../types";
+import { coachAlltime, coachNotes } from "../aiClient";
 
 interface InsightsTrendsProps {
   history: WorkoutSession[];
@@ -205,8 +207,11 @@ function sparkPath(values: number[]) {
 }
 
 export default function InsightsTrends({ history, exercisesList, onAskGemini }: InsightsTrendsProps) {
-  const [askState, setAskState] = useState<"idle" | "loading">("idle");
+  const [askState, setAskState] = useState<"idle" | "loading" | "ready">("idle");
+  const [askText, setAskText] = useState("");
+  const [askIsAI, setAskIsAI] = useState(false);
   const [notesStamp, setNotesStamp] = useState(0); // refresh tick
+  const [aiNotes, setAiNotes] = useState<{ title: string; body: string }[] | null>(null);
   const [curveExId, setCurveExId] = useState<string | null>(null); // open deep-dive
 
   const exName = (id: string) => exercisesList.find((e) => e.id === id)?.name || id;
@@ -335,20 +340,83 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
       .map((id) => ({ id, name: exName(id) }))
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, strength, notes, exSeries: byEx, exList };
+    // deterministic all-time readout — the fallback for "Ask the coach" when the
+    // model isn't reachable. Built from the same numbers, plain coaching voice.
+    let fallbackReadout: string;
+    if (history.length === 0) {
+      fallbackReadout = "Once you log a few sessions, your all-time read will appear here — your splits, your consistency, and where your strength is heading.";
+    } else {
+      const fp: string[] = [];
+      fp.push(
+        `You're averaging ${perWeek} session${perWeek === 1 ? "" : "s"} a week${streak > 0 ? `, with a ${streak}-week working streak going` : ""}. That's the part that compounds, so keep it steady.`
+      );
+      if (wow !== null) {
+        fp.push(`Your volume is ${wow >= 0 ? "up" : "down"} ${Math.abs(wow)}% on last week (${thisWeekVol.toLocaleString("en-US")} kg this week). ${Math.abs(wow) > 25 ? "That's a big swing — worth noticing whether it was planned." : "A normal week-to-week move."}`);
+      } else {
+        fp.push(`This is your first tracked week, ${thisWeekVol.toLocaleString("en-US")} kg of volume in. Once there's a second week the trend will mean more.`);
+      }
+      if (focus && focus !== "—") {
+        const topPct = split.find((s) => s.name === focus)?.pct;
+        fp.push(`Most of your work is going into ${focus.toLowerCase()}${topPct ? `, about ${topPct}% of your sets over the last month` : ""}. ${topPct && topPct >= 40 ? "If you want a more even build, ease a little of that into the lighter groups." : "The spread looks reasonable."}`);
+      }
+      const climbing = strength.find((s) => s.up);
+      if (climbing) fp.push(`${climbing.name} is your clearest climber right now (${climbing.delta.replace("↑ ", "")}). Keep the weekly jumps small and it'll hold.`);
+      fallbackReadout = fp.join("\n\n");
+    }
+
+    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, strength, notes, exSeries: byEx, exList, fallbackReadout };
   }, [history, exercisesList, notesStamp]);
 
   const fmtVol = (n: number) => n.toLocaleString("en-US");
 
-  const handleAsk = () => {
+  // The all-time coach call sees only these computed facts and writes the read
+  // over them; it never recomputes a number. Same facts feed the deterministic
+  // fallback, so the read is consistent whether or not the model answers.
+  const alltimePayload = useCallback(() => ({
+    totalSessions: history.length,
+    thisWeekVolumeKg: metrics.thisWeekVol,
+    volumeWoWPct: metrics.wow,
+    streakWeeks: metrics.streak,
+    sessionsPerWeek: metrics.perWeek,
+    focusGroup: metrics.focus,
+    split: metrics.split.filter((s) => s.sets > 0).map((s) => ({ group: s.name, sets: s.sets, pct: s.pct })),
+    lifts: metrics.strength.map((s) => ({ name: s.name, current: s.cur, trend: s.delta, climbing: s.up })),
+  }), [history.length, metrics]);
+
+  const handleAsk = useCallback(async () => {
     setAskState("loading");
-    // TODO(AI): replace with the all-time coach call through the backend proxy.
-    onAskGemini(
-      "Give me an all-time read on my training so far — my splits, my consistency, and where my strength is going. Plain coaching language, no clinical terms."
-    );
-    try { window.dispatchEvent(new CustomEvent("open-gemini-drawer")); } catch {}
-    setTimeout(() => setAskState("idle"), 600);
-  };
+    try {
+      const res = await coachAlltime(alltimePayload());
+      const text = (res.readout || "").trim();
+      if (text) { setAskText(text); setAskIsAI(true); }
+      else { setAskText(metrics.fallbackReadout); setAskIsAI(false); }
+    } catch {
+      // not configured / signed out / offline -> deterministic readout
+      setAskText(metrics.fallbackReadout);
+      setAskIsAI(false);
+    }
+    setAskState("ready");
+  }, [alltimePayload, metrics.fallbackReadout]);
+
+  // Coach notes fire passively on open and on each refresh; the deterministic
+  // notes show until (and unless) the model returns its own.
+  useEffect(() => {
+    if (history.length === 0) { setAiNotes(null); return; }
+    let cancelled = false;
+    setAiNotes(null);
+    coachNotes({
+      focusGroup: metrics.focus,
+      streakWeeks: metrics.streak,
+      split: metrics.split.filter((s) => s.sets > 0).map((s) => ({ group: s.name, sets: s.sets, pct: s.pct })),
+      lifts: metrics.strength.map((s) => ({ name: s.name, trend: s.delta, climbing: s.up })),
+    })
+      .then((r) => { if (!cancelled && Array.isArray(r.notes) && r.notes.length) setAiNotes(r.notes); })
+      .catch(() => { if (!cancelled) setAiNotes(null); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notesStamp, history.length]);
+
+  const shownNotes = aiNotes ?? metrics.notes;
 
   return (
     <div>
@@ -359,8 +427,24 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
           <div className="actitle">Your coach</div>
         </div>
         <p className="askbody">A read on your training so far. Your splits, your consistency, and where your strength is going.</p>
+
+        <AnimatePresence initial={false}>
+          {askState === "ready" && (
+            <motion.div
+              className="pbw-askout"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              {askText.split("\n\n").map((para, i) => <p key={i}>{para}</p>)}
+              {!askIsAI && <div className="pbw-askmeta">Read from your tracked numbers.</div>}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button className="pbw-askbtn" onClick={handleAsk} disabled={askState === "loading"}>
-          {askState === "loading" ? <span className="pbw-spin" /> : <ISpark />} Ask the coach
+          {askState === "loading" ? <span className="pbw-spin" /> : <ISpark />} {askState === "ready" ? "Ask again" : "Ask the coach"}
         </button>
       </div>
 
@@ -474,10 +558,10 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
           <div><div className="ct">Coach notes</div><div className="csub">Updated today</div></div>
           <button className="pbw-refresh" onClick={() => setNotesStamp((t) => t + 1)} aria-label="Refresh notes"><IconRefresh /></button>
         </div>
-        {metrics.notes.length === 0 ? (
+        {shownNotes.length === 0 ? (
           <p className="pbw-aistate">No observations yet. They appear once you have a bit of history.</p>
         ) : (
-          metrics.notes.map((n, i) => (
+          shownNotes.map((n, i) => (
             <div key={i} className="pbw-note"><div className="ntitle">{n.title}</div><p>{n.body}</p></div>
           ))
         )}

@@ -7,6 +7,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, Bot, Trash2, Dumbbell, History, BookOpen, AlertCircle, Mic, MicOff, CheckCircle2 } from "lucide-react";
 import { ChatMessage, AIResponse } from "../types";
 import { robustFetch } from "../utils/network";
+import { apiUrl, getAuthHeader } from "../aiClient";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "./ui/Button";
 
@@ -165,10 +166,11 @@ export default function AIAssistant({ workoutState, initialPrompt, evaluationOnl
     }));
 
     try {
-      const response = await robustFetch("/api/ai/command", {
+      const response = await robustFetch(apiUrl("/api/ai/command"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(await getAuthHeader()),
         },
         body: JSON.stringify({
           message: textToSend,
