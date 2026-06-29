@@ -936,6 +936,48 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-ca .caempty h3 { font-family: var(--m3-display-font); font-weight: 500; font-size: 18px; color: var(--m3-on); margin-bottom: 6px; }
 .pbw-ca .caempty p { font-size: 14px; color: var(--m3-on-var); line-height: 1.5; max-width: 300px; margin: 0 auto; }
 
+/* Workout overview popout — sheet over the dimmed History list
+   (workout-overview-popout.html, exact values; tokens mapped, only the avatar
+   gradient + coach gradient stops + PR gold are literal) */
+.pbw-wop { position: fixed; inset: 0; z-index: 120; }
+.pbw-wop .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+html.light .pbw-wop .scrim { background: rgba(20,10,40,.32); }
+.pbw-wop .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 90%; background: var(--m3-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -16px 40px -10px rgba(0,0,0,.6); display: flex; flex-direction: column; overflow: hidden; }
+.pbw-wop .handle { width: 40px; height: 5px; border-radius: 999px; background: var(--m3-sc-high); margin: 10px auto 0; flex: none; }
+.pbw-wop .sclose { position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border-radius: 999px; border: none; background: var(--m3-sc-low); color: var(--m3-on-var); display: grid; place-items: center; cursor: pointer; z-index: 3; }
+.pbw-wop .sclose svg { width: 17px; height: 17px; }
+.pbw-wop .pcover { flex: none; padding: 8px 20px 18px; text-align: center; background: linear-gradient(180deg, color-mix(in srgb, var(--m3-primary-fill) 16%, transparent), transparent); }
+.pbw-wop .pavatar { width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(145deg, #8b5cff, #5a2fe0); color: #fff; display: grid; place-items: center; margin: 8px auto 12px; }
+.pbw-wop .pavatar svg { width: 27px; height: 27px; }
+.pbw-wop .pname { font-family: var(--m3-display-font); font-weight: 500; font-size: 24px; color: var(--m3-on); letter-spacing: -.01em; line-height: 1.1; }
+.pbw-wop .pdate { font-family: var(--m3-mono-font); font-size: 12px; color: var(--m3-on-var); margin-top: 4px; }
+.pbw-wop .pstats { display: flex; justify-content: center; margin-top: 16px; }
+.pbw-wop .pstat { flex: 1; position: relative; }
+.pbw-wop .pstat + .pstat::before { content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 1px; background: var(--m3-outline-q); }
+.pbw-wop .pv { font-family: var(--m3-mono-font); font-weight: 500; font-size: 20px; color: var(--m3-on); }
+.pbw-wop .pl { font-family: var(--m3-mono-font); font-size: 9px; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-dim); margin-top: 4px; }
+.pbw-wop .sheetbody { flex: 1; overflow-y: auto; padding: 4px 16px calc(16px + env(safe-area-inset-bottom)); }
+.pbw-wop .coachsec { background: linear-gradient(160deg, rgba(123,83,246,.16), rgba(213,102,200,.10)); border: 1px solid var(--m3-primary-cont); border-radius: 20px; padding: 16px; margin: 6px 0 16px; }
+.pbw-wop .coachhd { display: flex; align-items: center; gap: 8px; color: var(--m3-primary); font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+.pbw-wop .coachhd svg { width: 15px; height: 15px; }
+.pbw-wop .coachteaser { font-size: 14px; color: var(--m3-on); line-height: 1.5; margin: 10px 0 12px; }
+.pbw-wop .readmore { display: inline-flex; align-items: center; gap: 4px; border: none; background: none; color: var(--m3-primary); font-weight: 500; font-size: 14px; cursor: pointer; padding: 0; font-family: var(--m3-display-font); }
+.pbw-wop .readmore svg { width: 16px; height: 16px; }
+.pbw-wop .loglab { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--m3-on-dim); margin: 2px 2px 10px; }
+.pbw-wop .excard { background: var(--m3-sc-low); border-radius: 20px; padding: 14px 15px; margin-bottom: 10px; }
+.pbw-wop .exhd { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.pbw-wop .exname { font-family: var(--m3-display-font); font-weight: 500; font-size: 16px; color: var(--m3-on); }
+.pbw-wop .exn { font-family: var(--m3-mono-font); font-size: 11px; color: var(--m3-on-dim); text-transform: uppercase; letter-spacing: .04em; }
+.pbw-wop .setlist { display: flex; flex-direction: column; gap: 7px; }
+.pbw-wop .setrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pbw-wop .st { font-family: var(--m3-mono-font); font-size: 10px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; }
+.pbw-wop .st.warm { color: var(--m3-accent); background: color-mix(in srgb, var(--m3-accent) 16%, transparent); }
+.pbw-wop .st.norm { color: var(--m3-on-var); background: var(--m3-sc-high); }
+.pbw-wop .st.drop { color: var(--m3-primary); background: var(--m3-primary-cont); }
+.pbw-wop .st.fail { color: var(--m3-error); background: var(--m3-error-cont); }
+.pbw-wop .sval { font-family: var(--m3-mono-font); font-size: 14px; font-weight: 500; color: var(--m3-on); display: flex; align-items: center; gap: 7px; }
+.pbw-wop .prb { font-family: var(--m3-mono-font); font-size: 9px; font-weight: 600; color: var(--m3-bg); background: var(--m3-gold); padding: 2px 6px; border-radius: 6px; }
+
 /* Routines — v5 chip cards (.rchip, Variant 2) */
 .pbw-rchip { background: var(--m3-sc-low); border-radius: 28px; padding: 20px; margin-bottom: 14px; }
 .pbw-rchip .rhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }

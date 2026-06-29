@@ -9,6 +9,7 @@ import { WorkoutSession, Exercise } from "../types";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import InsightsTrends from "./InsightsTrends";
 import { Button } from "./ui/Button";
+import WorkoutOverviewPopout from "./WorkoutOverviewPopout";
 
 interface HistoryLogsProps {
   history: WorkoutSession[];
@@ -26,6 +27,7 @@ const ISpark = () => (
 
 export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAskGemini, onViewAnalysis }: HistoryLogsProps) {
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [popoutLog, setPopoutLog] = useState<WorkoutSession | null>(null); // overview popout
   const [viewMode, setViewMode] = useState<"logs" | "analytics">("logs");
   const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
   // Per-card AI footer state. The busy->ready transition is driven by the
@@ -280,7 +282,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                   >
                   {/* Collapsed summary — option-3 .jcard, whole card is the tap target */}
                   <div
-                    onClick={() => toggleExpand(log.id)}
+                    onClick={() => setPopoutLog(log)}
                     className="pbw-jcard"
                     style={{ margin: 0, background: "transparent", borderRadius: 0, cursor: "pointer" }}
                   >
@@ -319,104 +321,24 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                     </div>
                   </div>
 
-                  {/* Collapsible log breakdown details */}
-                  <AnimatePresence initial={false}>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-gray-200 dark:border-white/5 bg-[var(--m3-sc-low)]"
-                      >
-                        <div className="p-4 md:p-5 space-y-4">
-                          {/* Interactive summary panel */}
-                          <div className="bg-[var(--m3-sc-low)] border border-gray-200 dark:border-white/10 rounded-xl p-3.5 flex flex-wrap gap-4 items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-yellow-500/10 text-yellow-500 rounded-lg ring-1 ring-yellow-500/20">
-                                <Trophy className="w-4 h-4 text-yellow-405" />
-                              </div>
-                              <div>
-                                <span className="block text-[9px] text-indigo-600 dark:text-indigo-300/60 font-semibold uppercase leading-none mb-1 tracking-wider font-mono">Max Weight Lifted</span>
-                                <span className="text-xs font-extrabold font-mono text-gray-900 dark:text-gray-100">{maxWeight} kg</span>
-                              </div>
-                            </div>
-
-                            {/* Ask Gemini shortcut button */}
-                            <Button
-                              variant="none"
-                              onClick={() => {
-                                const queryPrompt = `Explain performance details for my workout log "${log.name}" checked on ${formatDate(log.startTime)}, featuring ${totalVolume}kg total weight. Suggest recommendations for improvement.`;
-                                onAskGemini(queryPrompt);
-
-                                // Automatically open the Gemini Coach drawer
-                                const openDrawerEvent = new CustomEvent("open-gemini-drawer");
-                                window.dispatchEvent(openDrawerEvent);
-                              }}
-                              className="px-3.5 py-1.5 bg-indigo-505/10 hover:bg-indigo-505/20 text-indigo-305 text-xs font-bold rounded-lg flex items-center space-x-1.5 border border-indigo-500/20 transition-all shadow-md"
-                            >
-                              <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
-                              <span>Analyse with Gemini Coach</span>
-                            </Button>
-                          </div>
-
-                          {/* Log notes if present */}
-                          {log.notes && (
-                            <div className="p-3 bg-indigo-500/5 border-l-4 border-indigo-500/35 rounded-r-lg max-w-full">
-                              <span className="block text-[9px] text-indigo-600 dark:text-indigo-300/50 font-bold uppercase leading-none mb-1 tracking-wider font-mono font-bold">Session notes</span>
-                              <p className="text-xs text-slate-305 italic font-normal">{log.notes}</p>
-                            </div>
-                          )}
-
-                          {/* Exercises detailed table of sets completed */}
-                          <div className="space-y-4">
-                            {log.exercises.map((workoutEx) => (
-                              <div
-                                key={workoutEx.id}
-                                className="bg-[var(--m3-sc-low)] rounded-xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-2xs"
-                              >
-                                <div className="px-4 py-2.5 bg-[var(--m3-sc-low)] dark:border-white/10 shadow-sm border-b border-gray-200 dark:border-white/5 flex justify-between items-center">
-                                  <div>
-                                    <h5 className="font-extrabold text-[#818cf8] text-[#818cf8] text-xs md:text-sm">
-                                      {getExerciseName(workoutEx.exerciseId)}
-                                    </h5>
-                                    <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-300/40">
-                                      {getExerciseCategory(workoutEx.exerciseId)}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="p-3 divide-y divide-[#171727]/30">
-                                  {workoutEx.sets.map((set, setIdx) => (
-                                    <div
-                                      key={set.id}
-                                      className="py-1.5 flex justify-between items-center text-xs font-mono"
-                                    >
-                                      <div className="flex items-center space-x-3.5 text-gray-500 dark:text-slate-400">
-                                        <span>Set {setIdx + 1}</span>
-                                        <span className="text-[9px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/15 font-sans font-extrabold uppercase tracking-widest">
-                                          {set.type}
-                                        </span>
-                                      </div>
-                                      <div className="flex space-x-4 text-gray-900 dark:text-gray-100 font-extrabold font-mono">
-                                        <span>{set.weight} kg</span>
-                                        <span className="text-gray-500 font-normal">×</span>
-                                        <span>{set.reps} reps</span>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                   </motion.div>
                 </div>
               );
             })
           )}
         </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {popoutLog && (
+          <WorkoutOverviewPopout
+            session={popoutLog}
+            history={history}
+            exercisesList={exercisesList}
+            onClose={() => setPopoutLog(null)}
+            onReadFull={() => { setPopoutLog(null); onViewAnalysis(popoutLog); }}
+          />
+        )}
       </AnimatePresence>
     </div>
   );

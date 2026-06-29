@@ -179,8 +179,8 @@ const MUSCLE_COLOR: Record<string, string> = {
   Legs: "var(--m3-gold)",
   Shoulders: "var(--m3-error)",
   Arms: "var(--m3-primary)",
-  Core: "var(--m3-primary)",
-  Cardio: "var(--m3-success)",
+  Core: "var(--m3-on-dim)",
+  Cardio: "var(--m3-on-var)",
 };
 
 const completedSets = (s: WorkoutSession) =>
