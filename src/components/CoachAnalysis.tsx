@@ -10,10 +10,12 @@
  * client. Each section is rendered once. Plain coaching voice, no clinical or
  * sci-fi wording. See coach-analysis-claude-code-prompt.md + the data model.
  */
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { WorkoutSession, Exercise } from "../types";
 import { Button } from "./ui/Button";
+import { coachWorkout, AiError } from "../aiClient";
+import { muscleMap, CATEGORY_FALLBACK, MUSCLE_LABEL, MUSCLE_PARENT, Muscle } from "../data/muscleMap";
 
 interface CoachAnalysisProps {
   completedWorkout: WorkoutSession;
@@ -23,25 +25,22 @@ interface CoachAnalysisProps {
   onSaveAnalysis: (analysis: any) => void;
 }
 
-// TODO(ai-backend): the per-workout coach call. POST to the backend proxy at an
-// ABSOLUTE base URL (never a relative /api path — in the Capacitor WebView that
-// resolves to the SPA shell and returns index.html, not JSON), with the Firebase
-// ID token. The backend computes the metrics and the model only interprets,
-// returning structured JSON so nothing like ** can leak into the UI.
-//   request:  { workoutId, metrics: { durationMin, groups, strength } }
-//   response: { summary: string }   // wentWell/nextTime are deterministic below
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface CoachSummaryResponse { summary: string }
+// The per-workout coach call lives in aiClient.coachWorkout: it POSTs the
+// deterministic metrics (computed below) to the backend proxy at the ABSOLUTE
+// base URL with the Firebase ID token, and the model only interprets them into
+// the prose summary, returning structured JSON so nothing like ** can leak in.
+// wentWell/nextTime stay deterministic below; only `summary` is the AI surface.
+type SummaryState = "loading" | "ready" | "off" | "error";
 
-const MUSCLE_GROUPS = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"];
 const startMs = (s: WorkoutSession) => new Date(s.startTime).getTime();
 
-// Coarse 7-group front/back figures. A region's fill is its group's bucket
-// colour; untouched regions and the outline use currentColor (so the figure
-// reads in dark + light). Only the violet intensities are literals.
-function MuscleFigure({ view, color }: { view: "front" | "back"; color: Record<string, string | null> }) {
-  const p = (g: string) => {
-    const c = color[g];
+// Granular front/back figures. Each shape is keyed to a sub-muscle region; its
+// fill is that region's bucket colour (from the per-muscle scores), and
+// untouched regions + outline use currentColor so the figure reads in dark +
+// light. Only the violet intensities are literals.
+function MuscleFigure({ view, color }: { view: "front" | "back"; color: Record<string, string> }) {
+  const f = (m: Muscle) => {
+    const c = color[m];
     return c ? { fill: c } : { fill: "currentColor", fillOpacity: 0.05 };
   };
   const base = { fill: "currentColor", fillOpacity: 0.05 };
@@ -49,30 +48,41 @@ function MuscleFigure({ view, color }: { view: "front" | "back"; color: Record<s
     return (
       <svg className="fig" viewBox="0 0 360 470" width="190">
         <g stroke="currentColor" strokeOpacity={0.12} strokeWidth={1.5}>
-          <circle cx="180" cy="44" r="23" {...base} />
-          <rect x="169" y="64" width="22" height="16" rx="7" {...base} />
-          <ellipse cx="106" cy="114" rx="12" ry="16" {...p("Shoulders")} />
-          <ellipse cx="254" cy="114" rx="12" ry="16" {...p("Shoulders")} />
-          <ellipse cx="130" cy="110" rx="23" ry="18" {...p("Shoulders")} />
-          <ellipse cx="230" cy="110" rx="23" ry="18" {...p("Shoulders")} />
-          <rect x="140" y="97" width="38" height="14" rx="6" {...p("Chest")} />
-          <rect x="182" y="97" width="38" height="14" rx="6" {...p("Chest")} />
-          <rect x="140" y="112" width="38" height="14" rx="6" {...p("Chest")} />
-          <rect x="182" y="112" width="38" height="14" rx="6" {...p("Chest")} />
-          <rect x="140" y="127" width="38" height="14" rx="6" {...p("Chest")} />
-          <rect x="182" y="127" width="38" height="14" rx="6" {...p("Chest")} />
-          <rect x="106" y="128" width="24" height="58" rx="12" {...p("Arms")} />
-          <rect x="230" y="128" width="24" height="58" rx="12" {...p("Arms")} />
-          <rect x="103" y="190" width="22" height="58" rx="11" {...p("Arms")} />
-          <rect x="235" y="190" width="22" height="58" rx="11" {...p("Arms")} />
-          <rect x="152" y="146" width="56" height="34" rx="12" {...p("Core")} />
-          <rect x="152" y="182" width="56" height="34" rx="12" {...p("Core")} />
-          <line x1="180" y1="148" x2="180" y2="214" stroke="currentColor" strokeOpacity={0.12} />
-          <line x1="154" y1="180" x2="206" y2="180" stroke="currentColor" strokeOpacity={0.12} />
-          <rect x="146" y="228" width="32" height="98" rx="15" {...p("Legs")} />
-          <rect x="182" y="228" width="32" height="98" rx="15" {...p("Legs")} />
-          <rect x="150" y="330" width="26" height="86" rx="13" {...p("Legs")} />
-          <rect x="184" y="330" width="26" height="86" rx="13" {...p("Legs")} />
+          <circle cx="180" cy="42" r="22" {...base} />
+          <rect x="170" y="62" width="20" height="14" rx="6" {...base} />
+          {/* traps (front, upper) */}
+          <path d="M160 70 L132 94 L152 96 L174 78 Z" {...f("traps")} />
+          <path d="M200 70 L228 94 L208 96 L186 78 Z" {...f("traps")} />
+          {/* side + front delts */}
+          <ellipse cx="100" cy="116" rx="12" ry="17" {...f("delt_side")} />
+          <ellipse cx="260" cy="116" rx="12" ry="17" {...f("delt_side")} />
+          <ellipse cx="120" cy="108" rx="20" ry="16" {...f("delt_front")} />
+          <ellipse cx="240" cy="108" rx="20" ry="16" {...f("delt_front")} />
+          {/* chest: upper / mid / lower */}
+          <rect x="142" y="96" width="36" height="13" rx="5" {...f("chest_upper")} />
+          <rect x="182" y="96" width="36" height="13" rx="5" {...f("chest_upper")} />
+          <rect x="142" y="111" width="36" height="13" rx="5" {...f("chest_mid")} />
+          <rect x="182" y="111" width="36" height="13" rx="5" {...f("chest_mid")} />
+          <rect x="142" y="126" width="36" height="14" rx="6" {...f("chest_lower")} />
+          <rect x="182" y="126" width="36" height="14" rx="6" {...f("chest_lower")} />
+          {/* biceps + forearms */}
+          <rect x="104" y="126" width="22" height="54" rx="11" {...f("biceps")} />
+          <rect x="234" y="126" width="22" height="54" rx="11" {...f("biceps")} />
+          <rect x="101" y="184" width="20" height="56" rx="10" {...f("forearms")} />
+          <rect x="239" y="184" width="20" height="56" rx="10" {...f("forearms")} />
+          {/* obliques + abs */}
+          <rect x="140" y="150" width="12" height="56" rx="5" {...f("obliques")} />
+          <rect x="208" y="150" width="12" height="56" rx="5" {...f("obliques")} />
+          <rect x="154" y="148" width="52" height="29" rx="9" {...f("abs")} />
+          <rect x="154" y="180" width="52" height="29" rx="9" {...f("abs")} />
+          {/* quads + adductors */}
+          <rect x="144" y="224" width="26" height="96" rx="13" {...f("quads")} />
+          <rect x="190" y="224" width="26" height="96" rx="13" {...f("quads")} />
+          <rect x="170" y="228" width="9" height="66" rx="4" {...f("adductors")} />
+          <rect x="181" y="228" width="9" height="66" rx="4" {...f("adductors")} />
+          {/* lower legs (shin, no region) */}
+          <rect x="150" y="326" width="26" height="84" rx="13" {...base} />
+          <rect x="184" y="326" width="26" height="84" rx="13" {...base} />
         </g>
       </svg>
     );
@@ -80,23 +90,35 @@ function MuscleFigure({ view, color }: { view: "front" | "back"; color: Record<s
   return (
     <svg className="fig" viewBox="0 0 360 470" width="190">
       <g stroke="currentColor" strokeOpacity={0.12} strokeWidth={1.5}>
-        <circle cx="180" cy="44" r="23" {...base} />
-        <path d="M150 122 L180 84 L210 122 L198 140 L162 140 Z" {...p("Back")} />
-        <ellipse cx="130" cy="112" rx="23" ry="18" {...p("Shoulders")} />
-        <ellipse cx="230" cy="112" rx="23" ry="18" {...p("Shoulders")} />
-        <rect x="106" y="130" width="24" height="58" rx="12" {...p("Back")} />
-        <rect x="230" y="130" width="24" height="58" rx="12" {...p("Back")} />
-        <rect x="103" y="192" width="22" height="56" rx="11" {...p("Arms")} />
-        <rect x="235" y="192" width="22" height="56" rx="11" {...p("Arms")} />
-        <path d="M152 142 C146 168 150 196 176 206 L178 146 Z" {...p("Back")} />
-        <path d="M208 142 C214 168 210 196 184 206 L182 146 Z" {...p("Back")} />
-        <rect x="166" y="150" width="28" height="62" rx="10" {...p("Back")} />
-        <ellipse cx="165" cy="232" rx="20" ry="17" {...p("Legs")} />
-        <ellipse cx="195" cy="232" rx="20" ry="17" {...p("Legs")} />
-        <rect x="146" y="256" width="32" height="78" rx="15" {...p("Legs")} />
-        <rect x="182" y="256" width="32" height="78" rx="15" {...p("Legs")} />
-        <rect x="150" y="338" width="26" height="80" rx="13" {...p("Legs")} />
-        <rect x="184" y="338" width="26" height="80" rx="13" {...p("Legs")} />
+        <circle cx="180" cy="42" r="22" {...base} />
+        {/* traps (back, upper diamond) */}
+        <path d="M150 116 L180 80 L210 116 L196 138 L164 138 Z" {...f("traps")} />
+        {/* side + rear delts */}
+        <ellipse cx="100" cy="116" rx="12" ry="17" {...f("delt_side")} />
+        <ellipse cx="260" cy="116" rx="12" ry="17" {...f("delt_side")} />
+        <ellipse cx="120" cy="110" rx="20" ry="16" {...f("delt_rear")} />
+        <ellipse cx="240" cy="110" rx="20" ry="16" {...f("delt_rear")} />
+        {/* upper back (rhomboids / mid traps) */}
+        <rect x="156" y="138" width="48" height="34" rx="8" {...f("upper_back")} />
+        {/* lats */}
+        <path d="M152 146 C140 178 152 206 178 214 L180 150 Z" {...f("lats")} />
+        <path d="M208 146 C220 178 208 206 182 214 L180 150 Z" {...f("lats")} />
+        {/* lower back (erectors) */}
+        <rect x="165" y="206" width="30" height="40" rx="8" {...f("lower_back")} />
+        {/* triceps + forearms */}
+        <rect x="104" y="126" width="22" height="54" rx="11" {...f("triceps")} />
+        <rect x="234" y="126" width="22" height="54" rx="11" {...f("triceps")} />
+        <rect x="101" y="184" width="20" height="54" rx="10" {...f("forearms")} />
+        <rect x="239" y="184" width="20" height="54" rx="10" {...f("forearms")} />
+        {/* glutes */}
+        <ellipse cx="165" cy="252" rx="22" ry="18" {...f("glutes")} />
+        <ellipse cx="195" cy="252" rx="22" ry="18" {...f("glutes")} />
+        {/* hamstrings */}
+        <rect x="146" y="270" width="32" height="78" rx="15" {...f("hamstrings")} />
+        <rect x="182" y="270" width="32" height="78" rx="15" {...f("hamstrings")} />
+        {/* calves */}
+        <rect x="150" y="352" width="26" height="74" rx="13" {...f("calves")} />
+        <rect x="184" y="352" width="26" height="74" rx="13" {...f("calves")} />
       </g>
     </svg>
   );
@@ -116,32 +138,43 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
     const exById = new Map(exercisesList.map((e) => [e.id, e]));
     const catOf = (id: string) => exById.get(id)?.category || "Other";
 
-    // completed sets per coarse group
-    const groupCount: Record<string, number> = {};
+    // Per sub-muscle scoring from the curated map. A completed set adds its full
+    // count to each PRIMARY muscle and half to each SECONDARY one (score drives
+    // the shade); `muscleSets` is the plain count of sets that touched the
+    // muscle at all (shown in the list). Unmapped exercises fall back to their
+    // coarse category. The model never sees this — it's all deterministic.
+    const muscleScore: Record<string, number> = {};
+    const muscleSets: Record<string, number> = {};
     let totalSets = 0;
     (completedWorkout.exercises || []).forEach((we) => {
       const done = (we.sets || []).filter((s) => s.isCompleted);
       if (!done.length) return;
-      const cat = catOf(we.exerciseId);
-      groupCount[cat] = (groupCount[cat] || 0) + done.length;
       totalSets += done.length;
+      const map = muscleMap[we.exerciseId];
+      const primaries = map ? map.primary : (CATEGORY_FALLBACK[catOf(we.exerciseId)] || []);
+      const secondaries = map ? (map.secondary || []) : [];
+      primaries.forEach((mu) => {
+        muscleScore[mu] = (muscleScore[mu] || 0) + done.length;
+        muscleSets[mu] = (muscleSets[mu] || 0) + done.length;
+      });
+      secondaries.forEach((mu) => {
+        muscleScore[mu] = (muscleScore[mu] || 0) + done.length * 0.5;
+        muscleSets[mu] = (muscleSets[mu] || 0) + done.length;
+      });
     });
-    const maxCount = Math.max(1, ...Object.values(groupCount));
-    const groups = MUSCLE_GROUPS.map((g) => {
-      const c = groupCount[g] || 0;
-      const ratio = c / maxCount;
-      let bucket: string | null = null;
-      let color: string | null = null;
-      if (c > 0) {
+    const maxScore = Math.max(1, ...Object.values(muscleScore));
+    const muscleColor: Record<string, string> = {};
+    const worked = (Object.keys(muscleScore) as Muscle[])
+      .map((mu) => {
+        const ratio = muscleScore[mu] / maxScore;
+        let bucket: string, color: string;
         if (ratio >= 0.7) { bucket = "High"; color = "#9a6cff"; }
-        else if (ratio >= 0.35) { bucket = "Moderate"; color = "rgba(139,92,255,.4)"; }
+        else if (ratio >= 0.35) { bucket = "Moderate"; color = "rgba(139,92,255,.45)"; }
         else { bucket = "Light"; color = "rgba(139,92,255,.2)"; }
-      }
-      return { name: g, sets: c, ratio, bucket, color };
-    });
-    const groupColor: Record<string, string | null> = {};
-    groups.forEach((g) => { groupColor[g.name] = g.color; });
-    const worked = groups.filter((g) => g.sets > 0).sort((a, b) => b.sets - a.sets);
+        muscleColor[mu] = color;
+        return { key: mu, name: MUSCLE_LABEL[mu], parent: MUSCLE_PARENT[mu], sets: muscleSets[mu], ratio, bucket, color };
+      })
+      .sort((a, b) => b.ratio - a.ratio || b.sets - a.sets);
 
     // strength: previous best (from past sessions) vs this session
     const thisMs = startMs(completedWorkout);
@@ -200,7 +233,7 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
       : 0;
 
     return {
-      groups, worked, groupColor, strength,
+      worked, muscleColor, strength,
       wentWell: wentWell.slice(0, 3), nextTime: nextTime.slice(0, 3),
       durationMin, totalSets, hasData: totalSets > 0,
     };
@@ -208,6 +241,57 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
 
   const dateStr = new Date(completedWorkout.startTime).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
   const durLabel = `${m.durationMin} min${m.durationMin === 1 ? "" : "s"}`;
+
+  // Written coach read — the one AI surface on this screen. The model only ever
+  // sees the deterministic facts below and writes a single line over them.
+  const [summaryState, setSummaryState] = useState<SummaryState>("loading");
+  const [summaryText, setSummaryText] = useState("");
+  const [offNote, setOffNote] = useState(
+    "The written coach read appears here once analysis is set up. Your session numbers below are live."
+  );
+
+  const runSummary = useCallback(async () => {
+    setSummaryState("loading");
+    try {
+      const res = await coachWorkout({
+        workoutName: completedWorkout.name,
+        date: dateStr,
+        durationMin: m.durationMin,
+        totalSets: m.totalSets,
+        groups: m.worked.map((g) => ({ name: g.name, sets: g.sets, intensity: g.bucket })),
+        strength: m.strength.map((s) => ({
+          name: s.name,
+          kind: s.isBW ? "bodyweight" : "weighted",
+          thisSession: s.thisStr,
+          previousBest: s.prevStr,
+          trend: s.trend,
+        })),
+      });
+      const text = (res.summary || "").trim();
+      if (text) { setSummaryText(text); setSummaryState("ready"); }
+      else setSummaryState("off");
+    } catch (e) {
+      if (e instanceof AiError && e.code === "not_configured") {
+        setOffNote("The written coach read appears here once analysis is set up. Your session numbers below are live.");
+        setSummaryState("off");
+      } else if (e instanceof AiError && e.code === "auth_required") {
+        setOffNote("Sign in to get your written coach read. Your session numbers below are live.");
+        setSummaryState("off");
+      } else {
+        setSummaryState("error");
+      }
+    }
+  }, [completedWorkout.name, dateStr, m.durationMin, m.totalSets, m.worked, m.strength]);
+
+  useEffect(() => {
+    if (!m.hasData) return;
+    let cancelled = false;
+    setSummaryState("loading");
+    setSummaryText("");
+    runSummary().catch(() => { if (!cancelled) setSummaryState("error"); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completedWorkout.id, m.hasData]);
 
   const handleSave = () => {
     onSaveAnalysis({ wentWell: m.wentWell, nextTime: m.nextTime, generatedAt: Date.now(), v: 2 });
@@ -243,10 +327,24 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
             {/* Coach summary — AI surface (model writes the prose, backend-gated) */}
             <div className="summary">
               <ISpark />
-              <p className="castate">The written coach read appears here once analysis is set up. Your session numbers below are live.</p>
+              {summaryState === "loading" ? (
+                <div style={{ flex: 1 }}>
+                  <div className="caload" style={{ width: "100%" }} />
+                  <div className="caload" style={{ width: "70%" }} />
+                </div>
+              ) : summaryState === "ready" ? (
+                <p className="castate" style={{ color: "var(--m3-on)" }}>{summaryText}</p>
+              ) : summaryState === "error" ? (
+                <div style={{ flex: 1 }}>
+                  <p className="castate err">Couldn't load the written read just now. Your session numbers below are live.</p>
+                  <button className="caretry" onClick={() => { void runSummary(); }}>Try again</button>
+                </div>
+              ) : (
+                <p className="castate">{offNote}</p>
+              )}
             </div>
 
-            {/* Muscles worked — coarse, deterministic */}
+            {/* Muscles worked — granular sub-muscles, deterministic */}
             <div className="sec">Muscles worked</div>
             <div className="card">
               <div className="fbtoggle">
@@ -262,18 +360,18 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
                     exit={reduce ? { opacity: 1 } : { opacity: 0 }}
                     transition={{ duration: 0.18 }}
                   >
-                    <MuscleFigure view={view} color={m.groupColor} />
+                    <MuscleFigure view={view} color={m.muscleColor} />
                   </motion.div>
                 </AnimatePresence>
               </div>
               <div className="legend">
                 <span className="lg"><i style={{ background: "#9a6cff" }} />High</span>
-                <span className="lg"><i style={{ background: "rgba(139,92,255,.4)" }} />Moderate</span>
+                <span className="lg"><i style={{ background: "rgba(139,92,255,.45)" }} />Moderate</span>
                 <span className="lg"><i style={{ background: "rgba(139,92,255,.2)" }} />Light</span>
               </div>
               <div className="grouplist">
                 {m.worked.map((g) => (
-                  <div key={g.name} className="grow">
+                  <div key={g.key} className="grow">
                     <div className="gtop">
                       <span className="gnm">{g.name}</span>
                       <span className="gset">{g.sets} set{g.sets === 1 ? "" : "s"} · {g.bucket}</span>
