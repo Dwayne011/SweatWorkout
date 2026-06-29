@@ -690,23 +690,35 @@ html.light { background-color: #fcfaff; }
 .pbw-nsheet .nb.save { background: linear-gradient(95deg, var(--m3-primary-fill), #d566c8 90%); color: #fff; }
 
 /* History — v5 populated journal card */
-.pbw-jcard { background: var(--m3-sc); border-radius: 26px; padding: 16px; margin-bottom: 12px; position: relative; }
+.pbw-jwrap { position: relative; border-radius: 24px; overflow: hidden; background: transparent; }
+.pbw-jwrap .jdel { position: absolute; inset: 0; border-radius: 24px; background: var(--m3-delpane); display: flex; align-items: center; justify-content: flex-end; gap: 9px; padding: 0 24px; color: #fff; font-family: var(--m3-mono-font); font-weight: 600; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+.pbw-jwrap .jdel svg { width: 19px; height: 19px; }
+.pbw-jcard { background: var(--m3-sc); border-radius: 24px; padding: 15px; margin-bottom: 12px; position: relative; }
 .pbw-jcard .jtop { display: flex; gap: 13px; align-items: flex-start; }
 .pbw-jcard .jbadge { width: 46px; height: 46px; flex: none; border-radius: 14px; background: var(--m3-primary-cont); display: grid; place-items: center; color: var(--m3-primary); }
 .pbw-jcard .jbadge svg { width: 22px; height: 22px; }
+.pbw-jcard .jtext { flex: 1; min-width: 0; }
 .pbw-jcard .jname { font-family: var(--m3-display-font); font-weight: 500; font-size: 20px; color: var(--m3-on); line-height: 1.1; letter-spacing: -.01em; }
-.pbw-jcard .jmeta { font-family: var(--m3-mono-font); font-size: 14px; font-weight: 500; color: var(--m3-on-var); display: flex; align-items: center; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+.pbw-jcard .jmeta { font-family: var(--m3-mono-font); font-size: 13px; font-weight: 500; color: var(--m3-on-var); display: flex; align-items: center; gap: 8px; margin-top: 5px; }
 .pbw-jcard .jmeta svg { width: 15px; height: 15px; color: var(--m3-primary); }
 .pbw-jcard .jmeta .dur { color: var(--m3-primary); }
-.pbw-jcard .jex { display: flex; align-items: center; gap: 9px; margin-top: 11px; min-width: 0; }
+.pbw-jcard .jex { display: flex; align-items: center; gap: 9px; margin-top: 10px; min-width: 0; }
 .pbw-jcard .jex .lbl { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-primary-cont); background: var(--m3-primary-cont); padding: 4px 9px; border-radius: 999px; flex: none; }
 .pbw-jcard .jex .nms { font-size: 14px; color: var(--m3-on); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pbw-jcard .jfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
-.pbw-jcard .viewins { display: inline-flex; align-items: center; gap: 7px; background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); border: none; padding: 11px 16px; border-radius: 999px; font-family: var(--m3-mono-font); font-weight: 500; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
-.pbw-jcard .viewins svg { width: 15px; height: 15px; }
-.pbw-jcard .jhint { font-family: var(--m3-mono-font); font-size: 12px; font-style: italic; color: var(--m3-on-dim); display: flex; align-items: center; gap: 6px; }
-.pbw-jcard .jchev { color: var(--m3-on-dim); margin-left: auto; }
-.pbw-jcard .jchev svg { width: 18px; height: 18px; }
+.pbw-jcard .jchev { color: var(--m3-on-dim); flex: none; align-self: center; display: inline-flex; }
+.pbw-jcard .jchev svg { width: 20px; height: 20px; }
+.pbw-jcard .jfoot { margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--m3-outline-q); }
+/* three-state AI footer button (option-3) */
+@property --pbw-ang { syntax: "<angle>"; initial-value: 118deg; inherits: false; }
+.pbw-rbtn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 9px; border: none; cursor: pointer; border-radius: 999px; padding: 14px 18px; font-family: var(--m3-display-font); font-weight: 500; font-size: 15px; }
+.pbw-rbtn svg { width: 18px; height: 18px; flex: none; }
+.pbw-rbtn.rready { background: linear-gradient(95deg, var(--m3-primary-fill), #d566c8 92%); color: #fff; }
+.pbw-rbtn.getins { background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); }
+.pbw-rbtn.getins.busy { color: var(--m3-on); border: 2px solid transparent; background: linear-gradient(var(--m3-sc), var(--m3-sc)) padding-box, conic-gradient(from var(--pbw-ang), #7b53f6, #b15bff, #d566c8, #caf24e, #27d488, #4fc3f7, #7b53f6) border-box; box-shadow: inset 0 0 10px rgba(123,83,246,.22); animation: pbw-angspin 3s linear infinite; }
+.pbw-spin { width: 16px; height: 16px; border-radius: 50%; border: 2.4px solid var(--m3-outline-q); border-top-color: var(--m3-primary); animation: pbw-rspin .7s linear infinite; flex: none; }
+@keyframes pbw-rspin { to { transform: rotate(360deg); } }
+@keyframes pbw-angspin { to { --pbw-ang: 478deg; } }
+@media (prefers-reduced-motion: reduce) { .pbw-rbtn.getins.busy, .pbw-spin { animation: none; } }
 
 /* Routines — v5 chip cards (.rchip, Variant 2) */
 .pbw-rchip { background: var(--m3-sc-low); border-radius: 28px; padding: 20px; margin-bottom: 14px; }

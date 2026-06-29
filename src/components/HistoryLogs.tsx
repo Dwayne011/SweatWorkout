@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { Trash2, Dumbbell, Calendar, Clock, Trophy, ChevronDown, ChevronUp, Sparkles, MessageSquare, BarChart3, ListCollapse } from "lucide-react";
+import { Trash2, Dumbbell, Calendar, Clock, Trophy, ChevronDown, ChevronUp, ChevronRight, Sparkles, MessageSquare, BarChart3, ListCollapse } from "lucide-react";
 import { WorkoutSession, Exercise } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import WorkoutAnalytics from "./WorkoutAnalytics";
@@ -18,10 +18,21 @@ interface HistoryLogsProps {
   onViewAnalysis: (session: WorkoutSession) => void;
 }
 
+// The master i-spark — a filled big+small sparkle, lifted verbatim from the
+// mockup. Not a single-point star.
+const ISpark = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 13.7 8 19 9.5 13.7 11 12 16.5 10.3 11 5 9.5 10.3 8 12 2.5Zm6.5 9 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6Z" /></svg>
+);
+
 export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAskGemini, onViewAnalysis }: HistoryLogsProps) {
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"logs" | "analytics">("logs");
   const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
+  // Per-card AI footer state. The busy->ready transition is driven by the
+  // workout's `analysis` field appearing once the per-workout coach returns.
+  // TODO(data-model): wire to the real AI completion callback + request/response
+  // shapes once the exercise/set data model is finalised (see history AI spec).
+  const [analyzingLogId, setAnalyzingLogId] = useState<string | null>(null);
 
   const findBestMatchEx = (id: string) => {
     if (!id) return null;
@@ -141,8 +152,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
     return d.toLocaleDateString("en-US", {
       weekday: "short",
       month: "short",
-      day: "numeric",
-      year: "numeric"
+      day: "numeric"
     });
   };
 
@@ -200,7 +210,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.12 }}
-          className="space-y-4 pb-40"
+          className="space-y-3 pb-40"
         >
           {viewMode === "analytics" ? (
             <WorkoutAnalytics
@@ -224,12 +234,11 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
               const duration = calculateDurationMinutes(log.startTime, log.endTime);
 
               return (
-                <div key={log.id} className="relative rounded-2xl overflow-hidden shrink-0">
-                  {/* Clean text action underlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-rose-500/20 dark:to-rose-600/30 flex items-center justify-end px-6 rounded-2xl pointer-events-none">
-                    <div className="flex items-center justify-center bg-[var(--m3-sc-low)] rounded-lg border border-rose-500/20 px-2.5 py-1 shadow-sm">
-                      <span className="text-rose-500 text-[10px] font-bold uppercase tracking-wider font-mono">Delete Log</span>
-                    </div>
+                <div key={log.id} className="pbw-jwrap shrink-0">
+                  {/* Red delete pane — revealed on swipe (Gmail-style, matches workouts page) */}
+                  <div className="jdel">
+                    <span>Delete</span>
+                    <Trash2 />
                   </div>
                   <motion.div
                     layout="position"
@@ -247,11 +256,12 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                         setTimeout(() => onDeleteLog(log.id), 300);
                       }
                     }}
-                    className={`bg-[var(--m3-sc)] rounded-[26px] overflow-hidden relative z-10 w-full h-full ${
+                    style={{ background: "var(--m3-sc)", position: "relative", zIndex: 1 }}
+                    className={`rounded-[24px] overflow-hidden w-full h-full ${
                       deletingLogId === log.id ? 'translate-x-[-100vw] opacity-0 transition-all duration-300' : ''
                     }`}
                   >
-                  {/* Collapsed summary — v5 .jcard */}
+                  {/* Collapsed summary — option-3 .jcard, whole card is the tap target */}
                   <div
                     onClick={() => toggleExpand(log.id)}
                     className="pbw-jcard"
@@ -259,7 +269,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                   >
                     <div className="jtop">
                       <div className="jbadge"><Calendar /></div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="jtext">
                         <div className="jname">{log.name}</div>
                         <div className="jmeta">
                           {formatDate(log.startTime)} <span>·</span> <Clock /> <span className="dur">{duration} mins</span>
@@ -269,17 +279,26 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                           <span className="nms">{(log.exercises || []).map(ex => getExerciseName(ex.exerciseId)).join(", ") || "No exercises logged"}</span>
                         </div>
                       </div>
+                      <span className="jchev"><ChevronRight /></span>
                     </div>
                     <div className="jfoot">
-                      {deletingLogId === log.id ? (
-                        <span className="text-[10px] text-rose-500 font-mono italic px-2">Deleting…</span>
+                      {log.analysis ? (
+                        <Button variant="none" className="pbw-rbtn rready" onClick={(e) => { e.stopPropagation(); onViewAnalysis(log); }}>
+                          <ISpark /> AI Coach analysis <ChevronRight />
+                        </Button>
+                      ) : analyzingLogId === log.id ? (
+                        <Button variant="none" className="pbw-rbtn getins busy" disabled onClick={(e) => e.stopPropagation()}>
+                          <span className="pbw-spin" /> Analysing workout…
+                        </Button>
                       ) : (
-                        <Button variant="none" className="viewins" onClick={(e) => { e.stopPropagation(); onViewAnalysis(log); }}>
-                          <Sparkles /> {log.analysis ? "View insights" : "Analyze workout"}
+                        <Button
+                          variant="none"
+                          className="pbw-rbtn getins"
+                          onClick={(e) => { e.stopPropagation(); setAnalyzingLogId(log.id); onViewAnalysis(log); }}
+                        >
+                          <ISpark /> Get insights
                         </Button>
                       )}
-                      <span className="jhint">&larr; Swipe to delete</span>
-                      <span className="jchev">{isExpanded ? <ChevronUp /> : <ChevronDown />}</span>
                     </div>
                   </div>
 
