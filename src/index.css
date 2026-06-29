@@ -460,22 +460,23 @@ html.light { background-color: #fcfaff; }
 .m3-gsync { display: inline-flex; align-items: center; gap: 7px; flex: none; border: 1.5px solid var(--m3-outline); color: var(--m3-on); background: transparent; padding: 9px 14px; border-radius: var(--m3-r-full); font-size: var(--m3-label-lg); font-weight: 500; cursor: pointer; }
 
 /* floating bottom nav (the wrapper handles fixed placement) */
-.m3-nav {
-  background: var(--m3-sc-low);
-  border-top: 1px solid var(--m3-outline-q);
-  display: flex; justify-content: space-between;
-  padding: 9px 16px calc(9px + env(safe-area-inset-bottom));
-}
-.native-android .m3-nav { backdrop-filter: none; -webkit-backdrop-filter: none; }
-.m3-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--m3-on-dim); }
-.m3-nav .pill { width: 48px; height: 30px; border-radius: var(--m3-r-full); display: grid; place-items: center; transition: background .18s; }
-.m3-nav a.on .pill { background: var(--m3-primary-fill); }
-.m3-nav a.on { color: var(--m3-primary); }
-.m3-nav a.on .pill svg { color: #fff; }
-/* Aligned-pill: active tab shows icon only — label hidden but holds its space
-   so the bar height never jumps and icons stay on one shared baseline. */
-.m3-nav a.on .lbl { visibility: hidden; }
-.m3-nav .lbl { font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+/* Bottom nav — expanding-pill (bottom-nav-spec). Active tab = icon + label on a
+   violet pill; inactive tabs = icon + quiet under-label. Exact spec values;
+   --sl/--od map to --m3 tokens, gradient stops + shadow are the only literals.
+   Bottom padding adds the device safe-area on top of the 12px design value. */
+.pbw-enav { display: flex; justify-content: space-between; align-items: center; gap: 3px; padding: 8px 6px calc(12px + env(safe-area-inset-bottom)); background: var(--m3-sc-low); min-height: 64px; }
+.pbw-enav .item { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; color: var(--m3-on-dim); text-decoration: none; cursor: pointer; min-width: 0; -webkit-tap-highlight-color: transparent; }
+.pbw-enav .pill { display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 999px; padding: 0; overflow: hidden; transition: background .42s cubic-bezier(.4,0,.2,1), padding .42s cubic-bezier(.4,0,.2,1), box-shadow .4s; }
+.pbw-enav .pill .ic { display: flex; align-items: center; justify-content: center; flex: none; }
+.pbw-enav .pill .ic svg { width: 23px; height: 23px; transform: scale(.9); transition: transform .42s cubic-bezier(.34,1.5,.5,1); }
+.pbw-enav .pill .lblIn { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; max-width: 0; opacity: 0; overflow: hidden; transition: max-width .44s cubic-bezier(.34,1.4,.6,1), opacity .3s, margin .44s; }
+.pbw-enav .lblUnder { font-family: var(--m3-mono-font); font-size: 8px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; margin-top: 5px; height: 12px; line-height: 12px; opacity: .6; color: var(--m3-on-dim); transition: opacity .3s, height .3s, margin .3s; }
+.pbw-enav .item.active { color: #fff; }
+.pbw-enav .item.active .pill { background: linear-gradient(160deg, #8b5cff, #6a3fe6); padding: 0 20px; box-shadow: 0 8px 20px -7px rgba(123,83,246,.7); }
+.pbw-enav .item.active .pill .ic svg { transform: scale(1.16); }
+.pbw-enav .item.active .pill .lblIn { max-width: 96px; opacity: 1; margin-left: 9px; }
+.pbw-enav .item.active .lblUnder { opacity: 0; height: 0; margin-top: 0; }
+@media (prefers-reduced-motion: reduce) { .pbw-enav .pill, .pbw-enav .pill .ic svg, .pbw-enav .pill .lblIn, .pbw-enav .lblUnder { transition: none; } }
 
 /* ============================================================
    Project PB — Workout page (exact port of project-pb-workout-page.html)
@@ -796,6 +797,36 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-aistate { font-size: 13px; color: var(--m3-on-var); line-height: 1.5; }
 .pbw-aistate.err { color: var(--m3-error); }
 .pbw-airetry { margin-top: 10px; background: var(--m3-sc-high); border: none; color: var(--m3-on); font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+
+/* Strength curve deep-dive (module 5, opened from a row) */
+.pbw-curveov { position: fixed; inset: 0; z-index: 9999; background: var(--m3-bg); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
+.pbw-curvehd { display: flex; align-items: center; gap: 12px; padding: 12px 16px 8px; flex: none; }
+.pbw-curveback { width: 40px; height: 40px; border-radius: 999px; border: none; background: var(--m3-sc); color: var(--m3-on); display: grid; place-items: center; cursor: pointer; flex: none; }
+.pbw-curveback svg { width: 20px; height: 20px; }
+.pbw-curvehd .ttl { font-family: var(--m3-display-font); font-weight: 500; font-size: 20px; color: var(--m3-on); }
+.pbw-curvebody { flex: 1; overflow-y: auto; padding: 6px 16px calc(env(safe-area-inset-bottom) + 24px); position: relative; }
+.pbw-exselwrap { position: relative; }
+.pbw-exsel { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--m3-sc-low); border: 1px solid var(--m3-outline-q); color: var(--m3-on); border-radius: 16px; padding: 14px 16px; font-family: var(--m3-display-font); font-weight: 500; font-size: 15px; cursor: pointer; text-align: left; }
+.pbw-exsel > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pbw-exsel > svg { width: 18px; height: 18px; color: var(--m3-on-dim); flex: none; }
+.pbw-exmenu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; background: var(--m3-surface); border: 1px solid var(--m3-outline-q); border-radius: 16px; padding: 6px; box-shadow: 0 18px 46px -12px rgba(0,0,0,.7); max-height: 300px; overflow-y: auto; }
+.pbw-exmenu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border: none; background: transparent; border-radius: 12px; font-family: var(--m3-display-font); font-size: 14px; font-weight: 500; color: var(--m3-on); cursor: pointer; text-align: left; }
+.pbw-exmenu button.on { background: var(--m3-sc); }
+.pbw-exmenu button svg { width: 16px; height: 16px; color: var(--m3-primary); margin-left: auto; flex: none; }
+.pbw-mtoggle { display: flex; gap: 4px; background: var(--m3-sc-low); padding: 5px; border-radius: 16px; margin-top: 12px; }
+.pbw-mtoggle button { flex: 1; border: none; cursor: pointer; padding: 10px 8px; border-radius: 12px; font-family: var(--m3-display-font); font-weight: 500; font-size: 13px; background: transparent; color: var(--m3-on-var); }
+.pbw-mtoggle button.on { background: var(--m3-primary-fill); color: #fff; }
+.pbw-curvecap { font-family: var(--m3-mono-font); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-dim); margin: 22px 2px 0; }
+.pbw-curveval { display: flex; align-items: baseline; gap: 12px; margin: 6px 2px 0; }
+.pbw-curveval .big { font-family: var(--m3-mono-font); font-weight: 500; font-size: 42px; line-height: 1; letter-spacing: -.02em; color: var(--m3-on); }
+.pbw-curveval .dl { font-family: var(--m3-mono-font); font-size: 15px; font-weight: 500; }
+.pbw-chart { background: var(--m3-sc-low); border-radius: 24px; padding: 16px 14px 12px; margin-top: 18px; }
+.pbw-chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.pbw-chart .axl { font-family: var(--m3-mono-font); font-size: 9px; fill: var(--m3-on-dim); }
+.pbw-curveempty { background: var(--m3-sc-low); border-radius: 24px; padding: 30px 20px; margin-top: 18px; text-align: center; }
+.pbw-curveempty .ei { width: 52px; height: 52px; border-radius: 16px; background: var(--m3-sc); color: var(--m3-on-dim); display: grid; place-items: center; margin: 0 auto 12px; }
+.pbw-curveempty .ei svg { width: 26px; height: 26px; }
+.pbw-curveempty p { font-size: 13px; color: var(--m3-on-var); line-height: 1.5; max-width: 280px; margin: 0 auto; }
 
 /* Routines — v5 chip cards (.rchip, Variant 2) */
 .pbw-rchip { background: var(--m3-sc-low); border-radius: 28px; padding: 20px; margin-bottom: 14px; }

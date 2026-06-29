@@ -15,7 +15,9 @@
  * those shapes in one place (the ai service), never a relative /api path, never
  * the Gemini key on the client. This file only renders the UI + states.
  */
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { motion } from "motion/react";
 import { WorkoutSession, Exercise } from "../types";
 
 interface InsightsTrendsProps {
@@ -41,6 +43,133 @@ const IconClock = () => <Stroke><path d="M3 9a9 9 0 1 1 .7 4.5" /><path d="M3 4v
 const IconFlame = () => <Stroke><path d="M12 2s5 4 5 9a5 5 0 0 1-10 0c0-2 1-3 1-3s0 2 2 2c0-3 2-5 2-8z" /></Stroke>;
 const IconRefresh = () => <Stroke><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" /></Stroke>;
 const ChevR = () => <Stroke><path d="M9 6l6 6-6 6" /></Stroke>;
+const ChevL = () => <Stroke><path d="M15 6l-6 6 6 6" /></Stroke>;
+const ChevDown = () => <Stroke><path d="M6 9l6 6 6-6" /></Stroke>;
+const Check2 = () => <Stroke><path d="M5 12l5 5L20 7" /></Stroke>;
+
+type SeriesPt = { date: number; est1rm: number; heaviest: number; weighted: boolean };
+
+// Module 5 — per-exercise strength deep-dive. No mockup markup existed for it,
+// so it follows the spec: line chart, big current value + delta, exercise
+// dropdown, Est. 1RM / Heaviest-set toggle, dated x-axis, honest empty state.
+function StrengthCurve({ exId, exSeries, exList, onClose }: {
+  exId: string;
+  exSeries: Record<string, SeriesPt[]>;
+  exList: { id: string; name: string }[];
+  onClose: () => void;
+}) {
+  const [selId, setSelId] = useState(exId);
+  const [metric, setMetric] = useState<"est1rm" | "heaviest">("est1rm");
+  const [dropOpen, setDropOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!dropOpen) return;
+    const onDoc = (e: PointerEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setDropOpen(false);
+    };
+    document.addEventListener("pointerdown", onDoc);
+    return () => document.removeEventListener("pointerdown", onDoc);
+  }, [dropOpen]);
+
+  const name = exList.find((e) => e.id === selId)?.name || selId;
+  const series = (exSeries[selId] || []).slice().sort((a, b) => a.date - b.date);
+  const weighted = series.some((p) => p.weighted);
+  const pts = series.map((p) => ({ date: p.date, v: metric === "est1rm" ? p.est1rm : p.heaviest }));
+  const usable = weighted ? pts.filter((p) => p.v > 0) : [];
+  const fmtDate = (t: number) => new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const cur = usable.length ? usable[usable.length - 1].v : 0;
+  const first = usable.length ? usable[0].v : 0;
+  const pc = first > 0 ? Math.round(((cur - first) / first) * 100) : 0;
+  const up = pc > 0;
+
+  // chart geometry (dated x-axis)
+  let chartEl: React.ReactNode = null;
+  if (usable.length >= 2) {
+    const W = 320, H = 152, padL = 10, padR = 10, padT = 16, padB = 26;
+    const vals = usable.map((p) => p.v);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const range = max - min || max || 1;
+    const lo = min - range * 0.18, hi = max + range * 0.18;
+    const t0 = usable[0].date, t1 = usable[usable.length - 1].date, tspan = t1 - t0 || 1;
+    const X = (t: number) => padL + ((t - t0) / tspan) * (W - padL - padR);
+    const Y = (v: number) => H - padB - ((v - lo) / (hi - lo || 1)) * (H - padT - padB);
+    const xy = usable.map((p) => [X(p.date), Y(p.v)] as const);
+    const line = xy.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+    const area = `${line} L ${xy[xy.length - 1][0].toFixed(1)} ${H - padB} L ${xy[0][0].toFixed(1)} ${H - padB} Z`;
+    const idxs = Array.from(new Set([0, Math.floor((usable.length - 1) / 2), usable.length - 1]));
+    chartEl = (
+      <div className="pbw-chart">
+        <svg viewBox={`0 0 ${W} ${H}`}>
+          <path d={area} fill="var(--m3-primary)" opacity="0.1" />
+          <path d={line} fill="none" stroke="var(--m3-primary)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          {xy.map((p, i) => (
+            <circle key={i} cx={p[0]} cy={p[1]} r={i === xy.length - 1 ? 3.4 : 2} fill="var(--m3-primary)" />
+          ))}
+          {idxs.map((idx, i) => (
+            <text key={idx} className="axl" x={X(usable[idx].date)} y={H - 8} textAnchor={i === 0 ? "start" : i === idxs.length - 1 ? "end" : "middle"}>{fmtDate(usable[idx].date)}</text>
+          ))}
+        </svg>
+      </div>
+    );
+  } else if (usable.length === 1) {
+    chartEl = <div className="pbw-curveempty"><p>One session logged so far. Log another and the curve will draw here.</p></div>;
+  }
+
+  return (
+    <motion.div className="pbw-curveov" initial={{ x: "100%" }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 420, damping: 38 }}>
+      <div className="pbw-curvehd">
+        <button className="pbw-curveback" onClick={onClose} aria-label="Back"><ChevL /></button>
+        <div className="ttl">Strength curve</div>
+      </div>
+      <div className="pbw-curvebody">
+        <div className="pbw-exselwrap" ref={wrapRef}>
+          <button className="pbw-exsel" onClick={() => setDropOpen((o) => !o)} aria-haspopup="listbox">
+            <span>{name}</span>
+            <ChevDown />
+          </button>
+          {dropOpen && (
+            <div className="pbw-exmenu" role="listbox">
+              {exList.map((e) => (
+                <button key={e.id} className={e.id === selId ? "on" : ""} role="option" aria-selected={e.id === selId}
+                  onClick={() => { setSelId(e.id); setDropOpen(false); }}>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
+                  {e.id === selId && <Check2 />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="pbw-mtoggle">
+          <button className={metric === "est1rm" ? "on" : ""} onClick={() => setMetric("est1rm")}>Est. 1RM</button>
+          <button className={metric === "heaviest" ? "on" : ""} onClick={() => setMetric("heaviest")}>Heaviest set</button>
+        </div>
+
+        {!weighted ? (
+          <div className="pbw-curveempty">
+            <div className="ei"><IconTrend /></div>
+            <p>No weighted working sets logged for this lift yet. Add some load and your {metric === "est1rm" ? "estimated 1RM" : "heaviest set"} will chart here.</p>
+          </div>
+        ) : (
+          <>
+            <div className="pbw-curvecap">{metric === "est1rm" ? "Estimated 1RM" : "Heaviest set"} · current</div>
+            <div className="pbw-curveval">
+              <span className="big">{Math.round(cur)} kg</span>
+              {usable.length >= 2 && (
+                <span className="dl" style={{ color: up ? "var(--m3-success)" : "var(--m3-on-dim)" }}>
+                  {pc > 0 ? `↑ +${pc}%` : pc < 0 ? `↓ ${pc}%` : "· flat"}
+                </span>
+              )}
+            </div>
+            {chartEl}
+          </>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 // muscle groups in the mockup's fixed order + palette
 const MUSCLE_GROUPS = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"];
@@ -78,6 +207,7 @@ function sparkPath(values: number[]) {
 export default function InsightsTrends({ history, exercisesList, onAskGemini }: InsightsTrendsProps) {
   const [askState, setAskState] = useState<"idle" | "loading">("idle");
   const [notesStamp, setNotesStamp] = useState(0); // refresh tick
+  const [curveExId, setCurveExId] = useState<string | null>(null); // open deep-dive
 
   const exName = (id: string) => exercisesList.find((e) => e.id === id)?.name || id;
   const exCategory = (id: string) => exercisesList.find((e) => e.id === id)?.category || "Other";
@@ -149,22 +279,23 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
     });
 
     // strength overview — per exercise est-1RM series (or BW reps)
-    const byEx: Record<string, { date: number; oneRm: number; reps: number; weighted: boolean }[]> = {};
+    const byEx: Record<string, { date: number; est1rm: number; heaviest: number; weighted: boolean }[]> = {};
     sorted.forEach((s) =>
       (s.exercises || []).forEach((e) => {
         const done = (e.sets || []).filter((set) => set.isCompleted);
         if (done.length === 0) return;
         const weighted = done.some((set) => (Number(set.weight) || 0) > 0);
-        const best = weighted
+        const heaviest = Math.max(0, ...done.map((set) => Number(set.weight) || 0));
+        const e1 = weighted
           ? Math.max(...done.map((set) => est1RM(Number(set.weight) || 0, Number(set.reps) || 0)))
           : Math.max(...done.map((set) => Number(set.reps) || 0));
-        (byEx[e.exerciseId] ||= []).push({ date: startMs(s), oneRm: best, reps: best, weighted });
+        (byEx[e.exerciseId] ||= []).push({ date: startMs(s), est1rm: e1, heaviest, weighted });
       })
     );
     const strength = Object.entries(byEx)
       .map(([id, series]) => {
         series.sort((a, b) => a.date - b.date);
-        const vals = series.map((p) => p.oneRm);
+        const vals = series.map((p) => p.est1rm);
         const weighted = series[series.length - 1].weighted;
         const first = vals[0], last = vals[vals.length - 1];
         let delta: string, up: boolean;
@@ -200,7 +331,11 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
       notes.push({ title: "Keep logging", body: "Log a few more sessions and your trends, splits, and strength curves will fill in here." });
     }
 
-    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, strength, notes };
+    const exList = Object.keys(byEx)
+      .map((id) => ({ id, name: exName(id) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, strength, notes, exSeries: byEx, exList };
   }, [history, exercisesList, notesStamp]);
 
   const fmtVol = (n: number) => n.toLocaleString("en-US");
@@ -287,7 +422,7 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
           <>
             <div className="pbw-ovlist">
               {metrics.strength.map((s) => (
-                <button key={s.id} className="pbw-ovrow" onClick={() => onAskGemini(`How is my ${s.name} progressing, and what should I do next? Plain coaching language.`)}>
+                <button key={s.id} className="pbw-ovrow" onClick={() => setCurveExId(s.id)}>
                   <div className="ovmain">
                     <div className="ovnm">{s.name}</div>
                     <div className="ovd">
@@ -347,6 +482,16 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
           ))
         )}
       </div>
+
+      {curveExId && createPortal(
+        <StrengthCurve
+          exId={curveExId}
+          exSeries={metrics.exSeries}
+          exList={metrics.exList}
+          onClose={() => setCurveExId(null)}
+        />,
+        document.body
+      )}
     </div>
   );
 }

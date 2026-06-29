@@ -904,25 +904,23 @@ export default function App() {
         <AnimatePresence>
           <WorkoutBanner activeWorkout={state.activeWorkout} setActiveTab={setActiveTab} activeTab={activeTab} exercises={state.exercises} restTimerTarget={restTimerTarget} showSwipeUpInfo={showSwipeUpInfo} setShowSwipeUpInfo={setShowSwipeUpInfo} />
         </AnimatePresence>
-        <nav className="m3-nav">
+        <nav className="pbw-enav">
           {[
-            { key: "workouts", label: "Workout", Icon: Dumbbell },
-            { key: "history", label: "History", Icon: History },
-            { key: "templates", label: "Routines", Icon: Layers },
-            { key: "exercises", label: "Library", Icon: Info },
-            { key: "account", label: state.user ? "Account" : "Login", Icon: User },
-          ].map(({ key, label, Icon }) => (
-            <motion.a
+            { key: "workouts", label: "Workout", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5l11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M14.5 9.5L9.5 14.5" /></svg>) },
+            { key: "history", label: "History", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v4l3 2" /><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 4v4h4" /></svg>) },
+            { key: "templates", label: "Routines", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5" /></svg>) },
+            { key: "exercises", label: "Library", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></svg>) },
+            { key: "account", label: state.user ? "Account" : "Login", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20 21a8 8 0 1 0-16 0" /><circle cx="12" cy="8" r="4" /></svg>) },
+          ].map(({ key, label, icon }) => (
+            <a
               key={key}
-              className={activeTab === key ? "on" : ""}
+              className={`item${activeTab === key ? " active" : ""}`}
               onClick={() => goToTab(key as typeof activeTab)}
-              whileTap={{ scale: 0.92 }}
-              transition={{ type: "spring", stiffness: 500, damping: 19, mass: 0.7 }}
               style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
             >
-              <span className="pill"><Icon className="w-5 h-5" /></span>
-              <span className="lbl">{label}</span>
-            </motion.a>
+              <span className="pill"><span className="ic">{icon}</span><span className="lblIn">{label}</span></span>
+              <span className="lblUnder">{label}</span>
+            </a>
           ))}
         </nav>
       </div>
