@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Trash2, Dumbbell, Calendar, Clock, Trophy, ChevronDown, ChevronUp, ChevronRight, Sparkles, MessageSquare, BarChart3, ListCollapse } from "lucide-react";
 import { WorkoutSession, Exercise } from "../types";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
@@ -329,17 +330,24 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
         </motion.div>
       </AnimatePresence>
 
-      <AnimatePresence>
-        {popoutLog && (
-          <WorkoutOverviewPopout
-            session={popoutLog}
-            history={history}
-            exercisesList={exercisesList}
-            onClose={() => setPopoutLog(null)}
-            onReadFull={() => { setPopoutLog(null); onViewAnalysis(popoutLog); }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Portalled to body so the sheet escapes the History page's stacking
+          context (its tab-slide transforms) and renders above the floating
+          bottom nav. AnimatePresence lives INSIDE the portal — wrapping a
+          portal in AnimatePresence is what breaks, not this. */}
+      {createPortal(
+        <AnimatePresence>
+          {popoutLog && (
+            <WorkoutOverviewPopout
+              session={popoutLog}
+              history={history}
+              exercisesList={exercisesList}
+              onClose={() => setPopoutLog(null)}
+              onReadFull={() => { setPopoutLog(null); onViewAnalysis(popoutLog); }}
+            />
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

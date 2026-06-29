@@ -2,17 +2,18 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Workout overview popout (workout-overview-popout.html). A sheet over the
- * dimmed History list, the at-a-glance read of one logged workout and the
- * bridge to the full coach analysis. Profile header + stats, the inline coach
- * take teaser, then the set log. All numbers are deterministic from the saved
- * doc; the coach-take prose is the model's job (backend-gated, see the analysis
- * page). Plain coaching voice. See workout-overview-popout-claude-code-prompt.md.
+ * Workout overview — a full-screen page (its own view, not a sheet). The
+ * at-a-glance read of one logged workout and the bridge to the full coach
+ * analysis: a back arrow, profile header + stats, the inline coach take teaser,
+ * then the set log. All numbers are deterministic from the saved doc; the
+ * coach-take prose is the model's job (backend-gated, see the analysis page).
+ * Plain coaching voice. Slides in from the right over History.
  */
-import React, { useMemo } from "react";
-import { motion, AnimatePresence, useReducedMotion, useDragControls } from "motion/react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { WorkoutSession, Exercise, WorkoutSet } from "../types";
 import { Button } from "./ui/Button";
+import { coachWorkout } from "../aiClient";
 
 interface Props {
   session: WorkoutSession;
@@ -34,7 +35,6 @@ const TYPE_META: Record<string, { label: string; cls: string }> = {
 
 export default function WorkoutOverviewPopout({ session, history, exercisesList, onClose, onReadFull }: Props) {
   const reduce = useReducedMotion();
-  const dragControls = useDragControls();
 
   const m = useMemo(() => {
     const exById = new Map(exercisesList.map((e) => [e.id, e]));
@@ -89,52 +89,71 @@ export default function WorkoutOverviewPopout({ session, history, exercisesList,
   const dateStr = date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
   const durMin = session.endTime ? Math.max(0, Math.round((new Date(session.endTime).getTime() - startMs(session)) / 60000)) : 0;
 
-  // TODO(ai-backend): coach-take prose comes from the same per-workout coach call
-  // as the analysis page (one call, short here, full there). Until that backend
-  // endpoint exists this shows the deterministic facts and the link to the
-  // numbers; the model write-up replaces this line.
+  // The coach-take prose is the same per-workout coach call as the analysis page
+  // (one call, short here, full there). When it isn't available (backend not set
+  // up, signed out, offline) this falls back to the deterministic facts line.
   const teaser = m.setCount > 0
     ? `You logged ${m.setCount} set${m.setCount === 1 ? "" : "s"} across ${m.lifts} lift${m.lifts === 1 ? "" : "s"}${m.volume > 0 ? `, ${m.volume.toLocaleString()} kg of total volume` : ""}.`
     : "No completed sets in this session yet.";
 
-  return (
-    <motion.div className="pbw-wop">
-      <motion.div
-        className="scrim"
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-      />
-      <motion.div
-        className="sheet"
-        initial={reduce ? false : { y: "100%" }}
-        animate={{ y: 0 }}
-        exit={reduce ? { opacity: 0 } : { y: "100%" }}
-        transition={{ type: "spring", stiffness: 320, damping: 34 }}
-        drag={reduce ? false : "y"}
-        dragListener={false}
-        dragControls={dragControls}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.5 }}
-        onDragEnd={(_e, info) => { if (info.offset.y > 120) onClose(); }}
-      >
-        <div className="handle" onPointerDown={(e) => !reduce && dragControls.start(e)} style={{ touchAction: "none" }} />
-        <button className="sclose" onClick={onClose} aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-        </button>
+  const [takeState, setTakeState] = useState<"loading" | "ready" | "fallback">(m.setCount > 0 ? "loading" : "fallback");
+  const [takeText, setTakeText] = useState("");
 
-        <div className="pcover">
-          <div className="pavatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="17" rx="3" /><path d="M3 9h18M8 2v4M16 2v4" /></svg>
-          </div>
-          <div className="pname">{session.name}</div>
-          <div className="pdate">{dateStr} · {durMin} min{durMin === 1 ? "" : "s"}</div>
-          <div className="pstats">
-            <div className="pstat"><div className="pv">{m.volume.toLocaleString()}</div><div className="pl">Volume</div></div>
-            <div className="pstat"><div className="pv">{m.setCount}</div><div className="pl">Sets</div></div>
-            <div className="pstat"><div className="pv">{m.lifts}</div><div className="pl">Lifts</div></div>
-            <div className="pstat"><div className="pv">{m.prCount}</div><div className="pl">PR</div></div>
+  const runTake = useCallback(async () => {
+    setTakeState("loading");
+    try {
+      const res = await coachWorkout({
+        workoutName: session.name,
+        date: dateStr,
+        durationMin: durMin,
+        totalSets: m.setCount,
+        lifts: m.lifts,
+        volumeKg: m.volume,
+        prCount: m.prCount,
+        exercises: m.exercises.map((e) => ({ name: e.name, sets: e.count })),
+      });
+      const text = (res.summary || "").trim();
+      if (text) { setTakeText(text); setTakeState("ready"); }
+      else setTakeState("fallback");
+    } catch {
+      // not configured / signed out / offline -> deterministic teaser
+      setTakeState("fallback");
+    }
+  }, [session.name, dateStr, durMin, m.setCount, m.lifts, m.volume, m.prCount, m.exercises]);
+
+  useEffect(() => {
+    if (m.setCount <= 0) { setTakeState("fallback"); return; }
+    let cancelled = false;
+    runTake().catch(() => { if (!cancelled) setTakeState("fallback"); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.id]);
+
+  return (
+    <motion.div
+      className="pbw-wop"
+      initial={reduce ? false : { x: "100%" }}
+      animate={{ x: 0 }}
+      exit={reduce ? { opacity: 0 } : { x: "100%" }}
+      transition={{ type: "spring", stiffness: 420, damping: 38 }}
+    >
+      <div className="wopbody">
+        <div className="wophead">
+          <button className="wopback" onClick={onClose} aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <div className="pcover">
+            <div className="pavatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="17" rx="3" /><path d="M3 9h18M8 2v4M16 2v4" /></svg>
+            </div>
+            <div className="pname">{session.name}</div>
+            <div className="pdate">{dateStr} · {durMin} min{durMin === 1 ? "" : "s"}</div>
+            <div className="pstats">
+              <div className="pstat"><div className="pv">{m.volume.toLocaleString()}</div><div className="pl">Volume</div></div>
+              <div className="pstat"><div className="pv">{m.setCount}</div><div className="pl">Sets</div></div>
+              <div className="pstat"><div className="pv">{m.lifts}</div><div className="pl">Lifts</div></div>
+              <div className="pstat"><div className="pv">{m.prCount}</div><div className="pl">PR</div></div>
+            </div>
           </div>
         </div>
 
@@ -144,7 +163,14 @@ export default function WorkoutOverviewPopout({ session, history, exercisesList,
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 13.7 8 19 9.5 13.7 11 12 16.5 10.3 11 5 9.5 10.3 8 12 2.5Zm6.5 9 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6Z" /></svg>
               <span>Coach take</span>
             </div>
-            <p className="coachteaser">{teaser}</p>
+            {takeState === "loading" ? (
+              <div className="coachload">
+                <div className="cll" style={{ width: "100%" }} />
+                <div className="cll" style={{ width: "62%" }} />
+              </div>
+            ) : (
+              <p className="coachteaser">{takeState === "ready" ? takeText : teaser}</p>
+            )}
             <Button variant="none" className="readmore" onClick={onReadFull}>
               Read full analysis
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
@@ -169,7 +195,7 @@ export default function WorkoutOverviewPopout({ session, history, exercisesList,
             </div>
           ))}
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }

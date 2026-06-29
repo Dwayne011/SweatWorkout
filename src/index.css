@@ -733,6 +733,10 @@ html.light { background-color: #fcfaff; }
 .pbw-askbtn { width: 100%; border: none; cursor: pointer; border-radius: 999px; padding: 14px; background: var(--m3-primary-fill); color: #fff; font-family: var(--m3-display-font); font-weight: 500; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .pbw-askbtn svg { width: 18px; height: 18px; }
 .pbw-askbtn:disabled { opacity: .6; }
+.pbw-askout { overflow: hidden; }
+.pbw-askout > p { color: var(--m3-on-primary-cont); font-size: 14px; line-height: 1.55; margin-bottom: 12px; }
+.pbw-askout > p:first-child { margin-top: 2px; }
+.pbw-askmeta { font-family: var(--m3-mono-font); font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--m3-on-primary-cont); opacity: .6; margin-bottom: 14px; }
 
 .pbw-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 .pbw-tile { background: var(--m3-sc-low); border-radius: 20px; padding: 15px; }
@@ -929,6 +933,9 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-ca .savebtn svg { width: 19px; height: 19px; }
 .pbw-ca .castate { font-size: 14px; color: var(--m3-on-var); line-height: 1.5; }
 .pbw-ca .castate.err { color: var(--m3-error); }
+.pbw-ca .caload { height: 13px; border-radius: 7px; background: linear-gradient(90deg, var(--m3-sc-high) 25%, var(--m3-sc) 37%, var(--m3-sc-high) 63%); background-size: 400% 100%; animation: pbw-cashim 1.4s ease infinite; }
+.pbw-ca .caload + .caload { margin-top: 9px; }
+@keyframes pbw-cashim { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
 .pbw-ca .caretry { margin-top: 12px; background: var(--m3-sc-high); border: none; color: var(--m3-on); font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; padding: 9px 16px; border-radius: 999px; cursor: pointer; }
 .pbw-ca .caempty { background: var(--m3-sc-low); border-radius: 22px; padding: 30px 20px; text-align: center; }
 .pbw-ca .caempty .ei { width: 54px; height: 54px; border-radius: 16px; background: var(--m3-sc); color: var(--m3-on-dim); display: grid; place-items: center; margin: 0 auto 14px; }
@@ -936,17 +943,17 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-ca .caempty h3 { font-family: var(--m3-display-font); font-weight: 500; font-size: 18px; color: var(--m3-on); margin-bottom: 6px; }
 .pbw-ca .caempty p { font-size: 14px; color: var(--m3-on-var); line-height: 1.5; max-width: 300px; margin: 0 auto; }
 
-/* Workout overview popout — sheet over the dimmed History list
-   (workout-overview-popout.html, exact values; tokens mapped, only the avatar
-   gradient + coach gradient stops + PR gold are literal) */
-.pbw-wop { position: fixed; inset: 0; z-index: 120; }
-.pbw-wop .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
-html.light .pbw-wop .scrim { background: rgba(20,10,40,.32); }
-.pbw-wop .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 90%; background: var(--m3-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -16px 40px -10px rgba(0,0,0,.6); display: flex; flex-direction: column; overflow: hidden; }
-.pbw-wop .handle { width: 40px; height: 5px; border-radius: 999px; background: var(--m3-sc-high); margin: 10px auto 0; flex: none; }
-.pbw-wop .sclose { position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border-radius: 999px; border: none; background: var(--m3-sc-low); color: var(--m3-on-var); display: grid; place-items: center; cursor: pointer; z-index: 3; }
-.pbw-wop .sclose svg { width: 17px; height: 17px; }
-.pbw-wop .pcover { flex: none; padding: 8px 20px 18px; text-align: center; background: linear-gradient(180deg, color-mix(in srgb, var(--m3-primary-fill) 16%, transparent), transparent); }
+/* Workout overview — full-screen page (its own view, slides in from the right).
+   Tokens mapped, only the avatar gradient + coach gradient stops + PR gold are
+   literal. */
+.pbw-wop { position: fixed; inset: 0; z-index: 9990; background: var(--m3-bg); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.pbw-wop .wopbody { min-height: 100%; padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
+/* The header gradient spans the whole top — status-bar inset, back row, and the
+   cover — so the violet fade reads as one complete background, not a panel. */
+.pbw-wop .wophead { padding-top: calc(env(safe-area-inset-top) + 8px); background: linear-gradient(180deg, color-mix(in srgb, var(--m3-primary-fill) 18%, transparent) 0%, transparent 100%); }
+.pbw-wop .wopback { margin: 0 0 0 14px; width: 40px; height: 40px; border-radius: 999px; border: none; background: var(--m3-sc-low); color: var(--m3-on-var); display: grid; place-items: center; cursor: pointer; }
+.pbw-wop .wopback svg { width: 20px; height: 20px; }
+.pbw-wop .pcover { padding: 6px 20px 20px; text-align: center; }
 .pbw-wop .pavatar { width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(145deg, #8b5cff, #5a2fe0); color: #fff; display: grid; place-items: center; margin: 8px auto 12px; }
 .pbw-wop .pavatar svg { width: 27px; height: 27px; }
 .pbw-wop .pname { font-family: var(--m3-display-font); font-weight: 500; font-size: 24px; color: var(--m3-on); letter-spacing: -.01em; line-height: 1.1; }
@@ -956,11 +963,15 @@ html.light .pbw-wop .scrim { background: rgba(20,10,40,.32); }
 .pbw-wop .pstat + .pstat::before { content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 1px; background: var(--m3-outline-q); }
 .pbw-wop .pv { font-family: var(--m3-mono-font); font-weight: 500; font-size: 20px; color: var(--m3-on); }
 .pbw-wop .pl { font-family: var(--m3-mono-font); font-size: 9px; letter-spacing: .05em; text-transform: uppercase; color: var(--m3-on-dim); margin-top: 4px; }
-.pbw-wop .sheetbody { flex: 1; overflow-y: auto; padding: 4px 16px calc(16px + env(safe-area-inset-bottom)); }
+.pbw-wop .sheetbody { padding: 4px 16px 0; }
 .pbw-wop .coachsec { background: linear-gradient(160deg, rgba(123,83,246,.16), rgba(213,102,200,.10)); border: 1px solid var(--m3-primary-cont); border-radius: 20px; padding: 16px; margin: 6px 0 16px; }
 .pbw-wop .coachhd { display: flex; align-items: center; gap: 8px; color: var(--m3-primary); font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 .pbw-wop .coachhd svg { width: 15px; height: 15px; }
 .pbw-wop .coachteaser { font-size: 14px; color: var(--m3-on); line-height: 1.5; margin: 10px 0 12px; }
+.pbw-wop .coachload { margin: 12px 0 13px; }
+.pbw-wop .coachload .cll { height: 12px; border-radius: 6px; background: linear-gradient(90deg, rgba(255,255,255,.10) 25%, rgba(255,255,255,.04) 37%, rgba(255,255,255,.10) 63%); background-size: 400% 100%; animation: pbw-cashim 1.4s ease infinite; }
+.pbw-wop .coachload .cll + .cll { margin-top: 8px; }
+.lt .pbw-wop .coachload .cll { background: linear-gradient(90deg, rgba(0,0,0,.08) 25%, rgba(0,0,0,.03) 37%, rgba(0,0,0,.08) 63%); background-size: 400% 100%; }
 .pbw-wop .readmore { display: inline-flex; align-items: center; gap: 4px; border: none; background: none; color: var(--m3-primary); font-weight: 500; font-size: 14px; cursor: pointer; padding: 0; font-family: var(--m3-display-font); }
 .pbw-wop .readmore svg { width: 16px; height: 16px; }
 .pbw-wop .loglab { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--m3-on-dim); margin: 2px 2px 10px; }
