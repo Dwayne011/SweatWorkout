@@ -13,6 +13,7 @@ import { Exercise } from "../types";
 import { motion, AnimatePresence, useReducedMotion, useDragControls } from "motion/react";
 import { Button } from "./ui/Button";
 import { useBackHandler } from "../lib/backStack";
+import { exerciseScience } from "../data/exerciseScience";
 
 // Register helper for dispatching global events
 export function openExerciseGuide(exercise: Exercise) {
@@ -130,6 +131,7 @@ export default function ExerciseGuideModal() {
   const { steps, prose } = ex ? deriveSteps(ex) : { steps: null, prose: null };
   const primary = ex ? (parseList(ex.primaryTarget).length ? parseList(ex.primaryTarget) : [ex.category]) : [];
   const secondary = ex ? parseList(ex.secondaryTarget) : [];
+  const science = ex ? exerciseScience[ex.id] : undefined; // authored "why" + "watch out"
   const ytId = ex ? getYouTubeEmbedId(ex.videoLink) : null;
 
   return (
@@ -222,7 +224,7 @@ export default function ExerciseGuideModal() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" /></svg>
                   <span>Why this works</span>
                 </div>
-                <p>{ex.coachTip && ex.coachTip.trim() ? ex.coachTip.trim() : "The coaching write-up for this exercise is coming soon."}</p>
+                <p>{science?.why ? science.why : (ex.coachTip && ex.coachTip.trim() ? ex.coachTip.trim() : "The coaching write-up for this exercise is coming soon.")}</p>
               </div>
 
               {/* Muscles worked */}
@@ -257,7 +259,9 @@ export default function ExerciseGuideModal() {
               {/* Watch out for */}
               <div className="sec">Watch out for</div>
               <div className="card misscard">
-                <p className="pbw-edempty">Common mistakes for this exercise are coming soon.</p>
+                {science?.watchOut
+                  ? <p>{science.watchOut}</p>
+                  : <p className="pbw-edempty">Common mistakes for this exercise are coming soon.</p>}
               </div>
 
               <Button variant="none" className="gotit" onClick={close}>Got it</Button>
