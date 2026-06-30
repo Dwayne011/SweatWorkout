@@ -15,7 +15,8 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { WorkoutSession, Exercise } from "../types";
 import { Button } from "./ui/Button";
 import { coachWorkout, AiError } from "../aiClient";
-import { muscleMap, CATEGORY_FALLBACK, MUSCLE_LABEL, MUSCLE_PARENT, Muscle } from "../data/muscleMap";
+import { aggregateMuscles } from "../lib/muscleAgg";
+import MuscleFigure from "./MuscleFigure";
 
 interface CoachAnalysisProps {
   completedWorkout: WorkoutSession;
@@ -40,96 +41,6 @@ const fmtDur = (s: number) => {
   return `${sec}s`;
 };
 
-// Granular front/back figures. Each shape is keyed to a sub-muscle region; its
-// fill is that region's bucket colour (from the per-muscle scores), and
-// untouched regions + outline use currentColor so the figure reads in dark +
-// light. Only the violet intensities are literals.
-function MuscleFigure({ view, color }: { view: "front" | "back"; color: Record<string, string> }) {
-  const f = (m: Muscle) => {
-    const c = color[m];
-    return c ? { fill: c } : { fill: "currentColor", fillOpacity: 0.05 };
-  };
-  const base = { fill: "currentColor", fillOpacity: 0.05 };
-  if (view === "front") {
-    return (
-      <svg className="fig" viewBox="0 0 360 470" width="190">
-        <g stroke="currentColor" strokeOpacity={0.12} strokeWidth={1.5}>
-          <circle cx="180" cy="42" r="22" {...base} />
-          <rect x="170" y="62" width="20" height="14" rx="6" {...base} />
-          {/* traps (front, upper) */}
-          <path d="M160 70 L132 94 L152 96 L174 78 Z" {...f("traps")} />
-          <path d="M200 70 L228 94 L208 96 L186 78 Z" {...f("traps")} />
-          {/* side + front delts */}
-          <ellipse cx="100" cy="116" rx="12" ry="17" {...f("delt_side")} />
-          <ellipse cx="260" cy="116" rx="12" ry="17" {...f("delt_side")} />
-          <ellipse cx="120" cy="108" rx="20" ry="16" {...f("delt_front")} />
-          <ellipse cx="240" cy="108" rx="20" ry="16" {...f("delt_front")} />
-          {/* chest: upper / mid / lower */}
-          <rect x="142" y="96" width="36" height="13" rx="5" {...f("chest_upper")} />
-          <rect x="182" y="96" width="36" height="13" rx="5" {...f("chest_upper")} />
-          <rect x="142" y="111" width="36" height="13" rx="5" {...f("chest_mid")} />
-          <rect x="182" y="111" width="36" height="13" rx="5" {...f("chest_mid")} />
-          <rect x="142" y="126" width="36" height="14" rx="6" {...f("chest_lower")} />
-          <rect x="182" y="126" width="36" height="14" rx="6" {...f("chest_lower")} />
-          {/* biceps + forearms */}
-          <rect x="104" y="126" width="22" height="54" rx="11" {...f("biceps")} />
-          <rect x="234" y="126" width="22" height="54" rx="11" {...f("biceps")} />
-          <rect x="101" y="184" width="20" height="56" rx="10" {...f("forearms")} />
-          <rect x="239" y="184" width="20" height="56" rx="10" {...f("forearms")} />
-          {/* obliques + abs */}
-          <rect x="140" y="150" width="12" height="56" rx="5" {...f("obliques")} />
-          <rect x="208" y="150" width="12" height="56" rx="5" {...f("obliques")} />
-          <rect x="154" y="148" width="52" height="29" rx="9" {...f("abs")} />
-          <rect x="154" y="180" width="52" height="29" rx="9" {...f("abs")} />
-          {/* quads + adductors */}
-          <rect x="144" y="224" width="26" height="96" rx="13" {...f("quads")} />
-          <rect x="190" y="224" width="26" height="96" rx="13" {...f("quads")} />
-          <rect x="170" y="228" width="9" height="66" rx="4" {...f("adductors")} />
-          <rect x="181" y="228" width="9" height="66" rx="4" {...f("adductors")} />
-          {/* lower legs (shin, no region) */}
-          <rect x="150" y="326" width="26" height="84" rx="13" {...base} />
-          <rect x="184" y="326" width="26" height="84" rx="13" {...base} />
-        </g>
-      </svg>
-    );
-  }
-  return (
-    <svg className="fig" viewBox="0 0 360 470" width="190">
-      <g stroke="currentColor" strokeOpacity={0.12} strokeWidth={1.5}>
-        <circle cx="180" cy="42" r="22" {...base} />
-        {/* traps (back, upper diamond) */}
-        <path d="M150 116 L180 80 L210 116 L196 138 L164 138 Z" {...f("traps")} />
-        {/* side + rear delts */}
-        <ellipse cx="100" cy="116" rx="12" ry="17" {...f("delt_side")} />
-        <ellipse cx="260" cy="116" rx="12" ry="17" {...f("delt_side")} />
-        <ellipse cx="120" cy="110" rx="20" ry="16" {...f("delt_rear")} />
-        <ellipse cx="240" cy="110" rx="20" ry="16" {...f("delt_rear")} />
-        {/* upper back (rhomboids / mid traps) */}
-        <rect x="156" y="138" width="48" height="34" rx="8" {...f("upper_back")} />
-        {/* lats */}
-        <path d="M152 146 C140 178 152 206 178 214 L180 150 Z" {...f("lats")} />
-        <path d="M208 146 C220 178 208 206 182 214 L180 150 Z" {...f("lats")} />
-        {/* lower back (erectors) */}
-        <rect x="165" y="206" width="30" height="40" rx="8" {...f("lower_back")} />
-        {/* triceps + forearms */}
-        <rect x="104" y="126" width="22" height="54" rx="11" {...f("triceps")} />
-        <rect x="234" y="126" width="22" height="54" rx="11" {...f("triceps")} />
-        <rect x="101" y="184" width="20" height="54" rx="10" {...f("forearms")} />
-        <rect x="239" y="184" width="20" height="54" rx="10" {...f("forearms")} />
-        {/* glutes */}
-        <ellipse cx="165" cy="252" rx="22" ry="18" {...f("glutes")} />
-        <ellipse cx="195" cy="252" rx="22" ry="18" {...f("glutes")} />
-        {/* hamstrings */}
-        <rect x="146" y="270" width="32" height="78" rx="15" {...f("hamstrings")} />
-        <rect x="182" y="270" width="32" height="78" rx="15" {...f("hamstrings")} />
-        {/* calves */}
-        <rect x="150" y="352" width="26" height="74" rx="13" {...f("calves")} />
-        <rect x="184" y="352" width="26" height="74" rx="13" {...f("calves")} />
-      </g>
-    </svg>
-  );
-}
-
 const ArrowUp = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M9 7h8v8" /></svg>);
 const Flat = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 9h14M5 15h14" /></svg>);
 const ArrowDown = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M17 17L7 7M15 17H7V9" /></svg>);
@@ -144,43 +55,16 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
     const exById = new Map(exercisesList.map((e) => [e.id, e]));
     const catOf = (id: string) => exById.get(id)?.category || "Other";
 
-    // Per sub-muscle scoring from the curated map. A completed set adds its full
-    // count to each PRIMARY muscle and half to each SECONDARY one (score drives
-    // the shade); `muscleSets` is the plain count of sets that touched the
-    // muscle at all (shown in the list). Unmapped exercises fall back to their
-    // coarse category. The model never sees this — it's all deterministic.
-    const muscleScore: Record<string, number> = {};
-    const muscleSets: Record<string, number> = {};
-    let totalSets = 0;
-    (completedWorkout.exercises || []).forEach((we) => {
-      const done = (we.sets || []).filter((s) => s.isCompleted);
-      if (!done.length) return;
-      totalSets += done.length;
-      const map = muscleMap[we.exerciseId];
-      const primaries = map ? map.primary : (CATEGORY_FALLBACK[catOf(we.exerciseId)] || []);
-      const secondaries = map ? (map.secondary || []) : [];
-      primaries.forEach((mu) => {
-        muscleScore[mu] = (muscleScore[mu] || 0) + done.length;
-        muscleSets[mu] = (muscleSets[mu] || 0) + done.length;
-      });
-      secondaries.forEach((mu) => {
-        muscleScore[mu] = (muscleScore[mu] || 0) + done.length * 0.5;
-        muscleSets[mu] = (muscleSets[mu] || 0) + done.length;
-      });
-    });
-    const maxScore = Math.max(1, ...Object.values(muscleScore));
-    const muscleColor: Record<string, string> = {};
-    const worked = (Object.keys(muscleScore) as Muscle[])
-      .map((mu) => {
-        const ratio = muscleScore[mu] / maxScore;
-        let bucket: string, color: string;
-        if (ratio >= 0.7) { bucket = "High"; color = "#9a6cff"; }
-        else if (ratio >= 0.35) { bucket = "Moderate"; color = "rgba(139,92,255,.45)"; }
-        else { bucket = "Light"; color = "rgba(139,92,255,.2)"; }
-        muscleColor[mu] = color;
-        return { key: mu, name: MUSCLE_LABEL[mu], parent: MUSCLE_PARENT[mu], sets: muscleSets[mu], ratio, bucket, color };
-      })
-      .sort((a, b) => b.ratio - a.ratio || b.sets - a.sets);
+    // Per sub-muscle scoring from the curated map (shared with the Insights
+    // muscle map): a completed set adds its full count to each PRIMARY muscle
+    // and half to each SECONDARY one, the busiest region sets the scale, and
+    // every region buckets High/Moderate/Light. Unmapped exercises fall back to
+    // their coarse category. The model never sees this — it's all deterministic.
+    const muscleEntries = (completedWorkout.exercises || []).map((we) => ({
+      exerciseId: we.exerciseId,
+      sets: (we.sets || []).filter((s) => s.isCompleted).length,
+    }));
+    const { worked, muscleColor, totalSets } = aggregateMuscles(muscleEntries, catOf);
 
     const thisMs = startMs(completedWorkout);
 

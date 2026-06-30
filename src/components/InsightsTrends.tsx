@@ -21,6 +21,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { WorkoutSession, Exercise } from "../types";
 import { coachAlltime, coachNotes } from "../aiClient";
+import MuscleMap from "./MuscleMap";
 
 interface InsightsTrendsProps {
   history: WorkoutSession[];
@@ -214,6 +215,7 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
   const [aiNotes, setAiNotes] = useState<{ title: string; body: string }[] | null>(null);
   const [curveExId, setCurveExId] = useState<string | null>(null); // open deep-dive
   const [strengthQuery, setStrengthQuery] = useState(""); // (h4) movement search
+  const [showMuscleMap, setShowMuscleMap] = useState(false); // (h5) granular muscle map
 
   const exName = (id: string) => exercisesList.find((e) => e.id === id)?.name || id;
   const exCategory = (id: string) => exercisesList.find((e) => e.id === id)?.category || "Other";
@@ -270,14 +272,16 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
     // muscle split — last 30 days completed working sets per group
     const since30 = now - 30 * DAY;
     const groupCount30: Record<string, number> = {};
+    const exSets30: Record<string, number> = {}; // per-exercise sets, for the granular muscle map
     let total30 = 0;
     sorted.filter((s) => startMs(s) >= since30).forEach((s) =>
       (s.exercises || []).forEach((e) => {
         const cat = exCategory(e.exerciseId);
         const c = (e.sets || []).filter((set) => set.isCompleted).length;
-        if (c > 0) { groupCount30[cat] = (groupCount30[cat] || 0) + c; total30 += c; }
+        if (c > 0) { groupCount30[cat] = (groupCount30[cat] || 0) + c; total30 += c; exSets30[e.exerciseId] = (exSets30[e.exerciseId] || 0) + c; }
       })
     );
+    const muscleEntries30 = Object.entries(exSets30).map(([exerciseId, sets]) => ({ exerciseId, sets }));
     const maxGroup = Math.max(1, ...MUSCLE_GROUPS.map((g) => groupCount30[g] || 0));
     const split = MUSCLE_GROUPS.map((g) => {
       const c = groupCount30[g] || 0;
@@ -367,7 +371,7 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
       fallbackReadout = fp.join("\n\n");
     }
 
-    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, strength, strengthAll, notes, exSeries: byEx, exList, fallbackReadout };
+    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, muscleEntries30, strength, strengthAll, notes, exSeries: byEx, exList, fallbackReadout };
   }, [history, exercisesList, notesStamp]);
 
   const fmtVol = (n: number) => n.toLocaleString("en-US");
@@ -586,11 +590,12 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
         );
       })()}
 
-      {/* 6 — Muscle split */}
-      <div className="pbw-icard">
+      {/* 6 — Muscle split (h5: taps through to the granular front/back map) */}
+      <div className="pbw-icard pbw-mcard" role="button" tabIndex={0} onClick={() => setShowMuscleMap(true)}>
         <div className="cardhd">
           <span className="ci"><IconMuscle /></span>
           <div><div className="ct">Muscle split</div><div className="csub">Sets per group · last 30 days</div></div>
+          <span className="mmchev"><ChevR /></span>
         </div>
         <div className="pbw-mlist">
           {metrics.split.map((m) => (
@@ -603,7 +608,7 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
             </div>
           ))}
         </div>
-        <div className="pbw-mnote"><IconClock /><span>Counts every working set you logged in the last 30 days.</span></div>
+        <div className="pbw-mnote"><span>Tap for the granular front &amp; back muscle map.</span><ChevR /></div>
       </div>
 
       {/* 7 — Coach notes */}
@@ -628,6 +633,16 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
           exSeries={metrics.exSeries}
           exList={metrics.exList}
           onClose={() => setCurveExId(null)}
+        />,
+        document.body
+      )}
+
+      {showMuscleMap && createPortal(
+        <MuscleMap
+          entries={metrics.muscleEntries30}
+          exercisesList={exercisesList}
+          windowLabel="Last 30 days"
+          onClose={() => setShowMuscleMap(false)}
         />,
         document.body
       )}

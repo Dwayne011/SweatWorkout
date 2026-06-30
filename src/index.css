@@ -840,6 +840,13 @@ html.light { background-color: #fcfaff; }
 .pbw-mnote { display: flex; align-items: flex-start; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--m3-outline-q); }
 .pbw-mnote svg { width: 15px; height: 15px; color: var(--m3-success); flex: none; margin-top: 1px; }
 .pbw-mnote span { font-size: 12px; color: var(--m3-on-var); line-height: 1.45; }
+/* (h5) Muscle-split card taps through to the granular muscle map. */
+.pbw-mcard { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .12s ease, background .12s ease; }
+.pbw-mcard:active { transform: scale(.992); background: var(--m3-sc); }
+.pbw-mcard .cardhd .mmchev { margin-left: auto; color: var(--m3-on-dim); display: grid; place-items: center; }
+.pbw-mcard .cardhd .mmchev svg { width: 20px; height: 20px; }
+.pbw-mcard .pbw-mnote { align-items: center; }
+.pbw-mcard .pbw-mnote svg { color: var(--m3-on-dim); margin-left: auto; }
 
 .pbw-icard.notescard .notesic { background: var(--m3-success-cont); color: var(--m3-success); }
 html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); background: var(--m3-success); }
@@ -961,6 +968,9 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-ca .gset { font-family: var(--m3-mono-font); font-size: 11px; color: var(--m3-on-var); }
 .pbw-ca .gbar { height: 7px; background: var(--m3-sc); border-radius: 999px; overflow: hidden; }
 .pbw-ca .gbar span { display: block; height: 100%; border-radius: 999px; }
+/* Muscle map page (Insights → tap muscle split). Reuses the .pbw-ca figure +
+   list styles; here the figure sits straight on the page (no card) per mockup. */
+.pbw-mmap .mmempty { background: var(--m3-sc-low); border-radius: 22px; padding: 22px; font-size: 14px; line-height: 1.5; color: var(--m3-on-var); }
 .pbw-ca .srow { padding: 14px 0; }
 .pbw-ca .srow + .srow { border-top: 1px solid var(--m3-outline-q); }
 .pbw-ca .srow:first-child { padding-top: 0; }
