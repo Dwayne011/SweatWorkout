@@ -51,6 +51,8 @@ export interface UserProfile {
   weightKg: number;   // Stored strictly in kilograms
   primaryGoal: "Hypertrophy" | "Strength" | "Cardiovascular Endurance" | "Weight Loss" | "General Fitness";
   preferredUnits: "Metric" | "Imperial";
+  trainingExperience?: "Beginner" | "Intermediate" | "Advanced"; // optional on legacy profiles
+  daysPerWeek?: number;                                          // training days per week (1-7)
 }
 
 export interface WorkoutSession {

@@ -100,6 +100,19 @@ export interface CoachWorkoutResp { summary: string }
 export interface CoachAlltimeResp { readout: string }
 export interface CoachNotesResp { notes: { title: string; body: string }[] }
 
-export const coachWorkout = (payload: unknown) => aiFetch<CoachWorkoutResp>("/api/ai/coach", { kind: "workout", payload });
-export const coachAlltime = (payload: unknown) => aiFetch<CoachAlltimeResp>("/api/ai/coach", { kind: "alltime", payload });
-export const coachNotes = (payload: unknown) => aiFetch<CoachNotesResp>("/api/ai/coach", { kind: "notes", payload });
+// (o8a) The coach reads the athlete profile. Inject it centrally here so every
+// coach call (CoachAnalysis, WorkoutOverviewPopout, InsightsTrends) carries it
+// without each caller threading it through. Snapshot from the same localStorage
+// key useWorkoutState persists to.
+function storedProfile(): unknown {
+  try {
+    const s = localStorage.getItem("projectpb_user_profile");
+    return s ? JSON.parse(s) : null;
+  } catch {
+    return null;
+  }
+}
+
+export const coachWorkout = (payload: unknown) => aiFetch<CoachWorkoutResp>("/api/ai/coach", { kind: "workout", payload, profile: storedProfile() });
+export const coachAlltime = (payload: unknown) => aiFetch<CoachAlltimeResp>("/api/ai/coach", { kind: "alltime", payload, profile: storedProfile() });
+export const coachNotes = (payload: unknown) => aiFetch<CoachNotesResp>("/api/ai/coach", { kind: "notes", payload, profile: storedProfile() });

@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from "react";
 import { UserProfile } from "../types";
 import { motion } from "motion/react";
-import { Check, Ruler, Scale, User, Target, ChevronDown } from "lucide-react";
+import { Check, Ruler, Scale, User, Target, ChevronDown, TrendingUp, CalendarDays } from "lucide-react";
 import { Button } from "./ui/Button";
 
 interface OnboardingProfileProps {
@@ -36,6 +36,10 @@ export default function OnboardingProfile({ onComplete, initialProfile }: Onboar
   const [primaryGoal, setPrimaryGoal] = useState<UserProfile["primaryGoal"]>(
     initialProfile?.primaryGoal || "General Fitness"
   );
+  const [trainingExperience, setTrainingExperience] = useState<NonNullable<UserProfile["trainingExperience"]>>(
+    initialProfile?.trainingExperience || "Intermediate"
+  );
+  const [daysPerWeek, setDaysPerWeek] = useState<number>(initialProfile?.daysPerWeek || 3);
 
   const [ageInput, setAgeInput] = useState<string>((initialProfile?.age || 30).toString());
   const [heightInput, setHeightInput] = useState<string>(
@@ -78,7 +82,9 @@ export default function OnboardingProfile({ onComplete, initialProfile }: Onboar
       heightCm: finalHeight,
       weightKg: finalWeight,
       primaryGoal,
-      preferredUnits
+      preferredUnits,
+      trainingExperience,
+      daysPerWeek
     });
   };
 
@@ -335,6 +341,36 @@ export default function OnboardingProfile({ onComplete, initialProfile }: Onboar
             className={`m3-goal${primaryGoal === goal ? " sel" : ""}`}
           >
             {goal === "Cardiovascular Endurance" ? "Cardio endurance" : goal}
+          </Button>
+        ))}
+      </div>
+
+      {/* Training experience */}
+      <div className="m3-seclabel"><span className="l"><TrendingUp /> Training experience</span></div>
+      <div className="m3-goals">
+        {(["Beginner", "Intermediate", "Advanced"] as const).map((lvl) => (
+          <Button
+            variant="none"
+            key={lvl}
+            onClick={() => setTrainingExperience(lvl)}
+            className={`m3-goal${trainingExperience === lvl ? " sel" : ""}`}
+          >
+            {lvl}
+          </Button>
+        ))}
+      </div>
+
+      {/* Training days per week */}
+      <div className="m3-seclabel"><span className="l"><CalendarDays /> Training days per week</span></div>
+      <div className="m3-goals">
+        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+          <Button
+            variant="none"
+            key={d}
+            onClick={() => setDaysPerWeek(d)}
+            className={`m3-goal${daysPerWeek === d ? " sel" : ""}`}
+          >
+            {d}
           </Button>
         ))}
       </div>

@@ -783,14 +783,25 @@ Respond STRICTLY with a JSON matching the expected schema.`;
         res.status(503).json({ error: "not_configured", message: "The AI coach is not set up yet." });
         return;
       }
-      const { kind, payload } = req.body || {};
+      const { kind, payload, profile } = req.body || {};
+      // (o8a) The coach reads the whole athlete profile and tailors to it.
+      const p = (profile || {}) as Record<string, any>;
+      const profileBlock = `Athlete profile (tailor the read to this person; weight advice to their experience and goal; do not restate the profile back):
+- Biological sex: ${p.biologicalSex || "Prefer not to say"}
+- Age: ${p.age ?? "unknown"}
+- Body weight: ${p.weightKg ? `${p.weightKg} kg` : "unknown"}
+- Height: ${p.heightCm ? `${p.heightCm} cm` : "unknown"}
+- Preferred units: ${p.preferredUnits || "Metric"}
+- Primary goal: ${p.primaryGoal || "General Fitness"}
+- Training experience: ${p.trainingExperience || "unknown"}
+- Trains about ${p.daysPerWeek ?? "unknown"} days per week`;
       const voice =
         "Plain coaching language, like a person talking, not a clinical readout. No medical or sci-fi jargon, no \"diagnostic\", no \"motor-unit fatigue\", no \"stimulation index\". No em dashes, no \"seamless\" or \"robust\". Use only the numbers provided, never invent or recompute any figure.";
 
       if (kind === "alltime") {
         const r = await ai.models.generateContent({
           model: GEMINI_MODEL,
-          contents: [{ role: "user", parts: [{ text: `You are a strength coach giving an athlete an all-time read on their training so far, from these computed facts:\n${JSON.stringify(payload)}\n\nWrite a short readout (3 to 5 short paragraphs) on their splits, their consistency, and where their strength is going. ${voice}` }] }],
+          contents: [{ role: "user", parts: [{ text: `${profileBlock}\n\nYou are a strength coach giving this athlete an all-time read on their training so far, from these computed facts:\n${JSON.stringify(payload)}\n\nWrite a short readout (3 to 5 short paragraphs) on their splits, their consistency, and where their strength is going. ${voice}` }] }],
           config: { responseMimeType: "application/json", responseSchema: { type: Type.OBJECT, properties: { readout: { type: Type.STRING } }, required: ["readout"] } },
         });
         res.json(JSON.parse((r.text || "{}").trim()));
@@ -800,7 +811,7 @@ Respond STRICTLY with a JSON matching the expected schema.`;
       if (kind === "notes") {
         const r = await ai.models.generateContent({
           model: GEMINI_MODEL,
-          contents: [{ role: "user", parts: [{ text: `You are a strength coach. From these computed facts:\n${JSON.stringify(payload)}\nwrite two short passive observations the athlete can glance at, each a title and a sentence. ${voice}` }] }],
+          contents: [{ role: "user", parts: [{ text: `${profileBlock}\n\nYou are a strength coach. From these computed facts:\n${JSON.stringify(payload)}\nwrite two short passive observations this athlete can glance at, each a title and a sentence. ${voice}` }] }],
           config: { responseMimeType: "application/json", responseSchema: { type: Type.OBJECT, properties: { notes: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, body: { type: Type.STRING } }, required: ["title", "body"] } } }, required: ["notes"] } },
         });
         res.json(JSON.parse((r.text || "{}").trim()));
@@ -810,7 +821,7 @@ Respond STRICTLY with a JSON matching the expected schema.`;
       // default: per-workout — one short interpretive line over the facts.
       const r = await ai.models.generateContent({
         model: GEMINI_MODEL,
-        contents: [{ role: "user", parts: [{ text: `You are a strength coach reading back one completed workout from these computed facts:\n${JSON.stringify(payload)}\n\nWrite "summary": one short plain-language line on the session, a real observation, not "you crushed it". If the session has no completed sets, say plainly there is not enough logged here to analyse. ${voice}` }] }],
+        contents: [{ role: "user", parts: [{ text: `${profileBlock}\n\nYou are a strength coach reading back one completed workout from these computed facts:\n${JSON.stringify(payload)}\n\nWrite "summary": one short plain-language line on the session, a real observation, not "you crushed it". If the session has no completed sets, say plainly there is not enough logged here to analyse. ${voice}` }] }],
         config: { responseMimeType: "application/json", responseSchema: { type: Type.OBJECT, properties: { summary: { type: Type.STRING } }, required: ["summary"] } },
       });
       res.json(JSON.parse((r.text || "{}").trim()));

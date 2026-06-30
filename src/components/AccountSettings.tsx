@@ -88,6 +88,9 @@ export default function AccountSettings({
                 ? `${state.userProfile.age} yo · ${state.userProfile.biologicalSex} · ${state.userProfile.preferredUnits === 'Metric' ? `${state.userProfile.weightKg} kg` : `${Math.round(state.userProfile.weightKg * 2.20462)} lbs`}`
                 : "No profile data set."}
               {state.userProfile ? <><br />Goal: {state.userProfile.primaryGoal}</> : null}
+              {state.userProfile && (state.userProfile.trainingExperience || state.userProfile.daysPerWeek) ? (
+                <><br />{state.userProfile.trainingExperience || "—"}{state.userProfile.daysPerWeek ? ` · ${state.userProfile.daysPerWeek} days/week` : ""}</>
+              ) : null}
             </p>
           </div>
         </div>
