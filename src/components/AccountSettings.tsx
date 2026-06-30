@@ -4,8 +4,8 @@ import { Button } from "./ui/Button";
 
 interface AccountSettingsProps {
   state: any;
-  theme: string;
-  setTheme: (theme: string) => void;
+  theme: "dark" | "light";
+  setTheme: React.Dispatch<React.SetStateAction<"dark" | "light">>;
   isFirebaseReady: boolean;
   auth: any;
   handleGoogleLogin: () => Promise<void>;

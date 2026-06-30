@@ -353,7 +353,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
 }
 
 // Icon helper to avoid missing imports
-function HistoryIcon(props: React.SVGProps<SVGSVGElement>) {
+function HistoryIcon({ size = 24, ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -361,6 +361,8 @@ function HistoryIcon(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
+      width={size}
+      height={size}
       {...props}
     >
       <path

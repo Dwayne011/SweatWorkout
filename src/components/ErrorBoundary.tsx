@@ -5,33 +5,30 @@
  * A small render-error boundary. Wrap a screen or card so one thrown reference
  * shows a calm fallback instead of taking the whole app to a blank screen.
  * Error boundaries have to be class components — there is no hook equivalent.
- *
- * NOTE: this project ships no @types/react, so React is untyped (`any`) and the
- * inherited React.Component members aren't visible to tsc. We `declare` the few
- * we use (ambient, no runtime emit) so the file typechecks without pulling in
- * the full React type packages.
  */
-import React from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
-  children?: any;
+  children: ReactNode;
   /** Short name for the wrapped area, used in the console log. */
   label?: string;
   /** Optional custom fallback. Falls back to the default card if omitted. */
-  fallback?: any;
+  fallback?: ReactNode;
 }
 
-export class ErrorBoundary extends React.Component {
-  declare props: Props;
-  declare setState: (state: { hasError: boolean }) => void;
-  state = { hasError: false };
+interface State {
+  hasError: boolean;
+}
 
-  static getDerivedStateFromError() {
+export class ErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false };
+
+  static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: { componentStack?: string }) {
-    console.error(`[ErrorBoundary${this.props.label ? " · " + this.props.label : ""}]`, error, info?.componentStack);
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error(`[ErrorBoundary${this.props.label ? " · " + this.props.label : ""}]`, error, info.componentStack);
   }
 
   private handleReset = () => this.setState({ hasError: false });

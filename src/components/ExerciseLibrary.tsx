@@ -120,7 +120,7 @@ export default function ExerciseLibrary({
     setEditFormMechanics(ex.formMechanics || "");
     setEditCoachTip(ex.coachTip || "");
     setEditPrimaryTarget(ex.primaryTarget || "");
-    setEditSecondaryTarget(ex.secondaryTarget || "");
+    setEditSecondaryTarget(Array.isArray(ex.secondaryTarget) ? ex.secondaryTarget.join(", ") : (ex.secondaryTarget || ""));
     setLargeFileError("");
     setSelectedFileForAnalysis(null);
     setIsAnalyzingMedia(false);
