@@ -19,6 +19,7 @@ interface HistoryLogsProps {
   onDeleteLog: (logId: string) => void;
   onAskGemini: (prompt: string) => void;
   onViewAnalysis: (session: WorkoutSession) => void;
+  onSaveAsRoutine: (session: WorkoutSession) => void;
 }
 
 // The master i-spark — a filled big+small sparkle, lifted verbatim from the
@@ -27,7 +28,7 @@ const ISpark = () => (
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 13.7 8 19 9.5 13.7 11 12 16.5 10.3 11 5 9.5 10.3 8 12 2.5Zm6.5 9 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6Z" /></svg>
 );
 
-export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAskGemini, onViewAnalysis }: HistoryLogsProps) {
+export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAskGemini, onViewAnalysis, onSaveAsRoutine }: HistoryLogsProps) {
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [popoutLog, setPopoutLog] = useState<WorkoutSession | null>(null); // overview popout
   useBackHandler(!!popoutLog, () => setPopoutLog(null)); // (o4) back closes the popout
@@ -345,6 +346,7 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
               exercisesList={exercisesList}
               onClose={() => setPopoutLog(null)}
               onReadFull={() => { setPopoutLog(null); onViewAnalysis(popoutLog); }}
+              onSaveRoutine={() => onSaveAsRoutine(popoutLog)}
             />
           )}
         </AnimatePresence>,

@@ -887,6 +887,7 @@ export default function App() {
                       onDeleteLog={state.deleteHistoryLog}
                       onAskGemini={handlePropagatePromptToGemini}
                       onViewAnalysis={(session) => setLatestCompletedWorkout(session)}
+                      onSaveAsRoutine={(session) => setSaveRoutineWorkout(session)}
                     />
                   </Suspense>
                 )}

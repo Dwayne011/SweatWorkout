@@ -21,6 +21,7 @@ interface Props {
   exercisesList: Exercise[];
   onClose: () => void;
   onReadFull: () => void;
+  onSaveRoutine: () => void;
 }
 
 const startMs = (s: WorkoutSession) => new Date(s.startTime).getTime();
@@ -33,7 +34,7 @@ const TYPE_META: Record<string, { label: string; cls: string }> = {
   failure: { label: "Failure", cls: "fail" },
 };
 
-export default function WorkoutOverviewPopout({ session, history, exercisesList, onClose, onReadFull }: Props) {
+export default function WorkoutOverviewPopout({ session, history, exercisesList, onClose, onReadFull, onSaveRoutine }: Props) {
   const reduce = useReducedMotion();
 
   const m = useMemo(() => {
@@ -176,6 +177,12 @@ export default function WorkoutOverviewPopout({ session, history, exercisesList,
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
             </Button>
           </div>
+
+          {/* (h2) Save this workout as a routine — same page as the post-workout flow. */}
+          <Button variant="none" className="wopsave" onClick={onSaveRoutine}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" /><path d="M17 21v-8H7v8M7 3v5h8" /></svg>
+            Save as a routine
+          </Button>
 
           <div className="loglab">Exercises</div>
           {m.exercises.map((ex, i) => (
