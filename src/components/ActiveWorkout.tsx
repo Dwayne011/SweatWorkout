@@ -8,6 +8,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { createPortal } from "react-dom";
 import { haptics } from "../lib/haptics";
 import { useBackHandler } from "../lib/backStack";
+import SwipeHint from "./SwipeHint";
 import {
   Play,
   Check,
@@ -1248,6 +1249,7 @@ export default function ActiveWorkout({
 
       {/* Exercises Added inside the Session */}
       <div className="space-y-5">
+        {session.exercises.length > 0 && <SwipeHint />}
         {session.exercises.length === 0 ? (
           <div className="m3-empty">
             <div className="m3-shape lg center" style={{ marginBottom: "8px" }}>

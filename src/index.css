@@ -503,6 +503,17 @@ html.light { background-color: #fcfaff; }
 .pbw-rt .ctlbtn { flex: 1; background: rgba(11,9,16,.72); color: #fff; border: none; font-family: var(--m3-mono-font); font-weight: 500; border-radius: 999px; padding: 11px; font-size: 14px; cursor: pointer; }
 .pbw-rt .skip { flex: 1; background: #ece5f6; color: #1d1828; border: none; font-weight: 500; border-radius: 999px; padding: 11px; font-size: 14px; cursor: pointer; font-family: var(--m3-display-font); }
 .pbw-sessbtns { display: flex; gap: 10px; }
+/* (w5) One-time swipe-to-delete hint */
+.pbw-swipehint-tip { display: flex; align-items: center; gap: 14px; background: var(--m3-sc-low); border: 1px solid var(--m3-primary-cont); border-radius: 18px; padding: 12px 14px; cursor: pointer; }
+.pbw-swipehint-tip .demo { position: relative; width: 78px; height: 38px; flex: none; border-radius: 12px; overflow: hidden; }
+.pbw-swipehint-tip .delpane { position: absolute; inset: 0; background: var(--m3-error); display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: #fff; }
+.pbw-swipehint-tip .delpane svg { width: 16px; height: 16px; }
+.pbw-swipehint-tip .row { position: absolute; inset: 0; background: var(--m3-sc-high); border-radius: 12px; display: flex; align-items: center; gap: 9px; padding: 0 12px; }
+.pbw-swipehint-tip .row .dots { width: 4px; height: 4px; border-radius: 999px; background: var(--m3-on-dim); box-shadow: 7px 0 var(--m3-on-dim), 14px 0 var(--m3-on-dim); }
+.pbw-swipehint-tip .row .lbl { font-family: var(--m3-mono-font); font-size: 11px; color: var(--m3-on-var); }
+.pbw-swipehint-tip .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pbw-swipehint-tip .txt b { font-size: 14px; font-weight: 500; color: var(--m3-on); }
+.pbw-swipehint-tip .txt span { font-size: 12px; color: var(--m3-on-var); line-height: 1.4; }
 /* (w3) Pinned Finish/Discard footer — always reachable, sits above the bottom
    nav with safe-area padding. Portalled to body, shown only on the workouts tab. */
 .pbw-sessftr {
