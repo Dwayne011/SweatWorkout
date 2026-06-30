@@ -41,14 +41,21 @@ function parseList(v?: string | string[]): string[] {
   return v.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-// setupInstructions + formMechanics -> numbered steps; legacy correctForm blob
-// is the prose fallback until structured steps are filled.
+// setupInstructions + formMechanics -> numbered steps. The catalogue's
+// correctForm is a single blob, but it's written as one cue per sentence, so we
+// split it on sentence boundaries into numbered steps too (the brief wanted
+// numbered form steps, not a paragraph). A single-sentence blob stays prose.
 function deriveSteps(ex: Exercise): { steps: string[] | null; prose: string | null } {
   const lines = (t?: string) =>
     t ? t.split(/\n+/).map((s) => s.trim().replace(/^\d+[.\)]\s*/, "").replace(/^[•\-]\s*/, "")).filter(Boolean) : [];
   const combined = [...lines(ex.setupInstructions), ...lines(ex.formMechanics)];
   if (combined.length > 0) return { steps: combined, prose: null };
-  if (ex.correctForm && ex.correctForm.trim()) return { steps: null, prose: ex.correctForm.trim() };
+  if (ex.correctForm && ex.correctForm.trim()) {
+    const prose = ex.correctForm.trim();
+    const sentences = prose.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+    if (sentences.length >= 2) return { steps: sentences, prose: null };
+    return { steps: null, prose };
+  }
   return { steps: null, prose: null };
 }
 
