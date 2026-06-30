@@ -10,6 +10,7 @@
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.cjs",
     "lint": "tsc --noEmit",
+    "digest": "node scripts/make-digest.mjs",
     "native:sync": "vite build && cap sync",
     "native:android": "vite build && cap sync android && cap open android"
   },

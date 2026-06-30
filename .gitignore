@@ -11,3 +11,6 @@ logcat-capture.txt
 
 # AI Studio one-off patch script (not app source)
 apply_fixes.py
+
+# Generated codebase digest for Claude Project uploads (npm run digest)
+project-pb-digest.md
