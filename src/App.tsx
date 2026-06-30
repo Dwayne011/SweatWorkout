@@ -18,6 +18,8 @@ const ExerciseLibrary = lazy(() => import("./components/ExerciseLibrary"));
 const AccountSettings = lazy(() => import("./components/AccountSettings"));
 import WorkoutSplashScene from "./components/WorkoutSplashScene";
 import CoachAnalysis from "./components/CoachAnalysis";
+import PostWorkoutChoice from "./components/PostWorkoutChoice";
+import SaveAsRoutine from "./components/SaveAsRoutine";
 import ErrorBoundary from "./components/ErrorBoundary";
 import IntroSplash from "./components/IntroSplash";
 import OnboardingProfile from "./components/OnboardingProfile";
@@ -234,6 +236,11 @@ export default function App() {
     if (s[s.length - 1] !== activeTab) s.push(activeTab);
   }, [activeTab]);
   const [latestCompletedWorkout, setLatestCompletedWorkout] = useState<WorkoutSession | null>(null);
+  // (w4) Post-workout flow: justFinished -> the choice screen; saveRoutineWorkout
+  // -> the save-as-routine page (over the choice). History's analysis still goes
+  // straight to latestCompletedWorkout (CoachAnalysis), bypassing the choice.
+  const [justFinished, setJustFinished] = useState<WorkoutSession | null>(null);
+  const [saveRoutineWorkout, setSaveRoutineWorkout] = useState<WorkoutSession | null>(null);
   const aiAssistantRef = useRef<any>(null);
   const isDraggingInfoRef = useRef(false);
 
@@ -373,6 +380,8 @@ export default function App() {
   // step. Each is also still closeable by its own control.
   useBackHandler(showAiOverlay, () => { setShowAiOverlay(false); setActiveAIPrompt(null); setIsAiExpanded(false); });
   useBackHandler(!!latestCompletedWorkout, () => setLatestCompletedWorkout(null));
+  useBackHandler(!!justFinished, () => setJustFinished(null));
+  useBackHandler(!!saveRoutineWorkout, () => setSaveRoutineWorkout(null));
   useBackHandler(showSwipeUpInfo, () => setShowSwipeUpInfo(false));
   useBackHandler(isEditingProfile, () => setIsEditingProfile(false));
 
@@ -403,7 +412,7 @@ export default function App() {
         ...state.activeWorkout,
         endTime: new Date().toISOString()
       };
-      setLatestCompletedWorkout(completed);
+      setJustFinished(completed);   // (w4) show the choice screen, not the AI feedback
       await state.finishWorkout();
     }
   };
@@ -974,6 +983,32 @@ export default function App() {
           ))}
         </nav>
       </div>
+
+      {/* (w4) Post-workout choice — shown after finishing, before any AI feedback. */}
+      {justFinished && (
+        <PostWorkoutChoice
+          workout={justFinished}
+          exercisesList={state.exercises}
+          history={state.history}
+          onSeeFeedback={() => { setLatestCompletedWorkout(justFinished); setJustFinished(null); }}
+          onSaveRoutine={() => setSaveRoutineWorkout(justFinished)}
+          onClose={() => setJustFinished(null)}
+        />
+      )}
+
+      {/* Save as a routine — over the choice (or from History); template only. */}
+      {saveRoutineWorkout && (
+        <SaveAsRoutine
+          session={saveRoutineWorkout}
+          exercisesList={state.exercises}
+          onBack={() => setSaveRoutineWorkout(null)}
+          onSave={(name, exercises) => {
+            state.createTemplate(name, exercises);
+            setSaveRoutineWorkout(null);
+            setJustFinished(null);
+          }}
+        />
+      )}
 
       {/* DETAILED WORKOUT COMPLETED SPLASH CONGRATULATIONS SCENE */}
       {latestCompletedWorkout && (
