@@ -49,8 +49,8 @@ export interface FirestoreErrorInfo {
   };
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
+function buildFirestoreErrorInfo(error: unknown, operationType: OperationType, path: string | null): FirestoreErrorInfo {
+  return {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
       userId: auth?.currentUser?.uid || null,
@@ -61,6 +61,19 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path,
   };
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo = buildFirestoreErrorInfo(error, operationType, path);
   console.error("Firestore Exception Details: ", JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
+}
+
+// Non-throwing variant for live onSnapshot error callbacks. Those fire
+// asynchronously, so throwing there becomes an UNCAUGHT error that disrupts the
+// app — when a collection is denied or unavailable, live sync should just
+// degrade to local-only, not crash. Logs the same diagnostics without throwing.
+export function logFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo = buildFirestoreErrorInfo(error, operationType, path);
+  console.warn("Firestore live sync degraded to local-only: ", JSON.stringify(errInfo));
 }

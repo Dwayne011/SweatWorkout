@@ -15,7 +15,7 @@ import {
 } from "./types";
 import { defaultExercises } from "./defaultExercises";
 import { specialRoutinesExercises, DEFAULT_ROUTINES } from "./specialExercises";
-import { db, auth, isFirebaseReady, handleFirestoreError, OperationType } from "./firebase";
+import { db, auth, isFirebaseReady, handleFirestoreError, logFirestoreError, OperationType } from "./firebase";
 import {
   collection,
   doc,
@@ -245,7 +245,7 @@ export function useWorkoutState() {
       (error) => {
         console.error("Exercises sync error:", error);
         setIsSyncing(false);
-        handleFirestoreError(error, OperationType.LIST, "custom_exercises");
+        logFirestoreError(error, OperationType.LIST, "custom_exercises");
       }
     );
 
@@ -284,7 +284,7 @@ export function useWorkoutState() {
       },
       (error) => {
         console.error("Templates sync error:", error);
-        handleFirestoreError(error, OperationType.LIST, "templates");
+        logFirestoreError(error, OperationType.LIST, "templates");
       }
     );
 
@@ -305,7 +305,7 @@ export function useWorkoutState() {
       },
       (error) => {
         console.error("History sync error:", error);
-        handleFirestoreError(error, OperationType.LIST, "workouts");
+        logFirestoreError(error, OperationType.LIST, "workouts");
       }
     );
 
@@ -325,7 +325,7 @@ export function useWorkoutState() {
       },
       (error) => {
         console.error("Exercise notes sync error:", error);
-        handleFirestoreError(error, OperationType.LIST, "exercise_notes");
+        logFirestoreError(error, OperationType.LIST, "exercise_notes");
       }
     );
 
@@ -342,7 +342,7 @@ export function useWorkoutState() {
       },
       (error) => {
         console.error("Sheets ID cloud sync error:", error);
-        handleFirestoreError(error, OperationType.GET, `user_sheets/${user.uid}`);
+        logFirestoreError(error, OperationType.GET, `user_sheets/${user.uid}`);
       }
     );
 
