@@ -28,7 +28,8 @@ import BottomNav from "./components/BottomNav";
 import { WorkoutSession, UserProfile } from "./types";
 import { getNotificationService } from "./services/notifications";
 import { isFirebaseReady, auth } from "./firebase";
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut } from "firebase/auth";
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
 import {
   Dumbbell,
   History,
@@ -433,23 +434,39 @@ export default function App() {
 
   const handleGoogleLogin = async () => {
     if (!isFirebaseReady || !auth) return;
-    const provider = new GoogleAuthProvider();
-    provider.addScope("https://www.googleapis.com/auth/spreadsheets");
+    const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
+    const isNative = (window as any).Capacitor?.isNativePlatform?.() === true;
     try {
-      const result = await signInWithPopup(auth, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      if (credential?.accessToken) {
-        state.setGoogleAccessToken(credential.accessToken);
+      if (isNative) {
+        // signInWithPopup can't run inside the Android WebView. The native plugin
+        // runs the real Google flow; we then sign the JS SDK in with the returned
+        // credential so auth.currentUser / getIdToken keep working for the backend
+        // token check, and hold the OAuth access token for Sheets sync.
+        // (Requires the native setup in NATIVE_GOOGLE_SIGNIN.md — google-services.json,
+        // SHA fingerprints, the google-services gradle plugin.)
+        const result = await FirebaseAuthentication.signInWithGoogle({ scopes: [SHEETS_SCOPE] });
+        const idToken = result.credential?.idToken;
+        const accessToken = result.credential?.accessToken;
+        if (idToken) await signInWithCredential(auth, GoogleAuthProvider.credential(idToken, accessToken));
+        if (accessToken) state.setGoogleAccessToken(accessToken);
+      } else {
+        const provider = new GoogleAuthProvider();
+        provider.addScope(SHEETS_SCOPE);
+        const result = await signInWithPopup(auth, provider);
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        if (credential?.accessToken) state.setGoogleAccessToken(credential.accessToken);
       }
     } catch (err) {
-      console.error("Popup login failed:", err);
-      alert("Authentication popup failed. Check that third-party cookies or browser popups are allowed for the AI Studio framed preview.");
+      console.error("Google login failed:", err);
+      alert("Google sign-in didn't complete. On the web, allow popups; on the phone, native sign-in needs the Firebase Android setup (see NATIVE_GOOGLE_SIGNIN.md).");
     }
   };
 
   const handleGoogleLogout = async () => {
     if (!isFirebaseReady || !auth) return;
+    const isNative = (window as any).Capacitor?.isNativePlatform?.() === true;
     try {
+      if (isNative) await FirebaseAuthentication.signOut();
       await signOut(auth);
       state.setGoogleAccessToken(null);
     } catch (err) {
