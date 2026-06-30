@@ -4,7 +4,8 @@
 
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
+// vite is a dev-only dependency, imported dynamically in the dev branch below so
+// a production image built with --omit=dev doesn't need it at runtime.
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import { initializeApp, getApps } from "firebase-admin/app";
@@ -57,7 +58,10 @@ const keyConfigured = () =>
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // Cloud Run (and most hosts) inject the port to listen on via $PORT; fall back
+  // to 3000 for local dev. Listening on a hardcoded port makes the container
+  // unreachable on Cloud Run.
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -833,6 +837,7 @@ Respond STRICTLY with a JSON matching the expected schema.`;
 
   // Serve static files / Vite middleware
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
