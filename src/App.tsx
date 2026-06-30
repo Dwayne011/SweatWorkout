@@ -8,6 +8,7 @@ import AIAssistant from "./components/AIAssistant";
 import TabSkeleton from "./components/TabSkeleton";
 import { haptics } from "./lib/haptics";
 import { App as CapApp } from "@capacitor/app";
+import { StatusBar, Style } from "@capacitor/status-bar";
 import { runTopBackHandler, useBackHandler } from "./lib/backStack";
 // Phase 1A: code-split the main tab views — each becomes its own chunk loaded
 // on first visit. ActiveWorkout (the largest) only downloads once a workout starts.
@@ -272,6 +273,12 @@ export default function App() {
 
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("app-theme", theme);
+    }
+
+    // Flip the native status-bar icons to match the theme so they stay legible
+    // (light theme needs dark icons). Capacitor Style.Light = dark content.
+    if ((window as any).Capacitor?.isNativePlatform?.()) {
+      StatusBar.setStyle({ style: theme === "light" ? Style.Light : Style.Dark }).catch(() => {});
     }
   }, [theme]);
 
