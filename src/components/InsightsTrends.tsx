@@ -213,6 +213,7 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
   const [notesStamp, setNotesStamp] = useState(0); // refresh tick
   const [aiNotes, setAiNotes] = useState<{ title: string; body: string }[] | null>(null);
   const [curveExId, setCurveExId] = useState<string | null>(null); // open deep-dive
+  const [strengthQuery, setStrengthQuery] = useState(""); // (h4) movement search
 
   const exName = (id: string) => exercisesList.find((e) => e.id === id)?.name || id;
   const exCategory = (id: string) => exercisesList.find((e) => e.id === id)?.category || "Other";
@@ -297,7 +298,7 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
         (byEx[e.exerciseId] ||= []).push({ date: startMs(s), est1rm: e1, heaviest, weighted });
       })
     );
-    const strength = Object.entries(byEx)
+    const strengthMapped = Object.entries(byEx)
       .map(([id, series]) => {
         series.sort((a, b) => a.date - b.date);
         const vals = series.map((p) => p.est1rm);
@@ -314,13 +315,15 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
           up = dr > 0;
         }
         return {
-          id, name: exName(id), weighted,
+          id, name: exName(id), category: exCategory(id), weighted,
           cur: weighted ? `${Math.round(last)} kg` : `BW×${Math.round(last)}`,
           delta, up, spark: sparkPath(vals.slice(-8)),
         };
       })
-      .sort((a, b) => Number(b.up) - Number(a.up))
-      .slice(0, 6);
+      .sort((a, b) => Number(b.up) - Number(a.up));
+    const strength = strengthMapped.slice(0, 6);
+    // (h4) full list, name-sorted, for the strength search.
+    const strengthAll = [...strengthMapped].sort((a, b) => a.name.localeCompare(b.name));
 
     // coach notes — deterministic observations from the metrics
     const notes: { title: string; body: string }[] = [];
@@ -364,7 +367,7 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
       fallbackReadout = fp.join("\n\n");
     }
 
-    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, strength, notes, exSeries: byEx, exList, fallbackReadout };
+    return { thisWeekVol, wow, streak, perWeek, focus, cal, split, total30, strength, strengthAll, notes, exSeries: byEx, exList, fallbackReadout };
   }, [history, exercisesList, notesStamp]);
 
   const fmtVol = (n: number) => n.toLocaleString("en-US");
@@ -530,6 +533,58 @@ export default function InsightsTrends({ history, exercisesList, onAskGemini }: 
           </>
         )}
       </div>
+
+      {/* 5 — Strength search (h4) — find any movement, open its curve */}
+      {metrics.strengthAll.length > 0 && (() => {
+        const q = strengthQuery.trim().toLowerCase();
+        const results = q ? metrics.strengthAll.filter((s) => s.name.toLowerCase().includes(q)) : metrics.strengthAll;
+        return (
+          <div className="pbw-icard pbw-strsearch">
+            <div className="ssh">
+              <div className="sseyb">Strength over time</div>
+              <div className="sstitle">Find a movement</div>
+              <div className="sssub">Search any exercise to open its full strength curve.</div>
+            </div>
+            <div className="pbw-ssbar">
+              <Stroke><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></Stroke>
+              <input
+                value={strengthQuery}
+                onChange={(e) => setStrengthQuery(e.target.value)}
+                placeholder="Search exercises…"
+                aria-label="Search exercises"
+              />
+              {strengthQuery && (
+                <button className="ssclear" onClick={() => setStrengthQuery("")} aria-label="Clear"><Stroke><path d="M6 6l12 12M18 6L6 18" /></Stroke></button>
+              )}
+            </div>
+            <div className="pbw-sscount">{results.length} {results.length === 1 ? "match" : "matches"}</div>
+            <div className="pbw-sslist">
+              {results.map((s) => (
+                <button key={s.id} className="pbw-ssrow" onClick={() => setCurveExId(s.id)}>
+                  <div className="ssmain">
+                    <div className="ssnm">{s.name}</div>
+                    <div className="sscat">{s.category} · Est. 1RM</div>
+                  </div>
+                  {s.spark && (
+                    <span className="ssspark">
+                      <svg viewBox="0 0 80 28" width="64" height="24" style={{ display: "block" }}>
+                        <path d={s.spark.d} fill="none" stroke={s.up ? "var(--m3-success)" : "var(--m3-primary)"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                  )}
+                  <div className="ssval">
+                    <div className="sscur">{s.cur}</div>
+                    <div className="ssdelta" style={{ color: s.up ? "var(--m3-success)" : "var(--m3-on-dim)" }}>{s.delta}</div>
+                  </div>
+                  <span className="sschev"><ChevR /></span>
+                </button>
+              ))}
+              {results.length === 0 && <div className="pbw-ovfoot">No movement matches "{strengthQuery}".</div>}
+            </div>
+            <div className="pbw-ovfoot">Tap a result to open its strength chart, with the Est. 1RM and Heaviest-set toggle.</div>
+          </div>
+        );
+      })()}
 
       {/* 6 — Muscle split */}
       <div className="pbw-icard">
