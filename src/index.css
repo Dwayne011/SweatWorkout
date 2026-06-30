@@ -1311,6 +1311,7 @@ input[type=number] {
 .pbw-composer .kitchip { display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--m3-outline-q); background: var(--m3-sc); border-radius: 14px; padding: 13px 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--m3-on-var); cursor: pointer; transition: background .12s, color .12s, border-color .12s; }
 .pbw-composer .kitchip.on { background: var(--m3-primary-fill); border-color: transparent; color: #fff; }
 .pbw-composer .kitnote { font-size: 12px; color: var(--m3-on-var); line-height: 1.45; margin-top: 10px; }
+.pbw-composer .kitcount { color: var(--m3-primary); font-weight: 500; }
 .pbw-composer .kitadd { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--m3-primary); font-family: inherit; font-size: 13px; font-weight: 600; padding: 10px 0 2px; cursor: pointer; }
 /* specific-kit checklist */
 .pbw-composer .kitlist { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; padding-top: 10px; }

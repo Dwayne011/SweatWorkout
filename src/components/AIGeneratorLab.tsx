@@ -38,6 +38,23 @@ interface AIGeneratorLabProps {
 const KIT_CHIPS = ["Full gym", "Dumbbells", "Kettlebells", "Bodyweight"];
 const SPECIFIC_KIT = ["Barbell & plates", "Adjustable bench", "Pull-up bar", "Cable machine", "Resistance bands", "Dip station"];
 
+// Each kit choice → the catalogue `equipment` tags it unlocks. Bodyweight is
+// always available (it's your body), so it's added implicitly. "Full gym" means
+// no filter at all. This is what turns the chips into a concrete performable
+// pool the model picks from, rather than a hint it can ignore.
+const EQUIP_MAP: Record<string, string[]> = {
+  "Full gym": ["Barbell", "Bodyweight", "Cables", "Dumbbell", "EZ-Bar", "Machine", "Other", "Weight plate"],
+  Dumbbells: ["Dumbbell"],
+  Kettlebells: ["Other", "Dumbbell"],
+  Bodyweight: ["Bodyweight"],
+  "Barbell & plates": ["Barbell", "Weight plate", "EZ-Bar"],
+  "Adjustable bench": [],
+  "Pull-up bar": ["Bodyweight"],
+  "Cable machine": ["Cables"],
+  "Resistance bands": ["Other"],
+  "Dip station": ["Bodyweight"],
+};
+
 export default function AIGeneratorLab({
   exercisesList,
   historyList,
@@ -95,6 +112,18 @@ export default function AIGeneratorLab({
     return [...base, ...extra].join(", ") || "Bodyweight only";
   };
 
+  // Turn the kit selection into the concrete pool of movements the user can
+  // actually do. Full gym → the whole catalogue; otherwise only exercises whose
+  // equipment is unlocked (bodyweight always counts). The model is handed this
+  // pool, so it can't prescribe a barbell lift to someone with only dumbbells.
+  const performableExercises = () => {
+    if (kit.has("Full gym")) return exercisesList;
+    const allowed = new Set<string>(["Bodyweight"]);
+    [...kit, ...specificKit].forEach((k) => (EQUIP_MAP[k] || []).forEach((e) => allowed.add(e)));
+    const filtered = exercisesList.filter((e) => allowed.has(e.equipment));
+    return filtered.length ? filtered : exercisesList;
+  };
+
   const handleGenerate = async () => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -109,7 +138,7 @@ export default function AIGeneratorLab({
           equipment: equipmentString(),
           includePastHistory,
           feedback,
-          exercisesList,
+          exercisesList: performableExercises(),
           historyList,
           userProfile,
           rpeTarget,
@@ -217,7 +246,10 @@ export default function AIGeneratorLab({
                   );
                 })}
               </div>
-              <p className="kitnote">Pick everything you have. Full gym covers it all, or tap the pieces you own.</p>
+              <p className="kitnote">
+                Pick everything you have. Full gym covers it all, or tap the pieces you own.
+                {!kit.has("Full gym") && <span className="kitcount"> · coaching from {performableExercises().length} movements you can do</span>}
+              </p>
               <button type="button" className="kitadd" onClick={() => setShowKit((s) => !s)}>
                 <Plus className="w-4 h-4" /> Add specific kit
               </button>
