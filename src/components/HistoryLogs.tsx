@@ -227,7 +227,11 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
         </Button>
       </div>
 
-      <AnimatePresence mode="wait" custom={tabDir.current}>
+      {/* initial={false}: don't play the sub-tab slide on the FIRST render. The
+          History tab unmounts/remounts on every visit, so without this the panel
+          slid in on every return (the "history page flash"). Switching between
+          Journals and Insights still animates — that's not the first render. */}
+      <AnimatePresence mode="wait" initial={false} custom={tabDir.current}>
         <motion.div
           key={viewMode}
           custom={tabDir.current}
