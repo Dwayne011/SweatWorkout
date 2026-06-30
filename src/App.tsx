@@ -792,19 +792,22 @@ export default function App() {
           <section className="space-y-6">
 
             {/* TAB SCREENS CONDITIONAL PRESENTATION */}
-            {/* (o3/o5) Fade-through, fixed: ONLY the incoming page animates
-                (opacity + a small scale, transform/opacity only). The outgoing
-                page is removed instantly — no exit, no popLayout. popLayout used
-                to position the exiting page ABSOLUTE and paint it on top, so for
-                the first ~half of the cross-fade you saw the old page sitting on
-                top, fading — that was the "previous-page flash". With nothing
-                exiting, there's no old page to flash; the new one just fades up
-                over the (consistent) app background. */}
+            {/* (o3/o5) Tab transition, flash-free. Two things caused flashes and
+                both are gone:
+                 1. The OUTGOING page used to animate out under popLayout, which
+                    paints it position:absolute ON TOP — you saw the old page
+                    sitting over the new one, fading. Now nothing exits (no exit,
+                    no popLayout): the old page is removed instantly.
+                 2. The incoming page used to fade in from opacity 0, so for a
+                    frame you saw the plain app background through it. Now it's
+                    OPAQUE from its first paint — only a tiny 0.98→1 scale settle,
+                    no opacity animation — so it covers where the old page was
+                    with no see-through gap. Transform-only, ~190ms. */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ scale: 0.98 }}
+                animate={{ scale: 1 }}
                 transition={{ duration: 0.19, ease: [0.4, 0, 0.2, 1] }}
               >
                 {/* Always render ActiveWorkout so background timers and service worker listeners continue */}
