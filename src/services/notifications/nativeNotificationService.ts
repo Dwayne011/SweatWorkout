@@ -122,6 +122,10 @@ export class NativeNotificationService implements NotificationService {
     void this.ensureListener();
     return () => {
       this.handlers.delete(handler);
+      // (o7) Tear the native plugin listener down once nobody's subscribed, so
+      // it doesn't dangle for the app's lifetime; ensureListener re-arms it if a
+      // new subscriber arrives.
+      if (this.handlers.size === 0) void this.teardownListener();
     };
   }
 
@@ -134,6 +138,14 @@ export class NativeNotificationService implements NotificationService {
       });
     } catch (e) {
       console.warn("[notifications] native addListener failed:", e);
+    }
+  }
+
+  private async teardownListener(): Promise<void> {
+    const handle = this.listenerHandle;
+    this.listenerHandle = undefined;
+    if (handle) {
+      try { await handle.remove(); } catch (e) { /* listener already gone */ }
     }
   }
 
