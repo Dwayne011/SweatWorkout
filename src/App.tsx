@@ -7,6 +7,8 @@ import { useWorkoutState } from "./useWorkoutState";
 import AIAssistant from "./components/AIAssistant";
 import TabSkeleton from "./components/TabSkeleton";
 import { haptics } from "./lib/haptics";
+import { App as CapApp } from "@capacitor/app";
+import { runTopBackHandler, useBackHandler } from "./lib/backStack";
 // Phase 1A: code-split the main tab views — each becomes its own chunk loaded
 // on first visit. ActiveWorkout (the largest) only downloads once a workout starts.
 const ActiveWorkout = lazy(() => import("./components/ActiveWorkout"));
@@ -50,6 +52,8 @@ import { Button } from "./components/ui/Button";
 
 import FlexingArm from "./components/FlexingArm";
 import ExerciseGuideModal from "./components/ExerciseGuideModal";
+
+type TabKey = "workouts" | "history" | "templates" | "exercises" | "account";
 
 function WorkoutBanner({ activeWorkout, setActiveTab, activeTab, exercises, restTimerTarget, showSwipeUpInfo, setShowSwipeUpInfo }: any) {
   const [elapsed, setElapsed] = React.useState(0);
@@ -213,17 +217,22 @@ export default function App() {
     return "dark";
   });
 
-  const [activeTab, setActiveTab] = useState<"workouts" | "history" | "templates" | "exercises" | "account">("workouts");
-  // Page-transition direction: tracks which way the slide goes so the incoming
-  // page enters from the correct side. Tap-driven nav routes through goToTab.
-  const TAB_ORDER = ["workouts", "history", "templates", "exercises", "account"] as const;
-  const navDir = useRef(0);
-  const goToTab = (key: typeof activeTab) => {
+  const [activeTab, setActiveTab] = useState<TabKey>("workouts");
+  const goToTab = (key: TabKey) => {
     if (key === activeTab) return;
-    navDir.current = TAB_ORDER.indexOf(key) > TAB_ORDER.indexOf(activeTab) ? 1 : -1;
     haptics.pageCommit();
     setActiveTab(key);
   };
+
+  // Back stack (o4): the tabs the user has stepped through. Forward navigation
+  // pushes (deduped against the top); hardware/web back pops to the previous tab.
+  const tabStack = useRef<TabKey[]>(["workouts"]);
+  const suppressTabPush = useRef(false);
+  useEffect(() => {
+    if (suppressTabPush.current) { suppressTabPush.current = false; return; }
+    const s = tabStack.current;
+    if (s[s.length - 1] !== activeTab) s.push(activeTab);
+  }, [activeTab]);
   const [latestCompletedWorkout, setLatestCompletedWorkout] = useState<WorkoutSession | null>(null);
   const aiAssistantRef = useRef<any>(null);
   const isDraggingInfoRef = useRef(false);
@@ -271,30 +280,73 @@ export default function App() {
     }
   }, [activeTab]);
 
-  // Intercept native hardware back key navigation controls
-  useEffect(() => {
-    if (window.history.state === null || !window.history.state.root) {
-      window.history.replaceState({ activeTab, root: true }, "");
+  // (o4) One back action for everything: Android hardware back (@capacitor/app)
+  // and web back both run this. Close the topmost registered overlay first, then
+  // step the tab back-stack to the PREVIOUS tab, and only exit at the root.
+  const handleGlobalBack = (): boolean => {
+    if (runTopBackHandler()) return true;
+    const s = tabStack.current;
+    if (s.length > 1) {
+      s.pop();
+      suppressTabPush.current = true;
+      setActiveTab(s[s.length - 1]);
+      return true;
     }
+    if (activeTab !== "workouts") {
+      suppressTabPush.current = true;
+      tabStack.current = ["workouts"];
+      setActiveTab("workouts");
+      return true;
+    }
+    return false;
+  };
+  const backRef = useRef(handleGlobalBack);
+  backRef.current = handleGlobalBack;
 
-    const handlePopState = (event: PopStateEvent) => {
-      // Re-push a history entry so physical back button click is intercepted next cycle
-      window.history.pushState({ activeTab }, "");
+  // Android hardware back → the same logic; exit only at the root.
+  useEffect(() => {
+    let handle: { remove: () => void } | undefined;
+    CapApp.addListener("backButton", () => {
+      if (!backRef.current()) CapApp.exitApp();
+    })
+      .then((h) => { handle = h; })
+      .catch(() => {});
+    return () => { handle?.remove(); };
+  }, []);
 
-      // Move backward to primary layouts workflows
-      if (activeTab !== "workouts") {
-        if (typeof navigator !== "undefined" && navigator.vibrate) {
-          navigator.vibrate(10);
-        }
-        setActiveTab("workouts");
-      }
+  // Web back (browser/PWA only): keep one sentinel entry armed and route each
+  // back through the same logic, re-arming after. At the root it stays in the
+  // app. Skipped on native, where @capacitor/app's backButton is the one source
+  // (otherwise hardware back would fire here too and pop twice).
+  useEffect(() => {
+    if ((window as any).Capacitor?.isNativePlatform?.()) return;
+    window.history.pushState({ pbnav: true }, "");
+    const onPop = () => {
+      backRef.current();
+      window.history.pushState({ pbnav: true }, "");
     };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
-    window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
+  // (o5) Warm the lazy tab chunks on idle so switching tabs never triggers a
+  // chunk fetch mid-transition (which made the fade stutter).
+  useEffect(() => {
+    const prefetch = () => {
+      import("./components/ActiveWorkout");
+      import("./components/TemplatesList");
+      import("./components/HistoryLogs");
+      import("./components/ExerciseLibrary");
+      import("./components/AccountSettings");
     };
-  }, [activeTab]);
+    const w = window as any;
+    if (typeof w.requestIdleCallback === "function") {
+      const id = w.requestIdleCallback(prefetch, { timeout: 3000 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(prefetch, 1500);
+    return () => clearTimeout(t);
+  }, []);
 
   const [isCreatingSheet, setIsCreatingSheet] = useState(false);
   const [isSyncingAllHistory, setIsSyncingAllHistory] = useState(false);
@@ -316,6 +368,13 @@ export default function App() {
   const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [activeAIPrompt, setActiveAIPrompt] = useState<string | null>(null);
   const [showAiOverlay, setShowAiOverlay] = useState(false);
+
+  // (o4) Back closes whichever of these is open, topmost first, before any tab
+  // step. Each is also still closeable by its own control.
+  useBackHandler(showAiOverlay, () => { setShowAiOverlay(false); setActiveAIPrompt(null); setIsAiExpanded(false); });
+  useBackHandler(!!latestCompletedWorkout, () => setLatestCompletedWorkout(null));
+  useBackHandler(showSwipeUpInfo, () => setShowSwipeUpInfo(false));
+  useBackHandler(isEditingProfile, () => setIsEditingProfile(false));
 
   useEffect(() => {
     // Elegant, smooth programmatic scroll to top upon switching tabs to avoid harsh layout snapping
@@ -713,19 +772,16 @@ export default function App() {
           <section className="space-y-6">
 
             {/* TAB SCREENS CONDITIONAL PRESENTATION */}
-            <AnimatePresence mode="wait" custom={navDir.current}>
+            {/* (o3/o5) Material fade-through: opacity + a small scale, transform
+                and opacity only. popLayout (not mode="wait") lets the incoming
+                page fade in as the outgoing fades out without a layout jump. */}
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeTab}
-                custom={navDir.current}
-                variants={{
-                  enter: (d: number) => ({ opacity: 0, x: d >= 0 ? 40 : -40 }),
-                  center: { opacity: 1, x: 0 },
-                  exit: (d: number) => ({ opacity: 0, x: d >= 0 ? -40 : 40 }),
-                }}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ type: "spring", stiffness: 360, damping: 34, mass: 0.85 }}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.19, ease: [0.4, 0, 0.2, 1] }}
               >
                 {/* Always render ActiveWorkout so background timers and service worker listeners continue */}
                 <WorkoutTabSegment activeTab={activeTab}>
@@ -1096,32 +1152,15 @@ export default function App() {
             {/* Backlight Ambient Glow Aura */}
             <div className="absolute w-[95%] max-w-2xl md:max-w-4xl lg:max-w-5xl h-[88vh] max-h-[760px] bg-gradient-to-r from-indigo-500/30 via-violet-500/25 to-purple-500/30 rounded-3xl blur-3xl opacity-80 pointer-events-none animate-pulse" />
 
-            {/* Glowing Gemini Card Container */}
+            {/* Glowing Gemini Card Container. (o3) Static shadow — the breathing
+                glow is the blurred aura above (opacity animate-pulse), so there's
+                no infinite box-shadow repaint loop. */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                boxShadow: [
-                  "0 0 25px rgba(99, 102, 241, 0.35), 0 0 12px rgba(168, 85, 247, 0.25), 0 0 0 1px rgba(99, 102, 241, 0.1)",
-                  "0 0 45px rgba(139, 92, 246, 0.65), 0 0 25px rgba(168, 85, 247, 0.50), 0 0 0 1.5px rgba(139, 92, 246, 0.35)",
-                  "0 0 25px rgba(99, 102, 241, 0.35), 0 0 12px rgba(168, 85, 247, 0.25), 0 0 0 1px rgba(99, 102, 241, 0.1)"
-                ]
-              }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 30 }}
-              transition={{
-                boxShadow: {
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                },
-                default: {
-                  type: "spring",
-                  damping: 24,
-                  stiffness: 280
-                }
-              }}
+              transition={{ type: "spring", damping: 24, stiffness: 280 }}
+              style={{ boxShadow: "0 0 35px rgba(139, 92, 246, 0.35), 0 0 0 1px rgba(99, 102, 241, 0.15)" }}
               className="relative w-full max-w-2xl md:max-w-4xl lg:max-w-5xl h-[88vh] max-h-[760px] bg-white dark:bg-black rounded-3xl overflow-hidden flex flex-col border border-indigo-500/20 z-10"
             >
               {/* Header inside of Overlay with Gemini animation look */}

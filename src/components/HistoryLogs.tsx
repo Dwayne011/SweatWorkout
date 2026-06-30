@@ -11,6 +11,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import InsightsTrends from "./InsightsTrends";
 import { Button } from "./ui/Button";
 import WorkoutOverviewPopout from "./WorkoutOverviewPopout";
+import { useBackHandler } from "../lib/backStack";
 
 interface HistoryLogsProps {
   history: WorkoutSession[];
@@ -29,6 +30,7 @@ const ISpark = () => (
 export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAskGemini, onViewAnalysis }: HistoryLogsProps) {
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [popoutLog, setPopoutLog] = useState<WorkoutSession | null>(null); // overview popout
+  useBackHandler(!!popoutLog, () => setPopoutLog(null)); // (o4) back closes the popout
   const [viewMode, setViewMode] = useState<"logs" | "analytics">("logs");
   const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
   // Per-card AI footer state. The busy->ready transition is driven by the

@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { haptics } from "../lib/haptics";
+import { useBackHandler } from "../lib/backStack";
 import {
   Play,
   Check,
@@ -924,6 +925,12 @@ export default function ActiveWorkout({
   const [durationPickerState, setDurationPickerState] = useState<{ exerciseId: string; setIndex: number; initialSeconds: number } | null>(null);
   const [pickerHours, setPickerHours] = useState<number>(0);
   const [pickerMinutes, setPickerMinutes] = useState<number>(0);
+
+  // (o4) Hardware/web back closes these in-screen overlays before leaving the
+  // workout. Topmost-open wins (the registry is LIFO).
+  useBackHandler(showAddModal, () => setShowAddModal(false));
+  useBackHandler(showDiscardConfirm, () => setShowDiscardConfirm(false));
+  useBackHandler(!!durationPickerState, () => setDurationPickerState(null));
   const [pickerSeconds, setPickerSeconds] = useState<number>(0);
 
   const hoursArray = Array.from({ length: 24 }, (_, i) => i);

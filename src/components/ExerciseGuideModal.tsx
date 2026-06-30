@@ -12,6 +12,7 @@ import React, { useState, useEffect } from "react";
 import { Exercise } from "../types";
 import { motion, AnimatePresence, useReducedMotion, useDragControls } from "motion/react";
 import { Button } from "./ui/Button";
+import { useBackHandler } from "../lib/backStack";
 
 // Register helper for dispatching global events
 export function openExerciseGuide(exercise: Exercise) {
@@ -92,6 +93,7 @@ export default function ExerciseGuideModal() {
   const [open, setOpen] = useState(false);
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const reduce = useReducedMotion();
+  useBackHandler(open, () => setOpen(false)); // (o4) back closes the guide sheet
   const dragControls = useDragControls();
 
   useEffect(() => {
