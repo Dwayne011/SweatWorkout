@@ -177,31 +177,16 @@ html, body {
   display: none !important;
 }
 
-/* Gemini Neural Fluid ambient backgrounds and glows */
-@keyframes fluid-glow {
-  0% {
-    transform: translate(0px, 0px) scale(1) rotate(0deg);
-  }
-  33% {
-    transform: translate(30px, -40px) scale(1.15) rotate(120deg);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9) rotate(240deg);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1) rotate(360deg);
-  }
-}
-
+/* Gemini Neural Fluid ambient backgrounds and glows. The gradients are kept as
+   a static backdrop; the old infinite fluid-glow loop (scale/rotate/translate on
+   big gradient layers) was a constant GPU compositor cost every frame the app sat
+   idle, so it's dropped everywhere — not just on the device. */
 .gemini-bg-glow-1 {
   background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(0,0,0,0) 100%);
-  animation: fluid-glow 15s infinite alternate ease-in-out;
 }
 
 .gemini-bg-glow-2 {
   background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(59, 130, 246, 0.04) 60%, rgba(0,0,0,0) 100%);
-  animation: fluid-glow 20s infinite alternate-reverse ease-in-out;
-  animation-delay: -5s;
 }
 
 /* ============================================================
@@ -1175,19 +1160,8 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-setrow.active .set-check span { background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); font-family: var(--m3-mono-font); font-size: var(--m3-label-sm); font-weight: 500; padding: 4px 8px; border-radius: 999px; }
 .pbw-setrow.pending .set-check { border: 2px solid var(--m3-outline-q); width: 20px; height: 20px; }
 
-/* The fluid-glow loop (scale/rotate/translate on big blurred gradients) is a
-   constant GPU compositor cost. Keep the static gradient but drop the animation
-   on the Android WebView and for anyone who prefers reduced motion. */
-.native-android .gemini-bg-glow-1,
-.native-android .gemini-bg-glow-2 {
-  animation: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .gemini-bg-glow-1,
-  .gemini-bg-glow-2 {
-    animation: none;
-  }
-}
+/* (The fluid-glow loop these blocks used to disable is now removed at source —
+   the gemini-bg-glow gradients are static everywhere, so no override is needed.) */
 
 /* 1D: backdrop-blur re-blurs everything behind an element every frame it
    composites — the dominant GPU cost on the Android WebView with this much

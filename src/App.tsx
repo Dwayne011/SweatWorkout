@@ -2,7 +2,7 @@
 // OS support: All (Web, Android, iOS)
 // Description: Main React App component providing routing tabs, sheets/auth popups, and layout structures.
 
-import React, { useState, useRef, useEffect, lazy, Suspense } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useWorkoutState } from "./useWorkoutState";
 import AIAssistant from "./components/AIAssistant";
 import TabSkeleton from "./components/TabSkeleton";
@@ -10,13 +10,15 @@ import { haptics } from "./lib/haptics";
 import { App as CapApp } from "@capacitor/app";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { runTopBackHandler, useBackHandler } from "./lib/backStack";
-// Phase 1A: code-split the main tab views — each becomes its own chunk loaded
-// on first visit. ActiveWorkout (the largest) only downloads once a workout starts.
-const ActiveWorkout = lazy(() => import("./components/ActiveWorkout"));
-const TemplatesList = lazy(() => import("./components/TemplatesList"));
-const HistoryLogs = lazy(() => import("./components/HistoryLogs"));
-const ExerciseLibrary = lazy(() => import("./components/ExerciseLibrary"));
-const AccountSettings = lazy(() => import("./components/AccountSettings"));
+// The five core tab views are imported EAGERLY (not React.lazy): switching tabs
+// can then never hit a Suspense fallback mid-transition — that blank spinner
+// frame was the "previous-page flash" under throttling. For a 5-tab app the
+// slightly larger initial bundle is the right trade for a flash-free swap.
+import ActiveWorkout from "./components/ActiveWorkout";
+import TemplatesList from "./components/TemplatesList";
+import HistoryLogs from "./components/HistoryLogs";
+import ExerciseLibrary from "./components/ExerciseLibrary";
+import AccountSettings from "./components/AccountSettings";
 import WorkoutSplashScene from "./components/WorkoutSplashScene";
 import CoachAnalysis from "./components/CoachAnalysis";
 import PostWorkoutChoice from "./components/PostWorkoutChoice";
@@ -345,24 +347,8 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // (o5) Warm the lazy tab chunks on idle so switching tabs never triggers a
-  // chunk fetch mid-transition (which made the fade stutter).
-  useEffect(() => {
-    const prefetch = () => {
-      import("./components/ActiveWorkout");
-      import("./components/TemplatesList");
-      import("./components/HistoryLogs");
-      import("./components/ExerciseLibrary");
-      import("./components/AccountSettings");
-    };
-    const w = window as any;
-    if (typeof w.requestIdleCallback === "function") {
-      const id = w.requestIdleCallback(prefetch, { timeout: 3000 });
-      return () => w.cancelIdleCallback?.(id);
-    }
-    const t = setTimeout(prefetch, 1500);
-    return () => clearTimeout(t);
-  }, []);
+  // (o5) The tab chunks are eager-imported now, so there's nothing to prefetch —
+  // they're already in the main bundle and a tab switch never fetches a chunk.
 
   const [isCreatingSheet, setIsCreatingSheet] = useState(false);
   const [isSyncingAllHistory, setIsSyncingAllHistory] = useState(false);
