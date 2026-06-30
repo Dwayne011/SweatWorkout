@@ -503,6 +503,20 @@ html.light { background-color: #fcfaff; }
 .pbw-rt .ctlbtn { flex: 1; background: rgba(11,9,16,.72); color: #fff; border: none; font-family: var(--m3-mono-font); font-weight: 500; border-radius: 999px; padding: 11px; font-size: 14px; cursor: pointer; }
 .pbw-rt .skip { flex: 1; background: #ece5f6; color: #1d1828; border: none; font-weight: 500; border-radius: 999px; padding: 11px; font-size: 14px; cursor: pointer; font-family: var(--m3-display-font); }
 .pbw-sessbtns { display: flex; gap: 10px; }
+/* (w3) Pinned Finish/Discard footer — always reachable, sits above the bottom
+   nav with safe-area padding. Portalled to body, shown only on the workouts tab. */
+.pbw-sessftr {
+  position: fixed; left: 0; right: 0;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 46;
+  display: flex; gap: 10px;
+  max-width: 56rem; margin: 0 auto;
+  padding: 10px 16px calc(10px);
+}
+.pbw-sessftr::before {
+  content: ""; position: absolute; inset: -18px 0 -8px 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(to top, var(--m3-bg) 36%, transparent);
+}
 .pbw-sbtn { flex: 1; border: none; border-radius: 999px; padding: 11px 14px; font-weight: 500; font-size: 14px; font-family: var(--m3-display-font); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: transform .14s cubic-bezier(.34,1.56,.64,1), filter .14s ease; -webkit-tap-highlight-color: transparent; }
 .pbw-sbtn:active { transform: scale(.94); filter: brightness(.9); }
 .pbw-sbtn svg { width: 17px; height: 17px; flex: none; }

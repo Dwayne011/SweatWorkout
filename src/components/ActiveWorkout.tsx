@@ -543,259 +543,6 @@ function ActiveRestCountdown({ target }: ActiveRestCountdownProps) {
   return <span className="font-extrabold">{formatTimerTime(seconds)}</span>;
 }
 
-interface DiscardSwipeSliderProps {
-  onSwipeLeft: () => void;
-  onSwipeRight: () => void;
-}
-
-function DiscardSwipeSlider({ onSwipeLeft, onSwipeRight }: DiscardSwipeSliderProps) {
-  const x = useMotionValue(0);
-  const lastVibratedRef = useRef<"left" | "right" | "neutral" | "none">("none");
-
-  // Track actual dark mode state dynamically and subscribe to changes
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const checkDark = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-    };
-    checkDark();
-    const observer = new MutationObserver(checkDark);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  // Transform ambient track background based on drag X coordinate
-  const containerBg = useTransform(x, [-110, 0, 110], [
-    "rgba(244, 63, 94, 0.14)",
-    isDarkMode ? "rgba(255, 255, 255, 0.03)" : "rgba(161, 161, 170, 0.08)",
-    "rgba(16, 185, 129, 0.14)"
-  ]);
-
-  // Transform tracking radial glow directly under the slider handle
-  const radialGlow = useTransform(x, (val) => {
-    const percent = 50 + (val / 220) * 100;
-    let r = 99, g = 102, b = 241;
-    let opacity = 0.22;
-    if (val < 0) {
-      const t = Math.min(1, Math.abs(val) / 100);
-      r = Math.round(99 + (244 - 99) * t);
-      g = Math.round(102 + (63 - 102) * t);
-      b = Math.round(241 + (94 - 241) * t);
-      opacity = 0.22 + 0.48 * t;
-    } else if (val > 0) {
-      const t = Math.min(1, val / 100);
-      r = Math.round(99 + (16 - 99) * t);
-      g = Math.round(102 + (185 - 102) * t);
-      b = Math.round(241 + (129 - 241) * t);
-      opacity = 0.22 + 0.48 * t;
-    }
-    return `radial-gradient(circle 130px at ${percent}% 50%, rgba(${r}, ${g}, ${b}, ${opacity}) 0%, rgba(${r}, ${g}, ${b}, 0) 100%)`;
-  });
-
-  // Transform handle capsule background, border and glow smoothly
-  const handleBg = useTransform(x, (val) => {
-    if (val === 0) {
-      return isDarkMode ? "rgba(39, 39, 42, 0.92)" : "rgba(255, 255, 255, 0.96)";
-    }
-    let r = 99, g = 102, b = 241;
-    if (val < 0) {
-      const t = Math.min(1, Math.abs(val) / 100);
-      r = Math.round(99 + (244 - 99) * t);
-      g = Math.round(102 + (63 - 102) * t);
-      b = Math.round(241 + (94 - 241) * t);
-    } else {
-      const t = Math.min(1, val / 100);
-      r = Math.round(99 + (16 - 99) * t);
-      g = Math.round(102 + (185 - 102) * t);
-      b = Math.round(241 + (129 - 241) * t);
-    }
-    return `rgba(${r}, ${g}, ${b}, 0.22)`;
-  });
-
-  const handleBorder = useTransform(x, (val) => {
-    if (val === 0) {
-      return isDarkMode ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)";
-    }
-    let r = 99, g = 102, b = 241;
-    let alpha = 0.15;
-    if (val < 0) {
-      const t = Math.min(1, Math.abs(val) / 100);
-      r = Math.round(99 + (244 - 99) * t);
-      g = Math.round(102 + (63 - 102) * t);
-      b = Math.round(241 + (94 - 241) * t);
-      alpha = 0.15 + 0.35 * t;
-    } else if (val > 0) {
-      const t = Math.min(1, val / 100);
-      r = Math.round(99 + (16 - 99) * t);
-      g = Math.round(102 + (185 - 102) * t);
-      b = Math.round(241 + (129 - 241) * t);
-      alpha = 0.15 + 0.35 * t;
-    }
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  });
-
-  const handleShadow = useTransform(x, (val) => {
-    if (val === 0) return isDarkMode ? "0 4px 12px rgba(0, 0, 0, 0.5)" : "0 4px 6px -1px rgba(0, 0, 0, 0.08)";
-    let r = 99, g = 102, b = 241;
-    if (val < 0) {
-      const t = Math.min(1, Math.abs(val) / 100);
-      r = Math.round(99 + (244 - 99) * t);
-      g = Math.round(102 + (63 - 102) * t);
-      b = Math.round(241 + (94 - 241) * t);
-    } else {
-      const t = Math.min(1, val / 100);
-      r = Math.round(99 + (16 - 99) * t);
-      g = Math.round(102 + (185 - 102) * t);
-      b = Math.round(241 + (129 - 241) * t);
-    }
-    const intensity = Math.min(0.45, Math.abs(val) / 110 * 0.5);
-    return `0 0 16px rgba(${r}, ${g}, ${b}, ${intensity})`;
-  });
-
-  // Smooth responsive transforms for text opacity: fade opposite instantly and fade target before handle reaches it
-  const leftOpacity = useTransform(x, [-50, -10, 0, 10], [0, 1, 1, 0]);
-  const leftScale = useTransform(x, [-110, 0], [1.12, 1]);
-
-  const rightOpacity = useTransform(x, [-10, 0, 10, 50], [0, 1, 1, 0]);
-  const rightScale = useTransform(x, [0, 110], [1, 1.12]);
-
-  // Pill index bar indicator background color transform inside key/discard
-  const barColor0 = useTransform(x, (val) => {
-    let r = 99, g = 102, b = 241;
-    let alpha = 0.4;
-    if (val < 0) {
-      const t = Math.min(1, Math.abs(val) / 100);
-      r = Math.round(99 + (244 - 99) * t);
-      g = Math.round(102 + (63 - 102) * t);
-      b = Math.round(241 + (94 - 241) * t);
-      alpha = 0.4 + 0.6 * t;
-    } else if (val > 0) {
-      const t = Math.min(1, val / 100);
-      r = Math.round(99 + (16 - 99) * t);
-      g = Math.round(102 + (185 - 102) * t);
-      b = Math.round(241 + (129 - 241) * t);
-      alpha = 0.4 + 0.6 * t;
-    }
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  });
-
-  const barColor1 = useTransform(x, (val) => {
-    let r = 99, g = 102, b = 241;
-    if (val < 0) {
-      const t = Math.min(1, Math.abs(val) / 100);
-      r = Math.round(99 + (244 - 99) * t);
-      g = Math.round(102 + (63 - 102) * t);
-      b = Math.round(241 + (94 - 241) * t);
-    } else if (val > 0) {
-      const t = Math.min(1, val / 100);
-      r = Math.round(99 + (16 - 99) * t);
-      g = Math.round(102 + (185 - 102) * t);
-      b = Math.round(241 + (129 - 241) * t);
-    }
-    return `rgb(${r}, ${g}, ${b})`;
-  });
-
-  return (
-    <motion.div 
-      className="w-full h-14 rounded-2xl relative flex items-center justify-between px-4 border border-gray-200/80 dark:border-white/5 overflow-hidden shadow-inner cursor-pointer select-none"
-      style={{ backgroundColor: containerBg }}
-    >
-      {/* Centered organic color-shifting radial glow trailing/tracking under handle */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none opacity-50 mix-blend-color-dodge"
-        style={{ background: radialGlow }}
-      />
-
-      {/* Swipe Left Hint (Discard) - Moved further left and shrunk font size slightly with extra tracking */}
-      <motion.div 
-        className="absolute left-[20px] flex items-center select-none z-10 pointer-events-none"
-        style={{
-          opacity: leftOpacity,
-          scale: leftScale,
-        }}
-      >
-        <span className="text-[9px] font-mono font-black tracking-[0.12em] text-rose-500/75 dark:text-rose-450/80 uppercase">
-          ← Discard
-        </span>
-      </motion.div>
-      
-      {/* Swipe Right Hint (Continue Workout) - Moved further right and shrunk font size slightly with extra tracking */}
-      <motion.div 
-        className="absolute right-[11px] flex items-center select-none z-10 pointer-events-none"
-        style={{
-          opacity: rightOpacity,
-          scale: rightScale,
-        }}
-      >
-        <span className="text-[9px] font-mono font-black tracking-[0.12em] text-emerald-500/75 dark:text-emerald-400/80 uppercase">
-          Continue →
-        </span>
-      </motion.div>
-
-      {/* Centered Draggable Handle Capsule - Shrunk to w-14 and h-10 for superior breathing room */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: -110, right: 110 }}
-          dragElastic={0.12}
-          dragSnapToOrigin={true}
-          style={{
-            x,
-            backgroundColor: handleBg,
-            borderColor: handleBorder,
-            boxShadow: handleShadow,
-          }}
-          onDrag={(e, info) => {
-            const currentX = x.get();
-            // Premium incremental haptic step-triggers as they slide closer to boundaries
-            if (currentX <= -70) {
-              if (lastVibratedRef.current !== "left") {
-                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-                lastVibratedRef.current = "left";
-              }
-            } else if (currentX >= 70) {
-              if (lastVibratedRef.current !== "right") {
-                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-                lastVibratedRef.current = "right";
-              }
-            } else {
-              if (Math.abs(currentX) < 15) {
-                if (lastVibratedRef.current !== "neutral") {
-                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(3);
-                  lastVibratedRef.current = "neutral";
-                }
-              } else if (lastVibratedRef.current !== "none") {
-                lastVibratedRef.current = "none";
-              }
-            }
-          }}
-          onDragEnd={(e, info) => {
-            const currentX = x.get();
-            lastVibratedRef.current = "none";
-            
-            if (currentX < -70) {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([15, 55]);
-              onSwipeLeft(); // Left boundary reached -> trigger Discard
-            } else if (currentX > 70) {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
-              onSwipeRight(); // Right boundary reached -> trigger Keep
-            }
-          }}
-          className="pointer-events-auto w-14 h-10 rounded-xl border flex items-center justify-center cursor-grab active:cursor-grabbing backdrop-blur-md select-none shadow-sm"
-        >
-          {/* Futuristic needle bar indicator pins */}
-          <div className="flex items-center space-x-1 rounded-lg">
-            <motion.span className="w-[3px] h-3 rounded-full" style={{ backgroundColor: barColor0 }} />
-            <motion.span className="w-[3px] h-4.5 rounded-full" style={{ backgroundColor: barColor1 }} />
-            <motion.span className="w-[3px] h-3 rounded-full" style={{ backgroundColor: barColor0 }} />
-          </div>
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
-
 function formatDurationMMSS(totalSeconds: number): string {
   if (!totalSeconds) return "";
   const m = Math.floor(totalSeconds / 60);
@@ -900,6 +647,10 @@ export default function ActiveWorkout({
 }: ActiveWorkoutProps) {
   const [showNoCompletedSetsModal, setShowNoCompletedSetsModal] = useState(false);
   const [emptyWorkoutAction, setEmptyWorkoutAction] = useState<"continue" | "discard">("continue");
+  // (w2) Finish-with-some-uncompleted-sets sheet.
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
+  const [incompleteCount, setIncompleteCount] = useState(0);
+  const finishPendingRef = useRef(false);
   const [draggingSetId, setDraggingSetId] = useState<string | null>(null);
   // Tracks whether the current swipe is past the delete threshold, so the
   // threshold-cross haptic fires exactly once per crossing (not every frame).
@@ -931,6 +682,8 @@ export default function ActiveWorkout({
   useBackHandler(showAddModal, () => setShowAddModal(false));
   useBackHandler(showDiscardConfirm, () => setShowDiscardConfirm(false));
   useBackHandler(!!durationPickerState, () => setDurationPickerState(null));
+  useBackHandler(showNoCompletedSetsModal, () => setShowNoCompletedSetsModal(false));
+  useBackHandler(showIncompleteModal, () => setShowIncompleteModal(false));
   const [pickerSeconds, setPickerSeconds] = useState<number>(0);
 
   const hoursArray = Array.from({ length: 24 }, (_, i) => i);
@@ -1058,13 +811,46 @@ export default function ActiveWorkout({
   };
 
   const handleFinishClick = () => {
-    const hasCompletedSet = session.exercises.some((ex) => ex.sets.some((s) => s.isCompleted));
-    if (!hasCompletedSet) {
-      setShowNoCompletedSetsModal(true);
-    } else {
+    let completed = 0;
+    let incomplete = 0;
+    session.exercises.forEach((ex) => ex.sets.forEach((s) => { if (s.isCompleted) completed++; else incomplete++; }));
+    if (completed === 0) {
+      setShowNoCompletedSetsModal(true);   // (w1) nothing logged
+      return;
+    }
+    if (incomplete > 0) {
+      setIncompleteCount(incomplete);       // (w2) some sets left unticked
+      setShowIncompleteModal(true);
+      return;
+    }
+    haptics.finishWorkout();
+    onFinish();
+  };
+
+  // (w2) "Mark done and finish" ticks every incomplete set, then finishes once
+  // the state reflects it (finishWorkout keeps only completed sets).
+  const markAllDoneAndFinish = () => {
+    setShowIncompleteModal(false);
+    finishPendingRef.current = true;
+    session.exercises.forEach((ex) =>
+      ex.sets.forEach((s, si) => { if (!s.isCompleted) onUpdateSet(ex.exerciseId, si, { isCompleted: true }); })
+    );
+  };
+  useEffect(() => {
+    if (!finishPendingRef.current) return;
+    const anyIncomplete = session.exercises.some((ex) => ex.sets.some((s) => !s.isCompleted));
+    if (!anyIncomplete) {
+      finishPendingRef.current = false;
       haptics.finishWorkout();
       onFinish();
     }
+  }, [session, onFinish]);
+
+  // (w2) "Discard them" just finishes — finishWorkout drops the unticked sets.
+  const discardIncompleteAndFinish = () => {
+    setShowIncompleteModal(false);
+    haptics.finishWorkout();
+    onFinish();
   };
 
   const handleSaveCustomInline = async (e: React.FormEvent) => {
@@ -1437,18 +1223,7 @@ export default function ActiveWorkout({
             </svg>
           </>
         )}
-        <div className="pbw-sessbtns">
-          <Button
-            variant="tonal"
-            onClick={() => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10); setShowDiscardConfirm(true); }}
-            className="pbw-sbtn discard"
-          >
-            <Trash2 /> Discard
-          </Button>
-          <Button variant="tonal" onClick={handleFinishClick} className="pbw-sbtn finish">
-            <CheckCircle /> Finish
-          </Button>
-        </div>
+        {/* (w3) Finish/Discard moved to a pinned footer below (always reachable). */}
       </div>
 
       {/* Workout notes */}
@@ -2564,6 +2339,20 @@ export default function ActiveWorkout({
         document.body
       )}
 
+      {/* (w3) Pinned Finish/Discard footer — portalled so it escapes the page
+          transforms and sits above the nav; only on the workouts tab. */}
+      {activeTab === "workouts" && createPortal(
+        <div className="pbw-sessftr">
+          <Button variant="tonal" onClick={() => setShowDiscardConfirm(true)} className="pbw-sbtn discard">
+            <Trash2 /> Discard
+          </Button>
+          <Button variant="tonal" onClick={handleFinishClick} className="pbw-sbtn finish">
+            <CheckCircle /> Finish
+          </Button>
+        </div>,
+        document.body
+      )}
+
       {/* No Completed Sets Safety Modal */}
       {showNoCompletedSetsModal && createPortal(
         <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/80 z-[10000] flex items-center justify-center p-4 backdrop-blur-md">
@@ -2572,36 +2361,69 @@ export default function ActiveWorkout({
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl space-y-4 shadow-black/10 dark:shadow-black/50"
           >
+            {/* (w1) Non-destructive: nothing was logged. No red header. */}
             <div className="text-center space-y-3">
-              <div className="mx-auto w-12 h-12 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center ring-1 ring-amber-500/20">
-                <AlertTriangle className="w-6 h-6 animate-pulse" />
+              <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center ring-1" style={{ background: "var(--m3-primary-cont)", color: "var(--m3-on-primary-cont)", borderColor: "var(--m3-primary-cont)" }}>
+                <Dumbbell className="w-6 h-6" />
               </div>
               <h3 className="text-base font-extrabold text-gray-900 dark:text-gray-100">
-                Empty Workout Session
+                Nothing logged yet
               </h3>
               <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed px-1">
-                You haven't ticked off any sets as completed. Please complete at least 1 set before finishing. Alternatively, you can select whether to continue or discard.
+                You haven't completed any sets in this workout. Keep going, or discard it?
               </p>
             </div>
 
-            <div className="pt-2">
-              <DiscardSwipeSlider
-                onSwipeLeft={() => {
-                  setShowNoCompletedSetsModal(false);
-                  onDiscard();
-                }}
-                onSwipeRight={() => {
-                  setShowNoCompletedSetsModal(false);
-                }}
-              />
-              
+            <div className="pt-2 flex flex-col gap-2.5">
               <Button
                 variant="outline"
                 type="button"
                 onClick={() => setShowNoCompletedSetsModal(false)}
-                className="w-full mt-3 py-2 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/10 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                className="w-full py-3 border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-100 font-bold rounded-xl text-sm transition-all cursor-pointer"
               >
-                Cancel
+                Keep going
+              </Button>
+              <Button
+                variant="none"
+                type="button"
+                onClick={() => { setShowNoCompletedSetsModal(false); onDiscard(); }}
+                className="w-full py-3 font-bold rounded-xl text-sm transition-all cursor-pointer"
+                style={{ background: "var(--m3-error)", color: "#fff" }}
+              >
+                Discard
+              </Button>
+            </div>
+          </motion.div>
+        </div>,
+        document.body
+      )}
+
+      {/* (w2) Some sets not completed on finish */}
+      {showIncompleteModal && createPortal(
+        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/80 z-[10000] flex items-center justify-center p-4 backdrop-blur-md">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl space-y-4 shadow-black/10 dark:shadow-black/50"
+          >
+            <div className="text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center ring-1" style={{ background: "var(--m3-primary-cont)", color: "var(--m3-on-primary-cont)", borderColor: "var(--m3-primary-cont)" }}>
+                <CheckCircle className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-extrabold text-gray-900 dark:text-gray-100">Finish workout?</h3>
+              <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed px-1">
+                You have {incompleteCount} set{incompleteCount === 1 ? "" : "s"} you haven't completed. Mark them done and finish, or discard them?
+              </p>
+            </div>
+            <div className="pt-2 flex flex-col gap-2.5">
+              <Button variant="none" type="button" onClick={markAllDoneAndFinish} className="w-full py-3 font-bold rounded-xl text-sm" style={{ background: "var(--m3-primary-fill)", color: "#fff" }}>
+                Mark done
+              </Button>
+              <Button variant="none" type="button" onClick={discardIncompleteAndFinish} className="w-full py-3 font-bold rounded-xl text-sm" style={{ background: "var(--m3-sc-high)", color: "var(--m3-on)" }}>
+                Discard
+              </Button>
+              <Button variant="outline" type="button" onClick={() => setShowIncompleteModal(false)} className="w-full py-2.5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-400 font-bold rounded-xl text-xs">
+                Keep editing
               </Button>
             </div>
           </motion.div>
