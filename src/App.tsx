@@ -792,15 +792,19 @@ export default function App() {
           <section className="space-y-6">
 
             {/* TAB SCREENS CONDITIONAL PRESENTATION */}
-            {/* (o3/o5) Material fade-through: opacity + a small scale, transform
-                and opacity only. popLayout (not mode="wait") lets the incoming
-                page fade in as the outgoing fades out without a layout jump. */}
-            <AnimatePresence mode="popLayout">
+            {/* (o3/o5) Fade-through, fixed: ONLY the incoming page animates
+                (opacity + a small scale, transform/opacity only). The outgoing
+                page is removed instantly — no exit, no popLayout. popLayout used
+                to position the exiting page ABSOLUTE and paint it on top, so for
+                the first ~half of the cross-fade you saw the old page sitting on
+                top, fading — that was the "previous-page flash". With nothing
+                exiting, there's no old page to flash; the new one just fades up
+                over the (consistent) app background. */}
+            <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.19, ease: [0.4, 0, 0.2, 1] }}
               >
                 {/* Always render ActiveWorkout so background timers and service worker listeners continue */}
