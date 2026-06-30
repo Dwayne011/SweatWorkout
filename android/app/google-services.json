@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "151356770117",
+    "project_id": "gen-lang-client-0615336375",
+    "storage_bucket": "gen-lang-client-0615336375.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:151356770117:android:29f0536756b9542af9202c",
+        "android_client_info": {
+          "package_name": "com.projectpb.workouts"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "151356770117-82kcr19prpbgatko41g7hgmqs8bkd1e9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZpip1hU7n5NyUK0yLlqRf5-B30K-X3kM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "151356770117-82kcr19prpbgatko41g7hgmqs8bkd1e9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

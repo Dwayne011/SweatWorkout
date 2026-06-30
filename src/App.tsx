@@ -430,7 +430,11 @@ export default function App() {
         // token check, and hold the OAuth access token for Sheets sync.
         // (Requires the native setup in NATIVE_GOOGLE_SIGNIN.md — google-services.json,
         // SHA fingerprints, the google-services gradle plugin.)
-        const result = await FirebaseAuthentication.signInWithGoogle({ scopes: [SHEETS_SCOPE] });
+        // useCredentialManager:false → the legacy GoogleSignIn account-picker.
+        // The default Credential Manager path throws NoCredentialException on
+        // this device; the legacy flow reliably shows the picker (and gives a
+        // clear DEVELOPER_ERROR if the SHA-1 isn't registered).
+        const result = await FirebaseAuthentication.signInWithGoogle({ scopes: [SHEETS_SCOPE], useCredentialManager: false });
         const idToken = result.credential?.idToken;
         const accessToken = result.credential?.accessToken;
         if (idToken) await signInWithCredential(auth, GoogleAuthProvider.credential(idToken, accessToken));
