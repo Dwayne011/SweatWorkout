@@ -16,6 +16,7 @@ const ExerciseLibrary = lazy(() => import("./components/ExerciseLibrary"));
 const AccountSettings = lazy(() => import("./components/AccountSettings"));
 import WorkoutSplashScene from "./components/WorkoutSplashScene";
 import CoachAnalysis from "./components/CoachAnalysis";
+import ErrorBoundary from "./components/ErrorBoundary";
 import IntroSplash from "./components/IntroSplash";
 import OnboardingProfile from "./components/OnboardingProfile";
 import { WorkoutSession, UserProfile } from "./types";
@@ -258,19 +259,9 @@ export default function App() {
     }
   }, [theme]);
 
-  // Global button haptic feedback listener
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('button') || target.closest('.cta-text') || target.closest('a')) {
-        if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate(10);
-        }
-      }
-    };
-    document.addEventListener('click', handleGlobalClick);
-    return () => document.removeEventListener('click', handleGlobalClick);
-  }, []);
+  // (o1) The global tap-vibrate listener was removed — haptics now fire only for
+  // the rest countdown (see src/lib/haptics.ts and the navigator.vibrate shim in
+  // main.tsx).
 
   // Track the last non-workout tab to switch back to it when swiping down from active workouts view
   const lastNonWorkoutTab = useRef<"history" | "templates" | "exercises" | "account">("templates");
@@ -740,6 +731,7 @@ export default function App() {
                 <WorkoutTabSegment activeTab={activeTab}>
                   {state.activeWorkout ? (
                     <Suspense fallback={<TabSkeleton />}>
+                    <ErrorBoundary label="Active workout">
                     <ActiveWorkout
                       session={state.activeWorkout}
                       exercisesList={state.exercises}
@@ -769,6 +761,7 @@ export default function App() {
                       setRestTimerTarget={setRestTimerTarget}
                       activeTab={activeTab}
                     />
+                    </ErrorBoundary>
                     </Suspense>
                   ) : activeTab === "workouts" ? (
                     // Launching screen if no session active yet

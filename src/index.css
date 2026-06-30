@@ -943,6 +943,15 @@ html.light .pbw-icard.notescard .notesic { color: var(--m3-on-success); backgrou
 .pbw-ca .caempty h3 { font-family: var(--m3-display-font); font-weight: 500; font-size: 18px; color: var(--m3-on); margin-bottom: 6px; }
 .pbw-ca .caempty p { font-size: 14px; color: var(--m3-on-var); line-height: 1.5; max-width: 300px; margin: 0 auto; }
 
+/* Render-error fallback card (ErrorBoundary) — a calm grey card so a thrown
+   reference never blanks the screen. */
+.pbw-eboundary { background: var(--m3-sc-low); border: 1px solid var(--m3-outline-q); border-radius: 24px; padding: 32px 22px; text-align: center; margin: 8px 0; }
+.pbw-eboundary .ei { width: 54px; height: 54px; border-radius: 16px; background: var(--m3-sc); color: var(--m3-on-dim); display: grid; place-items: center; margin: 0 auto 14px; }
+.pbw-eboundary .ei svg { width: 26px; height: 26px; }
+.pbw-eboundary h3 { font-family: var(--m3-display-font); font-weight: 500; font-size: 18px; color: var(--m3-on); margin-bottom: 6px; }
+.pbw-eboundary p { font-size: 14px; color: var(--m3-on-var); line-height: 1.5; max-width: 320px; margin: 0 auto 18px; }
+.pbw-eboundary .ebtn { border: none; cursor: pointer; border-radius: 999px; padding: 11px 22px; background: var(--m3-primary-fill); color: #fff; font-family: var(--m3-display-font); font-weight: 500; font-size: 14px; }
+
 /* Workout overview — full-screen page (its own view, slides in from the right).
    Tokens mapped, only the avatar gradient + coach gradient stops + PR gold are
    literal. */

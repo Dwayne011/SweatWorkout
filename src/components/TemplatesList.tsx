@@ -126,18 +126,9 @@ export default function TemplatesList({
 
   return (
     <div className="space-y-6 pb-40">
-      {/* Launcher cards */}
-      <div className="m3-card">
-        <div className="m3-shape md" style={{ marginBottom: "8px" }}>
-          <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-primary-cont)" /></svg>
-          <span className="si"><Play className="w-5 h-5" style={{ color: "var(--m3-primary)" }} /></span>
-        </div>
-        <h2 className="m3-h">Quick logging panel</h2>
-        <p className="m3-body">Skip planning and start a blank active workout instantly. Record whatever you perform, on the fly.</p>
-        <div style={{ height: "16px" }} />
-        <Button variant="primary" onClick={onStartBlank} className="m3-btn fill"><Play className="w-5 h-5" /> Start empty workout</Button>
-      </div>
-
+      {/* Launcher cards. (r2) The "Quick logging panel / Start empty workout"
+          card was removed — the Workouts home tab already carries that action.
+          onStartBlank is still used (AI composer, start-from-template). */}
       <div className="m3-card">
         <div className="m3-shape md" style={{ marginBottom: "8px" }}>
           <svg className="sf" viewBox="0 0 100 100"><use href="#shape-sunny" fill="var(--m3-sc-highest)" /></svg>

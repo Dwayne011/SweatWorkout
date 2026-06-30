@@ -19,6 +19,16 @@ try {
   }
 } catch { /* ignore storage access errors (private mode, etc.) */ }
 
+// Haptics policy (o1): the app buzzes only for the rest countdown, and that path
+// uses Capacitor Haptics on device — not the web Vibration API. Neutralise
+// navigator.vibrate so the many scattered raw vibrate(...) calls still in the UI
+// cannot fire. (They are physically removed as their components are reworked.)
+try {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate = () => false;
+  }
+} catch { /* read-only in some engines; ignore */ }
+
 // Register the PWA service worker for background rest-timer notifications.
 // Skip it when running inside the Capacitor native shell: there we use a native
 // notification plugin, and a service worker inside the WebView can interfere

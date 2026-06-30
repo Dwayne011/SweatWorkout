@@ -398,9 +398,7 @@ function RestTimerOverlay({
       setSecondsLeft(rem);
 
       if (rem !== null && rem <= 5 && rem > 0) {
-        if (typeof navigator !== "undefined" && navigator.vibrate) {
-          navigator.vibrate(120);
-        }
+        haptics.countdownPulse();   // last-five-seconds pulse (kept, via the wrapper)
       }
 
       if (rem === 0) {
@@ -2216,6 +2214,10 @@ export default function ActiveWorkout({
 
                         {workoutEx.sets.map((set, idx) => {
                           const typeLabel = set.type.charAt(0).toUpperCase() + set.type.slice(1);
+                          // RPE fill width for the cardio slider in this set-row path. Defined
+                          // here (mirrors the path-1 definition at ~1743); without it the cardio
+                          // branch threw `rpePercentage is not defined` and blanked the screen.
+                          const rpePercentage = (((set.rpe || 5) - 1) / 9) * 100;
                           return (
                           <div key={set.id} className="pbw-setswipe">
                             {draggingSetId === set.id && (

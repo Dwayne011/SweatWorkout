@@ -1,10 +1,9 @@
-// Centralised haptics. Every firing point in the app routes through a named
-// method here, so the intensities live in exactly one place and are easy to
-// audit. Restraint is the rule: a haptic marks a moment of consequence, never a
-// routine tap (scrolling, opening menus/pickers, typing, ordinary buttons,
-// expanding notes, or nav taps that don't change page must stay silent).
-//
-// Uses Capacitor Haptics on device; falls back to navigator.vibrate on the web.
+// Centralised haptics. POLICY (o1): the app buzzes ONLY for the rest countdown.
+// Every method here except `countdownPulse` and `timerDone` is a no-op, and the
+// scattered raw `navigator.vibrate(...)` calls across the UI are neutralised
+// globally in main.tsx. So the only haptics left are the last-five-seconds
+// pulse and the buzz at zero, both on the rest timer. On device these use
+// Capacitor Haptics; the web Vibration API is intentionally off.
 import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
 
 const canVibrate = () => typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
@@ -25,23 +24,23 @@ async function notify(type: NotificationType, fallback: number | number[]) {
   }
 }
 
+const noop = () => {};
+
 export const haptics = {
-  /** A single light tick the instant a swipe or tap commits to a new page. */
-  pageCommit: () => impact(ImpactStyle.Light, 8),
-  /** Light tick when a swipe row crosses the point where releasing will delete. */
-  swipeThreshold: () => impact(ImpactStyle.Light, 10),
-  /** Firmer tick on the actual delete. */
-  deleteCommit: () => impact(ImpactStyle.Medium, 18),
-  /** Confirm — checking the done-box on a set. */
-  setComplete: () => impact(ImpactStyle.Light, 10),
-  /** Light tick when tapping the set-type control to advance to the next type. */
-  setTypeCycle: () => impact(ImpactStyle.Light, 6),
-  /** Success-style notification on finishing a workout. */
-  finishWorkout: () => notify(NotificationType.Success, [12, 40, 18]),
-  /** One medium tick confirming Discard in the dialog. */
-  discardConfirm: () => impact(ImpactStyle.Medium, 16),
-  /** Notification haptic when the rest timer hits zero. */
+  /** Rest countdown — a tick each of the last five seconds. (kept) */
+  countdownPulse: () => impact(ImpactStyle.Medium, 120),
+  /** Rest countdown — the buzz at zero. (kept) */
   timerDone: () => notify(NotificationType.Warning, [400, 100, 400]),
+
+  // Everything below is intentionally silent (o1). Call sites stay so the
+  // intent is documented; the effect is gone. Re-enable a line to bring one back.
+  pageCommit: noop,
+  swipeThreshold: noop,
+  deleteCommit: noop,
+  setComplete: noop,
+  setTypeCycle: noop,
+  finishWorkout: noop,
+  discardConfirm: noop,
 };
 
 export type Haptics = typeof haptics;
