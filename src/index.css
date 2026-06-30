@@ -1276,3 +1276,69 @@ input[type=number] {
 .animate-swipe-hint {
   animation: swipe-hint 4s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
 }
+
+/* ============================================================
+   (r1) Workout composer — gemini-composer.html. Plain-voice rebuild
+   of the AI routine generator on the --m3 tokens (light + dark).
+   ============================================================ */
+.pbw-composer { background: var(--m3-sc-low); border-radius: 24px; padding: 20px; }
+.pbw-composer .cmphd { display: flex; align-items: center; gap: 11px; margin-bottom: 18px; }
+.pbw-composer .cmpic { width: 42px; height: 42px; border-radius: 13px; background: linear-gradient(135deg, var(--m3-primary-fill), #d566c8); color: #fff; display: grid; place-items: center; flex: none; }
+.pbw-composer .cmpt { font-family: var(--m3-display-font); font-weight: 500; font-size: 18px; color: var(--m3-on); }
+.pbw-composer .cmpsub { font-family: var(--m3-mono-font); font-size: 10px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--m3-primary); margin-top: 2px; }
+.pbw-composer .cmpbody { display: flex; flex-direction: column; gap: 18px; }
+.pbw-composer .cfield { display: flex; flex-direction: column; }
+.pbw-composer .clab { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--m3-on-dim); margin-bottom: 9px; }
+/* selects */
+.pbw-composer .cselect { position: relative; }
+.pbw-composer .cselect select { -webkit-appearance: none; appearance: none; width: 100%; background: var(--m3-sc); border: 1px solid var(--m3-outline-q); border-radius: 14px; padding: 14px 40px 14px 15px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--m3-on); cursor: pointer; }
+.pbw-composer .cselect svg { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--m3-on-var); pointer-events: none; }
+/* kit chips (multi-select) */
+.pbw-composer .kitchips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pbw-composer .kitchip { display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--m3-outline-q); background: var(--m3-sc); border-radius: 14px; padding: 13px 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--m3-on-var); cursor: pointer; transition: background .12s, color .12s, border-color .12s; }
+.pbw-composer .kitchip.on { background: var(--m3-primary-fill); border-color: transparent; color: #fff; }
+.pbw-composer .kitnote { font-size: 12px; color: var(--m3-on-var); line-height: 1.45; margin-top: 10px; }
+.pbw-composer .kitadd { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--m3-primary); font-family: inherit; font-size: 13px; font-weight: 600; padding: 10px 0 2px; cursor: pointer; }
+/* specific-kit checklist */
+.pbw-composer .kitlist { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; padding-top: 10px; }
+.pbw-composer .kitrow { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--m3-on); cursor: pointer; }
+/* shared check box (checklist rows + past-workouts toggle) */
+.pbw-composer .kitbox { width: 20px; height: 20px; border-radius: 7px; border: 1.5px solid var(--m3-outline); background: var(--m3-sc); display: grid; place-items: center; flex: none; color: #fff; transition: background .12s, border-color .12s; }
+.pbw-composer .kitbox.on { background: var(--m3-primary-fill); border-color: transparent; }
+/* past-workouts toggle card */
+.pbw-composer .ctoggle { display: flex; align-items: flex-start; gap: 12px; background: var(--m3-sc); border: 1px solid var(--m3-outline-q); border-radius: 16px; padding: 15px; cursor: pointer; }
+.pbw-composer .ctgt { font-size: 14px; font-weight: 600; color: var(--m3-on); }
+.pbw-composer .ctgs { font-size: 12.5px; color: var(--m3-on-var); line-height: 1.45; margin-top: 4px; }
+/* textarea */
+.pbw-composer .ctext { width: 100%; min-height: 84px; background: var(--m3-sc); border: 1px solid var(--m3-outline-q); border-radius: 14px; padding: 14px 15px; font-family: inherit; font-size: 14px; color: var(--m3-on); resize: vertical; line-height: 1.5; }
+.pbw-composer .ctext::placeholder { color: var(--m3-on-dim); }
+/* build button */
+.pbw-composer .cbuild { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; border: none; border-radius: 16px; background: linear-gradient(95deg, var(--m3-primary-fill), #d566c8 90%); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 2px; }
+/* error */
+.pbw-composer .cerr { background: rgba(220,70,90,.12); border: 1px solid rgba(220,70,90,.3); color: var(--m3-error); border-radius: 14px; padding: 13px 15px; font-size: 13px; font-weight: 500; line-height: 1.45; }
+/* loading */
+.pbw-composer .cmploading { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 34px 0; gap: 5px; }
+.pbw-composer .cspin { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, var(--m3-primary-fill), #d566c8); color: #fff; display: grid; place-items: center; margin-bottom: 8px; animation: cpulse 1.6s ease-in-out infinite; }
+@keyframes cpulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.9); opacity: .65; } }
+.pbw-composer .cloadt { font-family: var(--m3-display-font); font-weight: 500; font-size: 17px; color: var(--m3-on); }
+.pbw-composer .cloads { font-size: 13px; color: var(--m3-on-var); }
+/* result preview */
+.pbw-composer .crec { background: linear-gradient(160deg, rgba(123,83,246,.18), rgba(213,102,200,.10)); border: 1px solid var(--m3-primary-cont); border-radius: 18px; padding: 16px; }
+.pbw-composer .creceyb { font-family: var(--m3-mono-font); font-size: 10px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--m3-primary); }
+.pbw-composer .crecname { font-family: var(--m3-display-font); font-weight: 500; font-size: 18px; color: var(--m3-on); margin-top: 3px; }
+.pbw-composer .crecwhy { font-size: 14px; color: var(--m3-on); line-height: 1.5; margin-top: 6px; }
+.pbw-composer .cex { background: var(--m3-sc); border-radius: 16px; overflow: hidden; }
+.pbw-composer .cexhd { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; border-bottom: 1px solid var(--m3-outline-q); }
+.pbw-composer .cexnm { font-size: 14px; font-weight: 600; color: var(--m3-on); }
+.pbw-composer .cexcat { font-family: var(--m3-mono-font); font-size: 10px; text-transform: uppercase; color: var(--m3-on-var); }
+.pbw-composer .cexsets { padding: 6px 15px 12px; }
+.pbw-composer .cexrow { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; font-family: var(--m3-mono-font); font-size: 13px; }
+.pbw-composer .cexrow + .cexrow { border-top: 1px solid var(--m3-outline-q); }
+.pbw-composer .cexset { color: var(--m3-on-var); }
+.pbw-composer .cexval { display: flex; align-items: center; gap: 8px; color: var(--m3-on); font-weight: 600; }
+.pbw-composer .cextype { font-family: var(--m3-mono-font); font-size: 9px; text-transform: uppercase; letter-spacing: .05em; background: var(--m3-primary-cont); color: var(--m3-on-primary-cont); border-radius: 5px; padding: 2px 6px; }
+.pbw-composer .cextip { font-size: 12.5px; color: var(--m3-on-var); line-height: 1.45; padding-top: 8px; font-style: italic; }
+.pbw-composer .cprevbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pbw-composer .cghost, .pbw-composer .csave { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 14px; border-radius: 14px; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.pbw-composer .cghost { background: var(--m3-sc); border: 1px solid var(--m3-outline-q); color: var(--m3-on-var); }
+.pbw-composer .csave { background: var(--m3-primary-cont); border: none; color: var(--m3-primary); }

@@ -146,13 +146,13 @@ export default function TemplatesList({
             <svg className="sf" viewBox="0 0 100 100"><use href="#shape-wavy" fill="rgba(255,255,255,.18)" /></svg>
             <span className="si"><Sparkles className="w-5 h-5" style={{ color: "#fff" }} /></span>
           </div>
-          <span className="m3-eyebrow" style={{ background: "rgba(0,0,0,.25)", color: "#fff" }}>Lab</span>
+          <span className="m3-eyebrow" style={{ background: "rgba(0,0,0,.25)", color: "#fff" }}>Beta</span>
         </div>
-        <h2 className="m3-h" style={{ color: "#fff" }}>Gemini AI composer</h2>
-        <p className="m3-body" style={{ color: "var(--m3-on-tertiary-cont)" }}>Let Gemini S&C intelligence generate custom warm-ups, accessory work and progression targets.</p>
+        <h2 className="m3-h" style={{ color: "#fff" }}>Build me a workout</h2>
+        <p className="m3-body" style={{ color: "var(--m3-on-tertiary-cont)" }}>Tell the coach what you want and it'll put together warm-ups, accessory work and progression targets for you.</p>
         <div style={{ height: "16px" }} />
         <Button variant="primary" onClick={() => { setShowAIGenerator(!showAIGenerator); setShowAddTemplate(false); }} className="m3-btn" style={{ background: "linear-gradient(95deg, var(--m3-primary-fill), #d566c8 90%)", color: "#fff" }}>
-          <Sparkles className="w-5 h-5" /> {showAIGenerator ? "Hide AI composer" : "Launch AI composer"}
+          <Sparkles className="w-5 h-5" /> {showAIGenerator ? "Hide the composer" : "Open the composer"}
         </Button>
       </div>
 
