@@ -33,6 +33,12 @@ interface CoachAnalysisProps {
 type SummaryState = "loading" | "ready" | "off" | "error";
 
 const startMs = (s: WorkoutSession) => new Date(s.startTime).getTime();
+const fmtDur = (s: number) => {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${sec}s`;
+  return `${sec}s`;
+};
 
 // Granular front/back figures. Each shape is keyed to a sub-muscle region; its
 // fill is that region's bucket colour (from the per-muscle scores), and
@@ -176,10 +182,32 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
       })
       .sort((a, b) => b.ratio - a.ratio || b.sets - a.sets);
 
-    // strength: previous best (from past sessions) vs this session
     const thisMs = startMs(completedWorkout);
+
+    // (w7b) Cardio is summarised on duration + estimated calories, not as a
+    // strength row. Bodyweight comes from the saved profile (default 70 kg).
+    let bodyweightKg = 70;
+    try { const p = JSON.parse(localStorage.getItem("projectpb_user_profile") || "null"); if (p && Number(p.weightKg)) bodyweightKg = Number(p.weightKg); } catch { /* ignore */ }
+    let cardioSeconds = 0, cardioCalories = 0, cardioCount = 0;
+    (completedWorkout.exercises || []).forEach((we) => {
+      const ex = exById.get(we.exerciseId);
+      if (!(ex?.modality === "CARDIO" || ex?.category === "Cardio")) return;
+      const done = (we.sets || []).filter((s) => s.isCompleted);
+      if (!done.length) return;
+      cardioCount += 1;
+      const met = Number(ex?.metValue) || 7;
+      done.forEach((s) => {
+        const secs = Number(s.duration) || 0;
+        cardioSeconds += secs;
+        cardioCalories += met * bodyweightKg * (secs / 3600);
+      });
+    });
+    const cardio = cardioCount > 0 ? { seconds: cardioSeconds, calories: Math.round(cardioCalories), count: cardioCount } : null;
+
+    // strength: previous best (from past sessions) vs this session. Cardio excluded.
     const strength = (completedWorkout.exercises || []).map((we) => {
       const ex = exById.get(we.exerciseId);
+      if (ex?.modality === "CARDIO" || ex?.category === "Cardio") return null;
       const done = (we.sets || []).filter((s) => s.isCompleted);
       if (!done.length) return null;
       const isBW = ex?.equipment === "Bodyweight" || ex?.modality === "BODYWEIGHT" || done.every((s) => (Number(s.weight) || 0) === 0);
@@ -233,7 +261,7 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
       : 0;
 
     return {
-      worked, muscleColor, strength,
+      worked, muscleColor, strength, cardio,
       wentWell: wentWell.slice(0, 3), nextTime: nextTime.slice(0, 3),
       durationMin, totalSets, hasData: totalSets > 0,
     };
@@ -266,6 +294,9 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
           previousBest: s.prevStr,
           trend: s.trend,
         })),
+        cardio: m.cardio
+          ? { exercises: m.cardio.count, totalSeconds: m.cardio.seconds, estimatedCalories: m.cardio.calories }
+          : null,
       });
       const text = (res.summary || "").trim();
       if (text) { setSummaryText(text); setSummaryState("ready"); }
@@ -382,7 +413,26 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
               </div>
             </div>
 
+            {/* Cardio this session (w7b) — duration + estimated calories, not a strength row */}
+            {m.cardio && (
+              <>
+                <div className="sec">Cardio this session</div>
+                <div className="card cardiocard">
+                  <div className="crow">
+                    <div className="ck">Total time</div>
+                    <div className="cv">{fmtDur(m.cardio.seconds)}</div>
+                  </div>
+                  <div className="crow">
+                    <div className="ck">Calories <span className="cest">est</span></div>
+                    <div className="cv">~{m.cardio.calories} kcal</div>
+                  </div>
+                  <p className="cnote">A rough estimate, from a generic effort level and your body weight. Real burn depends on your intensity, heart rate, terrain, age, and technique.</p>
+                </div>
+              </>
+            )}
+
             {/* Strength this session */}
+            {m.strength.length > 0 && (<>
             <div className="sec">Strength this session</div>
             <div className="card">
               {m.strength.map((s, i) => (
@@ -413,6 +463,7 @@ export default function CoachAnalysis({ completedWorkout, history, exercisesList
                 </div>
               ))}
             </div>
+            </>)}
 
             {/* What went well */}
             <div className="sec">What went well</div>

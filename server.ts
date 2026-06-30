@@ -821,7 +821,7 @@ Respond STRICTLY with a JSON matching the expected schema.`;
       // default: per-workout — one short interpretive line over the facts.
       const r = await ai.models.generateContent({
         model: GEMINI_MODEL,
-        contents: [{ role: "user", parts: [{ text: `${profileBlock}\n\nYou are a strength coach reading back one completed workout from these computed facts:\n${JSON.stringify(payload)}\n\nWrite "summary": one short plain-language line on the session, a real observation, not "you crushed it". If the session has no completed sets, say plainly there is not enough logged here to analyse. ${voice}` }] }],
+        contents: [{ role: "user", parts: [{ text: `${profileBlock}\n\nYou are a strength coach reading back one completed workout from these computed facts:\n${JSON.stringify(payload)}\n\nWrite "summary": one short plain-language line on the session, a real observation, not "you crushed it". If there is cardio, treat it as conditioning (time and effort), never on a strength basis, and call any calorie figure an estimate. If the session has no completed sets, say plainly there is not enough logged here to analyse. ${voice}` }] }],
         config: { responseMimeType: "application/json", responseSchema: { type: Type.OBJECT, properties: { summary: { type: Type.STRING } }, required: ["summary"] } },
       });
       res.json(JSON.parse((r.text || "{}").trim()));
