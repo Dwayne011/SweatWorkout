@@ -39,6 +39,9 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
   // TODO(data-model): wire to the real AI completion callback + request/response
   // shapes once the exercise/set data model is finalised (see history AI spec).
   const [analyzingLogId, setAnalyzingLogId] = useState<string | null>(null);
+  // (h1) Logs whose insights have finished computing this session (so the button
+  // can flip Get insights -> [loading] -> View insights, navigation gated on ready).
+  const [readyLogIds, setReadyLogIds] = useState<Set<string>>(new Set());
 
   const findBestMatchEx = (id: string) => {
     if (!id) return null;
@@ -305,19 +308,29 @@ export default function HistoryLogs({ history, exercisesList, onDeleteLog, onAsk
                       <span className="jchev"><ChevronRight /></span>
                     </div>
                     <div className="jfoot">
-                      {log.analysis ? (
+                      {(log.analysis || readyLogIds.has(log.id)) ? (
+                        // Ready — tap NAVIGATES to the coach page (gated on ready).
                         <Button variant="none" className="pbw-rbtn rready" onClick={(e) => { e.stopPropagation(); onViewAnalysis(log); }}>
-                          <ISpark /> AI Coach analysis <ChevronRight />
+                          <ISpark /> View insights <ChevronRight />
                         </Button>
                       ) : analyzingLogId === log.id ? (
                         <Button variant="none" className="pbw-rbtn getins busy" disabled onClick={(e) => e.stopPropagation()}>
                           <span className="pbw-spin" /> Analysing workout…
                         </Button>
                       ) : (
+                        // Idle — tap RUNS the analysis + plays the loading animation;
+                        // it does not navigate. Only the ready button opens the page.
                         <Button
                           variant="none"
                           className="pbw-rbtn getins"
-                          onClick={(e) => { e.stopPropagation(); setAnalyzingLogId(log.id); onViewAnalysis(log); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAnalyzingLogId(log.id);
+                            setTimeout(() => {
+                              setReadyLogIds((prev) => new Set(prev).add(log.id));
+                              setAnalyzingLogId((cur) => (cur === log.id ? null : cur));
+                            }, 1300);
+                          }}
                         >
                           <ISpark /> Get insights
                         </Button>
