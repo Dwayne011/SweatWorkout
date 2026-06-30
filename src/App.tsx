@@ -24,6 +24,7 @@ import SaveAsRoutine from "./components/SaveAsRoutine";
 import ErrorBoundary from "./components/ErrorBoundary";
 import IntroSplash from "./components/IntroSplash";
 import OnboardingProfile from "./components/OnboardingProfile";
+import BottomNav from "./components/BottomNav";
 import { WorkoutSession, UserProfile } from "./types";
 import { getNotificationService } from "./services/notifications";
 import { isFirebaseReady, auth } from "./firebase";
@@ -971,25 +972,17 @@ export default function App() {
         <AnimatePresence>
           <WorkoutBanner activeWorkout={state.activeWorkout} setActiveTab={setActiveTab} activeTab={activeTab} exercises={state.exercises} restTimerTarget={restTimerTarget} showSwipeUpInfo={showSwipeUpInfo} setShowSwipeUpInfo={setShowSwipeUpInfo} />
         </AnimatePresence>
-        <nav className="pbw-enav">
-          {[
-            { key: "workouts", label: "Workout", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5l11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M14.5 9.5L9.5 14.5" /></svg>) },
+        <BottomNav
+          activeKey={activeTab}
+          onSelect={(key) => goToTab(key as typeof activeTab)}
+          tabs={[
+            { key: "workouts", label: "Workout", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16" /><path d="M6.5 5v4M17.5 5v4" /><circle cx="12" cy="11" r="1.7" /><path d="M8 7.5l4 1.8 4-1.8" /><path d="M12 12.7v4.3" /><path d="M12 17l-2.6 4M12 17l2.6 4" /></svg>) },
             { key: "history", label: "History", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v4l3 2" /><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 4v4h4" /></svg>) },
-            { key: "templates", label: "Routines", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5" /></svg>) },
-            { key: "exercises", label: "Library", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></svg>) },
+            { key: "templates", label: "Routines", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13" /><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01" /></svg>) },
+            { key: "exercises", label: "Library", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>) },
             { key: "account", label: state.user ? "Account" : "Login", icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20 21a8 8 0 1 0-16 0" /><circle cx="12" cy="8" r="4" /></svg>) },
-          ].map(({ key, label, icon }) => (
-            <a
-              key={key}
-              className={`item${activeTab === key ? " active" : ""}`}
-              onClick={() => goToTab(key as typeof activeTab)}
-              style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-            >
-              <span className="pill"><span className="ic">{icon}</span><span className="lblIn">{label}</span></span>
-              <span className="lblUnder">{label}</span>
-            </a>
-          ))}
-        </nav>
+          ]}
+        />
       </div>
 
       {/* (w4) Post-workout choice — shown after finishing, before any AI feedback. */}

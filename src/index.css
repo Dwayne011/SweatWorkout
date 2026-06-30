@@ -464,17 +464,19 @@ html.light { background-color: #fcfaff; }
    violet pill; inactive tabs = icon + quiet under-label. Exact spec values;
    --sl/--od map to --m3 tokens, gradient stops + shadow are the only literals.
    Bottom padding adds the device safe-area on top of the 12px design value. */
-.pbw-enav { display: flex; justify-content: space-between; align-items: center; gap: 3px; padding: 8px 6px calc(12px + env(safe-area-inset-bottom)); background: var(--m3-sc-low); min-height: 64px; }
-.pbw-enav .item { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; color: var(--m3-on-dim); text-decoration: none; cursor: pointer; min-width: 0; -webkit-tap-highlight-color: transparent; }
-.pbw-enav .pill { display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 999px; padding: 0; overflow: hidden; transition: background .42s cubic-bezier(.4,0,.2,1), padding .42s cubic-bezier(.4,0,.2,1), box-shadow .4s; }
-.pbw-enav .pill .ic { display: flex; align-items: center; justify-content: center; flex: none; }
-.pbw-enav .pill .ic svg { width: 23px; height: 23px; transform: scale(.9); transition: transform .42s cubic-bezier(.34,1.5,.5,1); }
-.pbw-enav .pill .lblIn { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; max-width: 0; opacity: 0; overflow: hidden; transition: max-width .44s cubic-bezier(.34,1.4,.6,1), opacity .3s, margin .44s; }
-.pbw-enav .lblUnder { font-family: var(--m3-mono-font); font-size: 8px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; margin-top: 5px; height: 12px; line-height: 12px; opacity: .6; color: var(--m3-on-dim); transition: opacity .3s, height .3s, margin .3s; }
+/* Each tab's expand state is one registered custom property so it works in
+   calc, transitions on a tap, and can be set live (transitions cut) on a drag. */
+@property --exp { syntax: "<number>"; inherits: true; initial-value: 0; }
+.pbw-enav { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 3px; padding: 8px 6px calc(12px + env(safe-area-inset-bottom)); background: var(--m3-sc-low); min-height: 64px; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.pbw-enav .item { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; color: var(--m3-on-dim); text-decoration: none; cursor: pointer; min-width: 0; -webkit-tap-highlight-color: transparent; transition: --exp .42s cubic-bezier(.4,0,.2,1), color .3s; }
 .pbw-enav .item.active { color: #fff; }
-.pbw-enav .item.active .pill { background: linear-gradient(160deg, #8b5cff, #6a3fe6); padding: 0 20px; box-shadow: 0 8px 20px -7px rgba(123,83,246,.7); }
-.pbw-enav .item.active .pill .ic svg { transform: scale(1.16); }
-.pbw-enav .item.active .pill .lblIn { max-width: 96px; opacity: 1; margin-left: 9px; }
+.pbw-enav .pill { display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 999px; padding: 0 calc(var(--exp) * 20px); overflow: hidden; background: transparent; box-shadow: 0 8px 20px -7px rgba(123,83,246,0); transition: background .42s cubic-bezier(.4,0,.2,1), box-shadow .4s; }
+.pbw-enav .item.active .pill { background: linear-gradient(160deg, #8b5cff, #6a3fe6); box-shadow: 0 8px 20px -7px rgba(123,83,246,.7); }
+.pbw-enav .pill .ic { display: flex; align-items: center; justify-content: center; flex: none; }
+.pbw-enav .pill .ic svg { width: 23px; height: 23px; transform: scale(calc(.9 + var(--exp) * .26)); }
+.pbw-enav .pill .lblIn { font-family: var(--m3-mono-font); font-size: 11px; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; max-width: calc(var(--exp) * 96px); opacity: var(--exp); margin-left: calc(var(--exp) * 9px); overflow: hidden; }
+.pbw-enav .lblUnder { font-family: var(--m3-mono-font); font-size: 8px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; margin-top: calc((1 - var(--exp)) * 5px); height: calc((1 - var(--exp)) * 12px); line-height: 12px; opacity: calc(.6 * (1 - var(--exp))); color: var(--m3-on-dim); overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .pbw-enav .item { transition: color .3s; } }
 .pbw-enav .item.active .lblUnder { opacity: 0; height: 0; margin-top: 0; }
 @media (prefers-reduced-motion: reduce) { .pbw-enav .pill, .pbw-enav .pill .ic svg, .pbw-enav .pill .lblIn, .pbw-enav .lblUnder { transition: none; } }
 
